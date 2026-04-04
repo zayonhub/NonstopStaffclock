@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NonStop Travels — Staff Clock</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--brand:#0d5c3a;--brand-mid:#138a52;--brand-lite:#1db96b;--brand-glow:rgba(29,185,107,.18);--surface:#f4f7f5;--card:#ffffff;--border:#e2ebe6;--text:#0f1f17;--muted:#6b8579;--danger:#dc2626;--warn:#d97706;}
+*{font-family:'Manrope',sans-serif;box-sizing:border-box;margin:0;padding:0;}
+h1,h2,h3,h4,h5,.syne{font-family:'Bricolage Grotesque',sans-serif;}
+body{background:var(--surface);color:var(--text);min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--brand-mid);border-radius:99px;}
+::-webkit-scrollbar-track{background:transparent;}
+.sidebar{width:250px;background:var(--brand);background-image:radial-gradient(ellipse at top left,rgba(29,185,107,.18) 0%,transparent 60%);position:fixed;left:0;top:0;height:100vh;display:flex;flex-direction:column;z-index:50;transition:transform .3s ease;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;font-size:.85rem;font-weight:500;color:rgba(255,255,255,.72);cursor:pointer;transition:all .2s;position:relative;}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);}
+.nav-item i{width:17px;text-align:center;}
+.nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#ef4444;color:#fff;border-radius:99px;font-size:.62rem;font-weight:700;padding:2px 6px;min-width:17px;text-align:center;}
+main{margin-left:250px;min-height:100vh;display:flex;flex-direction:column;}
+header{position:sticky;top:0;background:rgba(244,247,245,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;justify-content:space-between;z-index:40;gap:12px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;}
+.card-hover{transition:transform .18s,box-shadow .18s;}
+.card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,92,58,.1);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;font-size:.86rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;outline:none;}
+.btn-primary{background:var(--brand-mid);color:#fff;}
+.btn-primary:hover{background:var(--brand);box-shadow:0 4px 14px var(--brand-glow);}
+.btn-secondary{background:transparent;color:var(--brand-mid);border:1.5px solid var(--brand-mid);}
+.btn-secondary:hover{background:var(--brand-glow);}
+.btn-ghost{background:transparent;color:var(--muted);}
+.btn-ghost:hover{background:var(--surface);color:var(--text);}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1.5px solid #fca5a5;}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.clock-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 14px;border-radius:16px;border:none;cursor:pointer;transition:all .2s;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:.85rem;}
+.clock-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.12);}
+.clock-btn:disabled{opacity:.38;cursor:not-allowed;transform:none;}
+.clock-btn .icon{font-size:1.6rem;margin-bottom:2px;}
+.inp{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.86rem;background:var(--card);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Manrope',sans-serif;}
+.inp:focus{border-color:var(--brand-mid);box-shadow:0 0 0 3px var(--brand-glow);}
+label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.03em;text-transform:uppercase;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:600;letter-spacing:.02em;}
+.badge-ontime{background:#dcfce7;color:#14532d;}
+.badge-late{background:#fef9c3;color:#854d0e;}
+.badge-verylate{background:#fee2e2;color:#7f1d1d;}
+.badge-absent{background:#dbeafe;color:#1e3a8a;}
+.badge-present{background:#d1fae5;color:#065f46;}
+.badge-admin{background:#ede9fe;color:#5b21b6;}
+.badge-staff{background:#e0f2fe;color:#075985;}
+.badge-break{background:#fef9c3;color:#854d0e;}
+.badge-out{background:#ffedd5;color:#9a3412;}
+.tab-bar{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:12px;border:1px solid var(--border);flex-wrap:wrap;}
+.tab-btn{padding:8px 18px;border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:transparent;white-space:nowrap;}
+.tab-btn.active{background:var(--card);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,15,.55);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-box{background:var(--card);border-radius:20px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-radius:20px 20px 0 0;}
+.modal-body{overflow-y:auto;flex:1;padding:22px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;}
+#toastContainer{position:fixed;bottom:22px;right:22px;z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast-item{display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:14px;background:#0f1f17;color:#fff;font-size:.84rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.25);max-width:340px;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:all;}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px) scale(.95)}}
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--brand);background-image:radial-gradient(ellipse 80% 80% at 10% 90%,rgba(29,185,107,.25) 0%,transparent 50%),radial-gradient(ellipse 60% 60% at 90% 10%,rgba(29,185,107,.15) 0%,transparent 50%);padding:16px;}
+.auth-card{background:rgba(255,255,255,.97);border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,.35);width:100%;max-width:440px;overflow:hidden;}
+.auth-header{background:var(--brand);background-image:radial-gradient(ellipse at bottom right,rgba(29,185,107,.4) 0%,transparent 60%);padding:32px 32px 24px;color:#fff;}
+.auth-body{padding:26px 32px 32px;}
+.cal-day{width:100%;aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;border:2px solid transparent;font-size:.78rem;font-weight:600;gap:2px;}
+.cal-day:hover{transform:scale(1.06);border-color:var(--brand-mid);}
+.cal-day.empty{cursor:default;pointer-events:none;}
+.cal-day.today{border-color:var(--brand-lite)!important;box-shadow:0 0 0 3px rgba(29,185,107,.2);}
+.cal-day .dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.day-ontime{background:#dcfce7;color:#16a34a;}
+.day-late{background:#fef9c3;color:#d97706;}
+.day-verylate{background:#fee2e2;color:#dc2626;}
+.day-absent{background:#dbeafe;color:#2563eb;}
+.day-weekend{background:#f9fafb;color:#9ca3af;}
+.day-future{background:var(--surface);color:#d1d5db;}
+.status-pulse{display:inline-flex;align-items:center;gap:6px;}
+.status-pulse::before{content:'';width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-clocked-in::before{background:#22c55e;animation:pulse 1.5s infinite;}
+.status-on-break::before{background:#f59e0b;animation:pulse 1.5s infinite;}
+.status-out-assign::before{background:#f97316;animation:pulse 1.5s infinite;}
+.status-clocked-out::before{background:#94a3b8;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 currentColor}50%{box-shadow:0 0 0 5px transparent}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .32s ease both;}
+.fu1{animation-delay:.05s}.fu2{animation-delay:.1s}.fu3{animation-delay:.15s}.fu4{animation-delay:.2s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+#loadingOverlay{position:fixed;inset:0;background:var(--brand);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s;}
+.ldr-ring{animation:spin 1s linear infinite;}
+#offlineBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#f59e0b;color:#fff;text-align:center;padding:8px;font-size:.83rem;font-weight:600;}
+#syncBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:199;background:#3b82f6;color:#fff;text-align:center;padding:8px;font-size:.83rem;font-weight:600;}
+.msg-bubble{padding:10px 13px;border-radius:12px;max-width:82%;font-size:.84rem;line-height:1.55;}
+.msg-me{background:var(--brand-mid);color:#fff;border-radius:13px 13px 4px 13px;align-self:flex-end;}
+.msg-other{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:13px 13px 13px 4px;align-self:flex-start;}
+.mob-menu-btn{display:none;}
+#sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49;}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  #sidebarOverlay.open{display:block;}
+  main{margin-left:0!important;}
+  .mob-menu-btn{display:flex!important;}
+  .hide-mob{display:none!important;}
+  .page-pad{padding:14px!important;}
+  header{padding:12px 16px!important;}
+  .clock-grid{grid-template-columns:repeat(2,1fr)!important;}
+  .stats-4{grid-template-columns:1fr 1fr!important;}
+}
+@media(max-width:480px){.stats-4{grid-template-columns:1fr 1fr!important;}.auth-body{padding:18px 20px 24px;}.auth-header{padding:24px 20px 18px;}}
+.section-page{animation:fadeUp .3s ease;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <img src="https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png" alt="NonStop" style="height:56px;object-fit:contain;filter:brightness(0) invert(1);">
+  <svg width="42" height="42" viewBox="0 0 42 42" class="ldr-ring">
+    <circle cx="21" cy="21" r="17" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+    <circle cx="21" cy="21" r="17" fill="none" stroke="#1db96b" stroke-width="3" stroke-dasharray="28 86" stroke-linecap="round"/>
+  </svg>
+  <p style="color:rgba(255,255,255,.65);font-family:'Bricolage Grotesque',sans-serif;font-size:.85rem;letter-spacing:.1em;" id="loadingMsg">LOADING…</p>
+</div>
+
+<!-- BANNERS -->
+<div id="offlineBanner"><i class="fas fa-wifi-slash"></i> Offline — Clocks saved locally, will sync when reconnected.</div>
+<div id="syncBanner"><i class="fas fa-sync-alt fa-spin"></i> Syncing records to server…</div>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png" alt="NonStop Travels" style="height:48px;object-fit:contain;filter:brightness(0) invert(1);margin-bottom:14px;display:block;">
+      <h1 class="syne" style="font-size:1.65rem;font-weight:800;margin-bottom:3px;">Staff Clock</h1>
+      <p style="opacity:.7;font-size:.84rem;">NonStop Travels — Attendance System</p>
+    </div>
+    <div class="auth-body">
+      <div id="authErr" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:11px 13px;border-radius:10px;font-size:.82rem;margin-bottom:16px;align-items:center;gap:7px;">
+        <i class="fas fa-exclamation-circle"></i><span id="authErrTxt"></span>
+      </div>
+      <div id="offlineAuthNote" style="display:none;background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:11px 13px;border-radius:10px;font-size:.82rem;margin-bottom:16px;align-items:center;gap:7px;">
+        <i class="fas fa-wifi-slash"></i><span>Offline — signing in with saved session</span>
+      </div>
+      <div class="fade-up fu1" style="margin-bottom:14px;">
+        <label class="lbl">Email Address</label>
+        <input type="email" id="loginEmail" class="inp" placeholder="you@nonstoptravels.co" autocomplete="email">
+      </div>
+      <div class="fade-up fu2" style="margin-bottom:18px;">
+        <label class="lbl">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="loginPw" class="inp" style="padding-right:42px;" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);background:none;border:none;cursor:pointer;font-size:.88rem;"><i id="pwIcon" class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <button onclick="doLogin()" id="loginBtn" class="btn btn-primary fade-up fu3" style="width:100%;justify-content:center;">
+        <span>Sign In</span><i class="fas fa-arrow-right"></i>
+      </button>
+      <p style="font-size:.74rem;color:var(--muted);text-align:center;margin-top:14px;"><i class="fas fa-info-circle"></i> Use your NonStop Travels account credentials</p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+  <div id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div style="padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <div style="display:flex;align-items:center;gap:11px;">
+        <img src="https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png" alt="NST" style="height:28px;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0;">
+        <div>
+          <div class="syne" style="font-size:1rem;font-weight:800;color:#fff;line-height:1.1;">NonStop</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;">Staff Clock</div>
+        </div>
+      </div>
+    </div>
+    <nav style="flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;">
+      <div id="navClock" class="nav-item active" onclick="showSection('clock')"><i class="fas fa-clock"></i><span>Clock In/Out</span></div>
+      <div id="navCalendar" class="nav-item" onclick="showSection('calendar')"><i class="fas fa-calendar-alt"></i><span>My Calendar</span></div>
+      <div id="navMessages" class="nav-item" onclick="showSection('messages')"><i class="fas fa-comment-dots"></i><span>Messages</span><span id="msgBadge" class="nav-badge" style="display:none;">0</span></div>
+      <div id="navAdmin" class="nav-item" style="display:none;" onclick="showSection('admin')"><i class="fas fa-tachometer-alt"></i><span>Admin Dashboard</span></div>
+      <div id="navStaffList" class="nav-item" style="display:none;" onclick="showSection('stafflist')"><i class="fas fa-users"></i><span>Staff Overview</span></div>
+      <div id="navAdminCal" class="nav-item" style="display:none;" onclick="showSection('admincal')"><i class="fas fa-calendar-week"></i><span>All Calendars</span></div>
+      <div id="navReports" class="nav-item" style="display:none;" onclick="showSection('reports')"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
+      <div id="navSettings" class="nav-item" style="display:none;" onclick="showSection('settings')"><i class="fas fa-cog"></i><span>Settings</span></div>
+    </nav>
+    <div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,.1);">
+      <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;background:rgba(255,255,255,.08);border-radius:11px;margin-bottom:7px;">
+        <div id="sideAvatar" style="width:34px;height:34px;border-radius:9px;background:var(--brand-lite);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">U</div>
+        <div style="min-width:0;flex:1;">
+          <div id="sideName" style="color:#fff;font-weight:600;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">User</div>
+          <span id="sideRole" class="badge badge-staff" style="font-size:.62rem;">Staff</span>
+        </div>
+        <div id="onlineIndicator" style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;" title="Online"></div>
+      </div>
+      <div id="unsyncedBadge" style="display:none;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:6px 10px;margin-bottom:7px;font-size:.72rem;color:#fbbf24;text-align:center;">
+        <i class="fas fa-cloud-upload-alt"></i> <span id="unsyncedCount">0</span> record(s) pending sync
+      </div>
+      <button onclick="doLogout()" class="nav-item" style="width:100%;border:none;background:none;cursor:pointer;">
+        <i class="fas fa-sign-out-alt" style="color:rgba(255,255,255,.45);"></i><span style="color:rgba(255,255,255,.45);">Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div style="display:flex;align-items:center;gap:11px;">
+        <button class="mob-menu-btn btn btn-ghost" style="padding:7px;" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <h2 id="pageTitle" class="syne" style="font-size:1.15rem;font-weight:700;">Clock In/Out</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="headerClock" style="font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:700;color:var(--brand);background:var(--brand-glow);padding:5px 13px;border-radius:99px;min-width:80px;text-align:center;"></div>
+        <div id="headerDate" class="hide-mob" style="font-size:.78rem;color:var(--muted);"></div>
+        <span id="headerRole" class="badge badge-staff hide-mob">Staff</span>
+      </div>
+    </header>
+
+    <div style="padding:24px 28px;flex:1;" class="page-pad">
+
+      <!-- CLOCK SECTION -->
+      <div id="clockSection" class="section-page">
+        <div style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:20px;padding:28px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;" class="fade-up">
+          <div style="position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:rgba(29,185,107,.18);border-radius:50%;"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+            <div>
+              <p style="opacity:.7;font-size:.82rem;margin-bottom:3px;" id="clockGreet">Good morning,</p>
+              <h2 class="syne" id="clockName" style="font-size:1.8rem;font-weight:800;margin-bottom:6px;">Staff</h2>
+              <div id="clockStatusDisplay" class="status-pulse status-clocked-out" style="font-size:.86rem;font-weight:600;color:rgba(255,255,255,.85);">Not clocked in</div>
+            </div>
+            <div style="text-align:right;">
+              <div id="liveTimer" class="syne" style="font-size:2.4rem;font-weight:800;letter-spacing:.02em;line-height:1;">--:--:--</div>
+              <div style="font-size:.74rem;opacity:.6;margin-top:3px;" id="clockDate"></div>
+            </div>
+          </div>
+          <div id="locationStatus" style="margin-top:16px;background:rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:.82rem;">
+            <i class="fas fa-wifi" id="locIcon"></i>
+            <span id="locText">Checking office network…</span>
+          </div>
+        </div>
+        <div id="todaySummary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;" class="stats-4 fade-up fu1"></div>
+        <div class="card" style="padding:22px;margin-bottom:22px;">
+          <h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:16px;">Clock Actions</h3>
+          <div id="clockButtons" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;" class="clock-grid"></div>
+        </div>
+        <div class="card" style="padding:22px;">
+          <h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:14px;">Today's Timeline</h3>
+          <div id="todayLog" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- CALENDAR SECTION -->
+      <div id="calendarSection" class="section-page" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 class="syne" style="font-size:1.1rem;font-weight:700;" id="calMonthTitle"></h3>
+            <p style="font-size:.8rem;color:var(--muted);margin-top:2px;">Click any day to see details</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge badge-ontime"><i class="fas fa-circle" style="font-size:.5rem;"></i> On Time</span>
+              <span class="badge badge-late"><i class="fas fa-circle" style="font-size:.5rem;"></i> Late</span>
+              <span class="badge badge-verylate"><i class="fas fa-circle" style="font-size:.5rem;"></i> Very Late</span>
+              <span class="badge badge-absent"><i class="fas fa-circle" style="font-size:.5rem;"></i> Absent</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button onclick="changeCalMonth(-1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-left"></i></button>
+              <button onclick="changeCalMonth(1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sun</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Mon</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Tue</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Wed</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Thu</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Fri</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sat</div>
+          </div>
+          <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
+          <div style="font-size:.74rem;color:var(--muted);margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">📅 Click any colored day for full details</div>
+        </div>
+      </div>
+
+      <!-- MESSAGES SECTION -->
+      <div id="messagesSection" class="section-page" style="display:none;">
+        <div class="card" style="height:calc(100vh - 160px);display:flex;flex-direction:column;min-height:400px;">
+          <div style="padding:18px 20px;border-bottom:1px solid var(--border);">
+            <h3 class="syne" style="font-size:1rem;font-weight:700;">Messages with Admin</h3>
+            <p style="font-size:.78rem;color:var(--muted);margin-top:2px;">Chat directly with your administrator via the AMS</p>
+          </div>
+          <div id="msgList" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;"></div>
+          <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;">
+            <input type="text" id="msgInput" class="inp" placeholder="Type a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg()">
+            <button onclick="sendMsg()" class="btn btn-primary" style="padding:9px 16px;"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN DASHBOARD -->
+      <div id="adminSection" class="section-page" style="display:none;">
+        <div style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:20px;padding:26px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;" class="fade-up">
+          <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(29,185,107,.18);border-radius:50%;"></div>
+          <h2 class="syne" style="font-size:1.7rem;font-weight:800;margin-bottom:4px;">Admin Dashboard</h2>
+          <p style="opacity:.7;font-size:.85rem;" id="adminDateLabel">Today's attendance overview</p>
+        </div>
+        <div id="adminStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;" class="stats-4"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="card" style="padding:20px;">
+            <h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Today's Staff Status</h3>
+            <div id="adminTodayList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;"></div>
+          </div>
+          <div class="card" style="padding:20px;">
+            <h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Performance Overview (30 days)</h3>
+            <div id="adminPerfChart" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAFF LIST -->
+      <div id="stafflistSection" class="section-page" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 class="syne" style="font-size:1.1rem;font-weight:700;">Staff Overview</h3>
+            <p style="font-size:.8rem;color:var(--muted);margin-top:2px;">Click any staff to view today's detail</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <select id="staffFilter" class="inp" style="width:auto;padding:8px 12px;font-size:.82rem;" onchange="renderStaffList()">
+              <option value="all">All Staff</option>
+              <option value="clocked-in">Clocked In</option>
+              <option value="on-break">On Break</option>
+              <option value="out-assign">Out for Assignment</option>
+              <option value="clocked-out">Clocked Out</option>
+              <option value="absent">Absent</option>
+            </select>
+            <button onclick="loadAdminData()" class="btn btn-ghost" style="padding:8px 12px;"><i class="fas fa-sync-alt"></i></button>
+          </div>
+        </div>
+        <div id="staffListGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+      </div>
+
+      <!-- ADMIN CALENDARS -->
+      <div id="admincalSection" class="section-page" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+          <h3 class="syne" style="font-size:1.1rem;font-weight:700;">Staff Attendance Calendars</h3>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="adminCalStaff" class="inp" style="width:auto;padding:8px 12px;font-size:.82rem;" onchange="loadAdminCalendar()">
+              <option value="">Select staff…</option>
+            </select>
+            <button onclick="changeAdminCalMonth(-1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-left"></i></button>
+            <span id="adminCalTitle" style="font-size:.9rem;font-weight:700;min-width:110px;text-align:center;"></span>
+            <button onclick="changeAdminCalMonth(1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sun</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Mon</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Tue</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Wed</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Thu</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Fri</div>
+            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sat</div>
+          </div>
+          <div id="adminCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="reportsSection" class="section-page" style="display:none;">
+        <div class="card" style="padding:22px;margin-bottom:18px;">
+          <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;">Generate Report</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
+            <div><label class="lbl">Staff Member</label><select id="rptStaff" class="inp" style="padding:9px 12px;"><option value="all">All Staff</option></select></div>
+            <div><label class="lbl">Filter By</label><select id="rptType" class="inp" style="padding:9px 12px;"><option value="all">All Statuses</option><option value="on-time">On Time</option><option value="late">Late</option><option value="very-late">Very Late</option><option value="absent">Absent</option></select></div>
+            <div><label class="lbl">From</label><input type="date" id="rptFrom" class="inp"></div>
+            <div><label class="lbl">To</label><input type="date" id="rptTo" class="inp"></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+            <button onclick="generateReport()" class="btn btn-primary"><i class="fas fa-search"></i> Generate</button>
+            <button onclick="exportCSV()" class="btn btn-secondary"><i class="fas fa-file-csv"></i> Export CSV</button>
+            <button onclick="exportPDF()" class="btn btn-secondary" style="border-color:#dc2626;color:#dc2626;"><i class="fas fa-file-pdf"></i> Export PDF</button>
+          </div>
+        </div>
+        <div class="card" style="padding:22px;">
+          <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Report Results</h4>
+          <div id="reportResults"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="settingsSection" class="section-page" style="display:none;">
+        <div style="max-width:620px;">
+          <h3 class="syne" style="font-size:1.1rem;font-weight:700;margin-bottom:18px;">System Settings</h3>
+          <div class="card" style="padding:22px;margin-bottom:16px;">
+            <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;"><i class="fas fa-clock" style="color:var(--brand-mid);margin-right:7px;"></i>Time Classification Rules</h4>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div><label class="lbl">On Time — Until</label><input type="time" id="settingOnTime" class="inp" value="08:00"></div>
+                <div><label class="lbl">Late — Until</label><input type="time" id="settingLateTo" class="inp" value="08:30"></div>
+              </div>
+              <div><label class="lbl">Very Late — After</label><input type="time" id="settingVeryLate" class="inp" value="08:30"></div>
+            </div>
+          </div>
+          <div class="card" style="padding:22px;margin-bottom:16px;">
+            <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;"><i class="fas fa-wifi" style="color:var(--brand-mid);margin-right:7px;"></i>Office Network (Router IP)</h4>
+            <div>
+              <label class="lbl">Allowed Office IP Address</label>
+              <input type="text" id="settingIP" class="inp" placeholder="e.g. 102.88.34.10">
+              <p style="font-size:.74rem;color:var(--muted);margin-top:6px;"><i class="fas fa-info-circle"></i> Leave blank to allow clock-in from anywhere (testing mode).</p>
+            </div>
+          </div>
+          <button onclick="saveSettings()" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:.9rem;"><i class="fas fa-save"></i> Save Settings</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div id="dayModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <h3 id="dayModalTitle" class="syne" style="font-size:1.05rem;font-weight:700;"></h3>
+        <p id="dayModalSub" style="font-size:.78rem;color:var(--muted);margin-top:2px;"></p>
+      </div>
+      <button onclick="closeDayModal()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="dayModalBody"></div>
+  </div>
+</div>
+
+<!-- ASSIGNMENT NOTE MODAL -->
+<div id="noteModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-car" style="color:var(--warn);margin-right:8px;"></i>Out for Assignment</h3>
+      <button onclick="closeNoteModal()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <label class="lbl">Assignment Note (required)</label>
+      <textarea id="assignNote" class="inp" rows="3" style="resize:none;" placeholder="Describe your assignment…"></textarea>
+      <p style="font-size:.74rem;color:var(--muted);margin-top:6px;">This note is visible to the admin.</p>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeNoteModal()" class="btn btn-ghost">Cancel</button>
+      <button onclick="confirmOutAssign()" class="btn btn-primary"><i class="fas fa-check"></i> Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+// =====================================================
+//  SUPABASE — same project as AMS
+// =====================================================
+const SUPABASE_URL = 'https://asupemsmwzrovucpvqyt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_h3Kb-0pknHcYItkGeyEI-Q_urYDrPD9';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true }
+});
+
+// =====================================================
+//  CONSTANTS
+// =====================================================
+const SETTINGS_KEY  = 'nst_clock_settings';
+const RECORDS_KEY   = 'nst_clock_records';   // local cache keyed by "date_userId"
+const MESSAGES_KEY  = 'nst_clock_messages';
+const PROFILE_KEY   = 'nst_clock_profile';   // cached profile for offline login
+
+// =====================================================
+//  STATE
+// =====================================================
+let CU = null;   // supabase user
+let CP = null;   // profile row
+let APP_SETTINGS = loadSettings();
+let RECORDS = loadLocalRecords();
+let MESSAGES = loadMessages();
+let currentStatus = 'clocked-out';
+let sessionStart = null;
+let liveTimerInterval = null;
+let clockInterval = null;
+let pollInterval = null;
+let allStaffProfiles = [];  // for admin views
+let calYear, calMonth;
+let adminCalYear, adminCalMonth, adminCalStaffId;
+
+// =====================================================
+//  SETTINGS helpers
+// =====================================================
+function defaultSettings() {
+  return { onTimeUntil:'08:00', lateTo:'08:30', veryLateAfter:'08:30', officeIP:'' };
+}
+function loadSettings() {
+  try { return { ...defaultSettings(), ...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}') }; }
+  catch(e) { return defaultSettings(); }
+}
+function saveSettingsLocal(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); APP_SETTINGS = s; }
+
+// =====================================================
+//  LOCAL RECORD helpers  (offline-first store)
+// =====================================================
+function loadLocalRecords() {
+  try { return JSON.parse(localStorage.getItem(RECORDS_KEY)||'{}'); } catch(e) { return {}; }
+}
+function saveLocalRecords() { localStorage.setItem(RECORDS_KEY, JSON.stringify(RECORDS)); }
+
+function localKey(userId, dateStr) { return dateStr + '_' + userId; }
+
+function getLocalRecord(userId, dateStr) {
+  return RECORDS[localKey(userId, dateStr)] || null;
+}
+function setLocalRecord(rec) {
+  RECORDS[localKey(rec.user_id, rec.date)] = rec;
+  saveLocalRecords();
+  updateUnsyncedBadge();
+}
+
+function updateUnsyncedBadge() {
+  const unsynced = Object.values(RECORDS).filter(r => !r._synced).length;
+  const badge = $('unsyncedBadge');
+  if (badge) {
+    badge.style.display = unsynced > 0 ? 'block' : 'none';
+    const ct = $('unsyncedCount');
+    if (ct) ct.textContent = unsynced;
+  }
+}
+
+// =====================================================
+//  MESSAGES helpers
+// =====================================================
+function loadMessages() {
+  try { return JSON.parse(localStorage.getItem(MESSAGES_KEY)||'{}'); } catch(e) { return {}; }
+}
+function saveMessages() { localStorage.setItem(MESSAGES_KEY, JSON.stringify(MESSAGES)); }
+
+// =====================================================
+//  UTILS
+// =====================================================
+const $ = id => document.getElementById(id);
+const san = s => s ? String(s).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])) : '';
+const pad = n => String(n).padStart(2, '0');
+const fmtTime = d => d ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : '—';
+const fmtTimeFull = d => d ? `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` : '—';
+const todayStr = () => new Date().toISOString().slice(0,10);
+const nowTs = () => new Date().toISOString();
+const greet = () => { const h = new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; };
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function toast(msg, type='success', dur=3500) {
+  const icons = { success:'fas fa-check-circle', error:'fas fa-exclamation-circle', info:'fas fa-info-circle', warn:'fas fa-exclamation-triangle' };
+  const colors = { success:'#1db96b', error:'#ef4444', info:'#3b82f6', warn:'#f59e0b' };
+  const c = $('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.innerHTML = `<i class="${icons[type]||icons.success}" style="color:${colors[type]||colors.success};font-size:.95rem;flex-shrink:0;"></i><span>${san(msg)}</span>`;
+  c.appendChild(el);
+  setTimeout(() => { el.style.animation = 'toastOut .3s ease forwards'; setTimeout(() => el.remove(), 300); }, dur);
+}
+
+function hideLoading() {
+  const ol = $('loadingOverlay');
+  ol.style.opacity = '0';
+  setTimeout(() => ol.style.display = 'none', 500);
+}
+function showLoading(msg='LOADING…') {
+  const ol = $('loadingOverlay');
+  ol.style.display = 'flex'; ol.style.opacity = '1';
+  const lm = $('loadingMsg'); if(lm) lm.textContent = msg;
+}
+
+// =====================================================
+//  AUTH — Supabase + offline fallback
+// =====================================================
+function togglePw() {
+  const el = $('loginPw');
+  el.type = el.type === 'password' ? 'text' : 'password';
+  $('pwIcon').className = el.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+
+function showAuthErr(msg) {
+  const el = $('authErr');
+  $('authErrTxt').textContent = msg;
+  el.style.display = 'flex';
+}
+
+async function doLogin() {
+  const email = $('loginEmail').value.trim();
+  const pw    = $('loginPw').value;
+  if (!email || !pw) { showAuthErr('Please enter your email and password.'); return; }
+
+  const btn = $('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in…';
+  $('authErr').style.display = 'none';
+
+  if (!navigator.onLine) {
+    // Offline: try cached profile
+    const cached = getCachedProfile();
+    if (cached && cached.email === email) {
+      CU = { id: cached.id, email: cached.email };
+      CP = cached;
+      await bootApp(true);
+      btn.disabled = false; btn.innerHTML = '<span>Sign In</span><i class="fas fa-arrow-right"></i>';
+      return;
+    } else {
+      showAuthErr('Offline — no saved session for this email. Please connect to internet first.');
+      btn.disabled = false; btn.innerHTML = '<span>Sign In</span><i class="fas fa-arrow-right"></i>';
+      return;
+    }
+  }
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) { showAuthErr(error.message); return; }
+    CU = data.user;
+    // Fetch profile
+    const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', CU.id).single();
+    if (pErr || !profile) { showAuthErr('Profile not found. Contact your administrator.'); await sb.auth.signOut(); return; }
+    // Block applicants
+    if (profile.role === 'applicant') {
+      showAuthErr('Access denied — this system is for staff only. Use the NonStop Travels app instead.');
+      await sb.auth.signOut(); return;
+    }
+    CP = profile;
+    cacheProfile(profile);
+    await bootApp(false);
+  } catch(e) {
+    showAuthErr('Login failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>Sign In</span><i class="fas fa-arrow-right"></i>';
+  }
+}
+
+function getCachedProfile() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null'); } catch(e) { return null; }
+}
+function cacheProfile(profile) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+}
+
+async function doLogout() {
+  clearInterval(liveTimerInterval);
+  clearInterval(clockInterval);
+  clearInterval(pollInterval);
+  await sb.auth.signOut().catch(()=>{});
+  CU = null; CP = null;
+  $('mainApp').style.display = 'none';
+  $('authScreen').style.display = 'flex';
+  $('loginEmail').value = '';
+  $('loginPw').value = '';
+  toast('Signed out', 'info');
+}
+
+// =====================================================
+//  SUPABASE SYNC — push local records to clock_records
+// =====================================================
+async function syncRecordsToSupabase() {
+  if (!navigator.onLine || !CU) return;
+  const unsynced = Object.values(RECORDS).filter(r => !r._synced && r.user_id === CU.id);
+  if (!unsynced.length) return;
+
+  $('syncBanner').style.display = 'block';
+  let synced = 0;
+  for (const rec of unsynced) {
+    try {
+      const payload = {
+        user_id:     rec.user_id,
+        user_name:   rec.user_name,
+        date:        rec.date,
+        status:      rec.status,
+        clock_in:    rec.clock_in || null,
+        clock_out:   rec.clock_out || null,
+        break_start: rec.break_start || null,
+        break_end:   rec.break_end || null,
+        assign_note: rec.assign_note || null,
+        events:      rec.events || [],
+        online:      rec.online !== false,
+        updated_at:  nowTs()
+      };
+      const { error } = await sb.from('clock_records').upsert(payload, { onConflict: 'user_id,date' });
+      if (!error) {
+        rec._synced = true;
+        RECORDS[localKey(rec.user_id, rec.date)] = rec;
+        synced++;
+      }
+    } catch(e) { /* keep trying next */ }
+  }
+  saveLocalRecords();
+  updateUnsyncedBadge();
+  $('syncBanner').style.display = 'none';
+  if (synced > 0) toast(`${synced} record(s) synced to server`, 'success');
+}
+
+// Pull records from Supabase for a user+month into local cache (admin view)
+async function pullRecordsForUser(userId, year, month) {
+  if (!navigator.onLine) return;
+  const from = `${year}-${pad(month+1)}-01`;
+  const to   = `${year}-${pad(month+1)}-${new Date(year, month+1, 0).getDate()}`;
+  const { data } = await sb.from('clock_records')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', from)
+    .lte('date', to);
+  if (!data) return;
+  data.forEach(r => {
+    const rec = {
+      user_id:    r.user_id,
+      user_name:  r.user_name,
+      date:       r.date,
+      status:     r.status,
+      clock_in:   r.clock_in,
+      clock_out:  r.clock_out,
+      break_start:r.break_start,
+      break_end:  r.break_end,
+      assign_note:r.assign_note,
+      events:     r.events || [],
+      _synced:    true
+    };
+    const k = localKey(r.user_id, r.date);
+    if (!RECORDS[k] || !RECORDS[k]._synced) RECORDS[k] = rec;
+  });
+  saveLocalRecords();
+}
+
+// Pull today's records for all staff (admin dashboard)
+async function pullAllTodayRecords() {
+  if (!navigator.onLine) return;
+  const today = todayStr();
+  const { data } = await sb.from('clock_records').select('*').eq('date', today);
+  if (!data) return;
+  data.forEach(r => {
+    const rec = {
+      user_id:    r.user_id, user_name:r.user_name, date:r.date,
+      status:     r.status,  clock_in:r.clock_in,   clock_out:r.clock_out,
+      break_start:r.break_start, break_end:r.break_end,
+      assign_note:r.assign_note, events:r.events||[], _synced:true
+    };
+    RECORDS[localKey(r.user_id, r.date)] = rec;
+  });
+  saveLocalRecords();
+}
+
+// =====================================================
+//  BOOT
+// =====================================================
+async function bootApp(isOffline = false) {
+  const isAdmin = CP.role === 'admin';
+  const name = CP.full_name || CP.email;
+
+  // sidebar / header
+  $('sideAvatar').textContent = name.charAt(0).toUpperCase();
+  $('sideName').textContent = name;
+  $('sideRole').textContent = CP.role.charAt(0).toUpperCase() + CP.role.slice(1);
+  $('sideRole').className = `badge badge-${CP.role}`;
+  $('headerRole').textContent = $('sideRole').textContent;
+  $('headerRole').className = `badge badge-${CP.role} hide-mob`;
+  $('clockGreet').textContent = greet() + ',';
+  $('clockName').textContent = name.split(' ')[0];
+  $('onlineIndicator').style.background = navigator.onLine ? '#22c55e' : '#ef4444';
+
+  // nav visibility
+  ['navClock','navCalendar','navMessages'].forEach(id => $(id).style.display = 'flex');
+  ['navAdmin','navStaffList','navAdminCal','navReports','navSettings'].forEach(id => {
+    $(id).style.display = isAdmin ? 'flex' : 'none';
+  });
+
+  // settings prefill
+  $('settingOnTime').value = APP_SETTINGS.onTimeUntil;
+  $('settingLateTo').value = APP_SETTINGS.lateTo;
+  $('settingVeryLate').value = APP_SETTINGS.veryLateAfter;
+  $('settingIP').value = APP_SETTINGS.officeIP || '';
+
+  // calendar init
+  const now = new Date();
+  calYear = now.getFullYear(); calMonth = now.getMonth();
+  adminCalYear = now.getFullYear(); adminCalMonth = now.getMonth();
+
+  // report defaults
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  $('rptFrom').value = firstOfMonth.toISOString().slice(0,10);
+  $('rptTo').value   = now.toISOString().slice(0,10);
+
+  // pull staff profiles for admin
+  if (isAdmin && navigator.onLine) {
+    const { data } = await sb.from('profiles').select('id,full_name,email,role').in('role',['staff','admin']);
+    allStaffProfiles = data || [];
+    populateAdminDropdowns();
+    await pullAllTodayRecords();
+  }
+
+  // restore today's clock state from local cache (fast, works offline)
+  restoreClockState();
+  startHeaderClock();
+  checkOfficeNetwork();
+  updateUnsyncedBadge();
+
+  // sync any pending records
+  if (!isOffline) await syncRecordsToSupabase();
+
+  // poll every 30s when online
+  clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    updateMessageBadges();
+    if (!$('messagesSection').style.display || $('messagesSection').style.display !== 'none') renderMessages();
+    if (isAdmin) {
+      await pullAllTodayRecords();
+      if ($('adminSection').style.display !== 'none') loadAdminData();
+    }
+    await syncRecordsToSupabase();
+  }, 30000);
+
+  updateMessageBadges();
+  $('authScreen').style.display = 'none';
+  $('mainApp').style.display = 'flex';
+  showSection('clock');
+  renderClockButtons();
+  renderTodaySummary();
+  renderTodayLog();
+  hideLoading();
+}
+
+// =====================================================
+//  HEADER CLOCK
+// =====================================================
+function startHeaderClock() {
+  clearInterval(clockInterval);
+  function tick() {
+    const now = new Date();
+    $('headerClock').textContent = fmtTimeFull(now);
+    $('headerDate').textContent = now.toLocaleDateString('en-NG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    $('clockDate').textContent   = now.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  tick();
+  clockInterval = setInterval(tick, 1000);
+}
+
+// =====================================================
+//  NETWORK CHECK
+// =====================================================
+async function checkOfficeNetwork() {
+  const locIcon = $('locIcon'), locText = $('locText');
+  const officeIP = APP_SETTINGS.officeIP;
+  if (!officeIP) {
+    locIcon.className='fas fa-wifi'; locIcon.style.color='#22c55e';
+    locText.textContent = 'Testing mode — no IP restriction set';
+    window._networkAllowed = true; renderClockButtons(); return;
+  }
+  if (!navigator.onLine) {
+    locIcon.className='fas fa-cloud-slash'; locIcon.style.color='#fbbf24';
+    locText.textContent = 'Offline — clock-in restricted until reconnected';
+    window._networkAllowed = false; renderClockButtons(); return;
+  }
+  locIcon.className='fas fa-circle-notch fa-spin'; locIcon.style.color='rgba(255,255,255,.7)';
+  locText.textContent = 'Checking office network…';
+  try {
+    const resp = await fetch('https://api.ipify.org?format=json', {signal: AbortSignal.timeout(5000)});
+    const data = await resp.json();
+    if (data.ip === officeIP) {
+      locIcon.className='fas fa-wifi'; locIcon.style.color='#22c55e';
+      locText.textContent = `Connected to office network (${data.ip})`;
+      window._networkAllowed = true;
+    } else {
+      locIcon.className='fas fa-ban'; locIcon.style.color='#f87171';
+      locText.textContent = `Not on office network (Current: ${data.ip})`;
+      window._networkAllowed = false;
+    }
+  } catch(e) {
+    locIcon.className='fas fa-cloud-slash'; locIcon.style.color='#fbbf24';
+    locText.textContent = 'Could not verify network — offline clocking enabled';
+    window._networkAllowed = true;
+  }
+  renderClockButtons();
+}
+
+// =====================================================
+//  ONLINE / OFFLINE events
+// =====================================================
+window.addEventListener('online', async () => {
+  $('offlineBanner').style.display = 'none';
+  $('onlineIndicator').style.background = '#22c55e';
+  toast('Back online — syncing records…', 'info');
+  await syncRecordsToSupabase();
+  checkOfficeNetwork();
+  if (CP?.role === 'admin') await pullAllTodayRecords();
+});
+window.addEventListener('offline', () => {
+  $('offlineBanner').style.display = 'block';
+  $('onlineIndicator').style.background = '#ef4444';
+  toast('Offline — clocks saved locally', 'warn');
+  checkOfficeNetwork();
+});
+
+// =====================================================
+//  CLOCK STATE (always read/write local cache)
+// =====================================================
+function getTodayRecord() {
+  return getLocalRecord(CU.id, todayStr());
+}
+
+function buildEmptyRecord() {
+  return {
+    user_id: CU.id, user_name: CP.full_name || CP.email,
+    date: todayStr(), status: 'absent', events: [],
+    clock_in: null, clock_out: null, break_start: null, break_end: null,
+    assign_note: null, online: navigator.onLine, _synced: false
+  };
+}
+
+function restoreClockState() {
+  const rec = getTodayRecord();
+  if (!rec || !rec.events.length) { currentStatus = 'clocked-out'; stopLiveTimer(); updateStatusDisplay(); return; }
+  const last = rec.events[rec.events.length - 1];
+  if (!last) { currentStatus = 'clocked-out'; stopLiveTimer(); updateStatusDisplay(); return; }
+  if (last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign') { currentStatus='clocked-in'; sessionStart=new Date(last.ts); startLiveTimer(); }
+  else if (last.type==='start-break') { currentStatus='on-break'; sessionStart=new Date(last.ts); startLiveTimer(); }
+  else if (last.type==='out-assign') { currentStatus='out-assign'; sessionStart=new Date(last.ts); startLiveTimer(); }
+  else if (last.type==='clock-out') { currentStatus='clocked-out'; stopLiveTimer(); }
+  updateStatusDisplay();
+}
+
+function clockAction(type, note='') {
+  if (type==='clock-in' && window._networkAllowed===false) {
+    toast('You must be on the office network to clock in', 'error'); return;
+  }
+  const now = new Date();
+  const ts  = now.toISOString();
+  let rec   = getTodayRecord() || buildEmptyRecord();
+  rec.events.push({ type, ts, note });
+  rec._synced = false;
+  rec.online  = navigator.onLine;
+
+  if (type==='clock-in')       { rec.clock_in    = ts; rec.status = getAttendanceStatus(now); sessionStart=now; startLiveTimer(); currentStatus='clocked-in'; }
+  else if (type==='start-break'){ rec.break_start = ts; currentStatus='on-break'; sessionStart=now; }
+  else if (type==='end-break')  { rec.break_end   = ts; currentStatus='clocked-in'; sessionStart=now; }
+  else if (type==='out-assign') { rec.assign_note = note; currentStatus='out-assign'; sessionStart=now; }
+  else if (type==='back-assign'){ currentStatus='clocked-in'; sessionStart=now; }
+  else if (type==='clock-out')  { rec.clock_out   = ts; currentStatus='clocked-out'; stopLiveTimer(); }
+
+  setLocalRecord(rec);
+  updateStatusDisplay();
+  renderClockButtons();
+  renderTodaySummary();
+  renderTodayLog();
+
+  // async sync
+  syncRecordsToSupabase();
+
+  const labels = {
+    'clock-in':'Clocked In ✅','start-break':'Break Started ☕','end-break':'Break Ended 🔁',
+    'out-assign':'Out for Assignment 🚗','back-assign':'Back from Assignment','clock-out':'Clocked Out 🔚'
+  };
+  toast(labels[type] || type, 'success');
+}
+
+function getAttendanceStatus(clockInTime) {
+  const t = clockInTime.getHours()*60 + clockInTime.getMinutes();
+  const [oh,om] = APP_SETTINGS.onTimeUntil.split(':').map(Number);
+  const [lh,lm] = APP_SETTINGS.lateTo.split(':').map(Number);
+  if (t <= oh*60+om) return 'on-time';
+  if (t <= lh*60+lm) return 'late';
+  return 'very-late';
+}
+
+function updateStatusDisplay() {
+  const statusMap = {'clocked-in':'Clocked In','on-break':'On Break','out-assign':'Out for Assignment','clocked-out':'Not clocked in'};
+  const cssMap    = {'clocked-in':'status-clocked-in','on-break':'status-on-break','out-assign':'status-out-assign','clocked-out':'status-clocked-out'};
+  $('clockStatusDisplay').textContent = statusMap[currentStatus] || 'Unknown';
+  $('clockStatusDisplay').className   = `status-pulse ${cssMap[currentStatus]||''}`;
+}
+
+function startLiveTimer() {
+  clearInterval(liveTimerInterval);
+  function tick() {
+    if (!sessionStart) return;
+    const e = Math.floor((new Date()-sessionStart)/1000);
+    $('liveTimer').textContent = `${pad(Math.floor(e/3600))}:${pad(Math.floor((e%3600)/60))}:${pad(e%60)}`;
+  }
+  tick();
+  liveTimerInterval = setInterval(tick, 1000);
+}
+function stopLiveTimer() { clearInterval(liveTimerInterval); $('liveTimer').textContent = '--:--:--'; }
+
+// =====================================================
+//  CLOCK BUTTONS
+// =====================================================
+function renderClockButtons() {
+  const s = currentStatus;
+  const allowed = window._networkAllowed !== false;
+  const buttons = [
+    { type:'clock-in',     label:'Clock In',             icon:'✅', color:'#f0fdf4', border:'#86efac', text:'#166534', enabled: s==='clocked-out'&&allowed },
+    { type:'start-break',  label:'Start Break',           icon:'☕', color:'#fffbeb', border:'#fde68a', text:'#92400e', enabled: s==='clocked-in' },
+    { type:'end-break',    label:'End Break',             icon:'🔁', color:'#eff6ff', border:'#bfdbfe', text:'#1e40af', enabled: s==='on-break' },
+    { type:'out-assign',   label:'Out for Assignment',    icon:'🚗', color:'#fff7ed', border:'#fed7aa', text:'#9a3412', enabled: s==='clocked-in' },
+    { type:'clock-out',    label:'Clock Out',             icon:'🔚', color:'#fef2f2', border:'#fca5a5', text:'#991b1b', enabled: s==='clocked-in'||s==='out-assign' }
+  ];
+  if (s==='out-assign') buttons.splice(4,0,{ type:'back-assign', label:'Back from Assignment', icon:'🏢', color:'#f0fdf4', border:'#86efac', text:'#166534', enabled:true });
+  $('clockButtons').innerHTML = buttons.map(b =>
+    `<button class="clock-btn card-hover" ${!b.enabled?'disabled':''} onclick="handleClockBtn('${b.type}')"
+      style="background:${b.color};border:2px solid ${b.enabled?b.border:'var(--border)'};color:${b.text};">
+      <span class="icon">${b.icon}</span><span>${b.label}</span>
+    </button>`
+  ).join('');
+}
+
+function handleClockBtn(type) {
+  if (type==='out-assign') { $('assignNote').value=''; $('noteModal').style.display='flex'; return; }
+  clockAction(type);
+}
+function closeNoteModal() { $('noteModal').style.display='none'; }
+function confirmOutAssign() {
+  const note = $('assignNote').value.trim();
+  if (!note) { toast('Please enter an assignment note', 'warn'); return; }
+  closeNoteModal();
+  clockAction('out-assign', note);
+}
+
+// =====================================================
+//  TODAY SUMMARY
+// =====================================================
+function renderTodaySummary() {
+  const rec = getTodayRecord();
+  const ci  = rec?.clock_in  ? new Date(rec.clock_in)  : null;
+  const co  = rec?.clock_out ? new Date(rec.clock_out) : null;
+  const bs  = rec?.break_start ? new Date(rec.break_start) : null;
+  const be  = rec?.break_end   ? new Date(rec.break_end)   : null;
+  let workMin = 0;
+  if (ci&&co) workMin = Math.floor((co-ci)/60000);
+  else if (ci) workMin = Math.floor((new Date()-ci)/60000);
+  let breakMin = 0;
+  if (bs&&be) breakMin = Math.floor((be-bs)/60000);
+  const sl = rec?.status||'absent';
+  const sc = {'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[sl]||'badge-absent';
+  $('todaySummary').innerHTML = `
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock In</div>
+      <div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</div>
+    </div>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock Out</div>
+      <div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</div>
+    </div>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Work Time</div>
+      <div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${workMin>0?`${Math.floor(workMin/60)}h ${workMin%60}m`:'—'}</div>
+    </div>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Status</div>
+      <span class="badge ${sc}" style="width:fit-content;">${sl.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+    </div>`;
+}
+
+function renderTodayLog() {
+  const rec = getTodayRecord();
+  const el  = $('todayLog');
+  if (!rec || !rec.events.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;">No activity today yet</p>'; return;
+  }
+  const typeMap = {
+    'clock-in':    {icon:'fas fa-sign-in-alt',  color:'#22c55e', label:'Clocked In'},
+    'start-break': {icon:'fas fa-coffee',        color:'#f59e0b', label:'Break Started'},
+    'end-break':   {icon:'fas fa-redo',          color:'#3b82f6', label:'Break Ended'},
+    'out-assign':  {icon:'fas fa-car',           color:'#f97316', label:'Out for Assignment'},
+    'back-assign': {icon:'fas fa-building',      color:'#22c55e', label:'Back from Assignment'},
+    'clock-out':   {icon:'fas fa-sign-out-alt',  color:'#dc2626', label:'Clocked Out'},
+  };
+  el.innerHTML = rec.events.map(e => {
+    const m = typeMap[e.type] || {icon:'fas fa-circle',color:'#9ca3af',label:e.type};
+    const t = new Date(e.ts);
+    return `<div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="width:34px;height:34px;border-radius:10px;background:${m.color}18;color:${m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="${m.icon}" style="font-size:.88rem;"></i>
+      </div>
+      <div style="flex:1;padding-top:2px;">
+        <p style="font-weight:600;font-size:.85rem;">${m.label}</p>
+        <p style="font-size:.75rem;color:var(--muted);">${fmtTimeFull(t)}${e.note?` · <em>${san(e.note)}</em>`:''}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// =====================================================
+//  CALENDAR
+// =====================================================
+function getDayClass(userId, dateStr) {
+  const dow = new Date(dateStr).getDay();
+  if (dow===0) return 'day-weekend';
+  if (dateStr > todayStr()) return 'day-future';
+  const rec = getLocalRecord(userId, dateStr);
+  if (!rec || !rec.clock_in) return 'day-absent';
+  const s = rec.status || 'on-time';
+  if (s==='on-time') return 'day-ontime';
+  if (s==='late') return 'day-late';
+  if (s==='very-late') return 'day-verylate';
+  return 'day-absent';
+}
+
+function renderCalendar(userId, year, month, gridId, titleId) {
+  if (titleId) $(titleId).textContent = `${monthNames[month]} ${year}`;
+  const grid = $(gridId); if (!grid) return;
+  const firstDay    = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  let html = '';
+  for (let i=0;i<firstDay;i++) html += `<div class="cal-day empty"></div>`;
+  for (let d=1;d<=daysInMonth;d++) {
+    const ds  = `${year}-${pad(month+1)}-${pad(d)}`;
+    const cls = getDayClass(userId, ds);
+    const rec = getLocalRecord(userId, ds);
+    const ci  = rec?.clock_in ? fmtTime(new Date(rec.clock_in)) : '';
+    const isToday = ds===todayStr();
+    html += `<div class="cal-day ${cls}${isToday?' today':''}" onclick="openDayDetail('${userId}','${ds}')" title="${ds}${ci?' · '+ci:''}">
+      <span>${d}</span>${ci?`<span class="dot"></span>`:''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function changeCalMonth(dir) {
+  calMonth += dir;
+  if (calMonth<0){calMonth=11;calYear--;}
+  if (calMonth>11){calMonth=0;calYear++;}
+  renderCalendar(CU.id, calYear, calMonth, 'calGrid', 'calMonthTitle');
+}
+async function changeAdminCalMonth(dir) {
+  adminCalMonth += dir;
+  if (adminCalMonth<0){adminCalMonth=11;adminCalYear--;}
+  if (adminCalMonth>11){adminCalMonth=0;adminCalYear++;}
+  if (adminCalStaffId) {
+    await pullRecordsForUser(adminCalStaffId, adminCalYear, adminCalMonth);
+    renderCalendar(adminCalStaffId, adminCalYear, adminCalMonth, 'adminCalGrid', 'adminCalTitle');
+  } else {
+    $('adminCalTitle').textContent = `${monthNames[adminCalMonth]} ${adminCalYear}`;
+  }
+}
+async function loadAdminCalendar() {
+  adminCalStaffId = $('adminCalStaff').value;
+  if (!adminCalStaffId) { $('adminCalGrid').innerHTML='<p style="text-align:center;color:var(--muted);padding:24px;grid-column:1/-1;">Select a staff member</p>'; return; }
+  await pullRecordsForUser(adminCalStaffId, adminCalYear, adminCalMonth);
+  renderCalendar(adminCalStaffId, adminCalYear, adminCalMonth, 'adminCalGrid', 'adminCalTitle');
+}
+
+// =====================================================
+//  DAY DETAIL MODAL
+// =====================================================
+function openDayDetail(userId, dateStr) {
+  const rec    = getLocalRecord(userId, dateStr);
+  const user   = allStaffProfiles.find(u=>u.id===userId) || CP;
+  const dow    = new Date(dateStr).getDay();
+  const isFut  = dateStr > todayStr();
+  $('dayModalTitle').textContent = new Date(dateStr+'T12:00:00').toLocaleDateString('en-NG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const cls = getDayClass(userId, dateStr);
+  const statusLabels = {'day-ontime':'On Time ✅','day-late':'Late 🟠','day-verylate':'Very Late 🔴','day-absent':'Absent 🔵','day-weekend':'Weekend','day-future':'Upcoming'};
+  $('dayModalSub').textContent = `${user?.full_name||'Staff'} · ${statusLabels[cls]||''}`;
+  if (dow===0) { $('dayModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px;">Sunday — not a working day.</p>'; $('dayModal').style.display='flex'; return; }
+  if (isFut)   { $('dayModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px;">This day is in the future.</p>'; $('dayModal').style.display='flex'; return; }
+  if (!rec||!rec.clock_in) { $('dayModalBody').innerHTML=`<div style="text-align:center;padding:24px;"><div style="font-size:2.5rem;margin-bottom:10px;">🔵</div><p style="font-weight:600;font-size:.95rem;">Absent</p><p style="font-size:.82rem;color:var(--muted);margin-top:4px;">No clock-in recorded.</p></div>`; $('dayModal').style.display='flex'; return; }
+  const ci = rec.clock_in   ? new Date(rec.clock_in)   : null;
+  const co = rec.clock_out  ? new Date(rec.clock_out)  : null;
+  const bs = rec.break_start? new Date(rec.break_start): null;
+  const be = rec.break_end  ? new Date(rec.break_end)  : null;
+  let workMin=0; if(ci&&co) workMin=Math.floor((co-ci)/60000);
+  let breakMin=0; if(bs&&be) breakMin=Math.floor((be-bs)/60000);
+  const sc={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[rec.status]||'badge-absent';
+  const typeMap={'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};
+  $('dayModalBody').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Clock In</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</p></div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Clock Out</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</p></div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Break</p><p class="syne" style="font-size:1rem;font-weight:700;color:var(--brand);">${bs?fmtTime(bs)+' → '+(be?fmtTime(be):'?'):'-'}</p>${breakMin>0?`<p style="font-size:.74rem;color:var(--muted);margin-top:3px;">${breakMin} min</p>`:''}</div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Work Time</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${workMin>0?`${Math.floor(workMin/60)}h ${workMin%60}m`:'—'}</p></div>
+    </div>
+    <div style="margin-bottom:12px;"><span class="badge ${sc}" style="font-size:.82rem;padding:5px 12px;">${(rec.status||'absent').replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>${!rec._synced?`<span style="font-size:.72rem;color:#f59e0b;margin-left:8px;"><i class="fas fa-clock"></i> Pending sync</span>`:''}</div>
+    ${rec.assign_note?`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px;"><p style="font-size:.74rem;font-weight:600;color:#9a3412;margin-bottom:4px;"><i class="fas fa-car"></i> Assignment Note</p><p style="font-size:.84rem;">${san(rec.assign_note)}</p></div>`:''}
+    <p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Full Timeline</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${(rec.events||[]).map(e=>{const t=new Date(e.ts);return`<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;"><span style="font-family:monospace;font-weight:700;color:var(--brand);min-width:60px;">${fmtTime(t)}</span><span style="font-weight:600;">${typeMap[e.type]||e.type}</span>${e.note?`<span style="color:var(--muted);font-size:.76rem;"> — ${san(e.note)}</span>`:''}</div>`;}).join('')}
+    </div>`;
+  $('dayModal').style.display = 'flex';
+}
+function closeDayModal() { $('dayModal').style.display='none'; }
+
+// =====================================================
+//  MESSAGES (via AMS profile_notes table)
+// =====================================================
+async function renderMessages() {
+  const el = $('msgList'); if (!el||!CU) return;
+  if (!navigator.onLine) {
+    const cached = MESSAGES['thread_'+CU.id] || [];
+    if (!cached.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-wifi-slash" style="font-size:2rem;margin-bottom:10px;display:block;opacity:.4;"></i><p style="font-size:.85rem;">Offline — messages unavailable</p></div>'; return; }
+    el.innerHTML = cached.map(m => msgBubbleHtml(m)).join('');
+    el.scrollTop = el.scrollHeight; return;
+  }
+  const { data: notes } = await sb.from('profile_notes').select('*,author:author_id(full_name,role)').eq('profile_id',CU.id).order('created_at',{ascending:true});
+  const msgs = notes || [];
+  MESSAGES['thread_'+CU.id] = msgs; saveMessages();
+  if (!msgs.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p style="font-size:.85rem;">No messages yet</p></div>'; return; }
+  el.innerHTML = msgs.map(m => msgBubbleHtml(m)).join('');
+  el.scrollTop = el.scrollHeight;
+  updateMessageBadges();
+}
+
+function msgBubbleHtml(m) {
+  const isMe = m.author_id === CU.id;
+  return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};">
+    <div class="msg-bubble ${isMe?'msg-me':'msg-other'}">${san(m.content)}</div>
+    <span style="font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 4px;">${fmtTime(new Date(m.created_at))} · ${san(m.author?.full_name||'Admin')}</span>
+  </div>`;
+}
+
+async function sendMsg() {
+  const content = $('msgInput').value.trim(); if (!content||!CU) return;
+  if (!navigator.onLine) { toast('Cannot send messages while offline', 'warn'); return; }
+  const { error } = await sb.from('profile_notes').insert([{ profile_id:CU.id, author_id:CU.id, content }]);
+  if (error) { toast('Send failed: '+error.message,'error'); return; }
+  $('msgInput').value = '';
+  await renderMessages();
+}
+
+async function updateMessageBadges() {
+  if (!CU) return;
+  if (!navigator.onLine) return;
+  const { count } = await sb.from('profile_notes').select('id',{count:'exact',head:true}).eq('profile_id',CU.id).neq('author_id',CU.id);
+  const readKey = 'nst_msg_read_'+CU.id;
+  const lastRead = parseInt(localStorage.getItem(readKey)||'0');
+  const unread = Math.max(0,(count||0)-lastRead);
+  const badge = $('msgBadge');
+  if (unread>0) { badge.textContent=unread; badge.style.display='block'; }
+  else badge.style.display='none';
+}
+
+// =====================================================
+//  ADMIN DATA
+// =====================================================
+async function loadAdminData() {
+  if (navigator.onLine) await pullAllTodayRecords();
+  const today   = todayStr();
+  const staff   = allStaffProfiles.filter(u=>u.role==='staff');
+  let present=0,absent=0,late=0;
+  staff.forEach(s => {
+    const rec = getLocalRecord(s.id, today);
+    if (rec&&rec.clock_in) { present++; if(rec.status==='late'||rec.status==='very-late') late++; }
+    else absent++;
+  });
+  $('adminStats').innerHTML=`
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-users"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:var(--brand);">${staff.length}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Total Staff</p></div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-check-circle"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:#16a34a;">${present}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Present Today</p></div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#dbeafe;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-user-clock"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:#d97706;">${late}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Late Today</p></div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-user-minus"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:#dc2626;">${absent}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Absent Today</p></div>`;
+  $('adminDateLabel').textContent = `${new Date().toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} — ${present}/${staff.length} present`;
+
+  const statusIcons={'clocked-in':'🟢','on-break':'🟡','out-assign':'🟠','clocked-out':'⚪'};
+  $('adminTodayList').innerHTML = staff.map(s=>{
+    const rec=getLocalRecord(s.id,today);
+    const ci=rec?.clock_in?new Date(rec.clock_in):null;
+    const stat=rec?.status||'absent';
+    const sb2={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
+    let live='clocked-out';
+    if(rec?.events?.length){const last=rec.events[rec.events.length-1];if(last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign')live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
+    return `<div onclick="openDayDetail('${s.id}','${today}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;background:var(--card);" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${s.full_name.charAt(0)}</div>
+      <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.full_name)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${statusIcons[live]||''}</p></div>
+      <span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+    </div>`;
+  }).join('');
+
+  // Perf chart — last 30 work days from local cache
+  const days = getLast30WorkDays();
+  let pOT=0,pL=0,pVL=0,pAb=0;
+  staff.forEach(s=>days.forEach(ds=>{const r=getLocalRecord(s.id,ds);if(!r||!r.clock_in)pAb++;else if(r.status==='on-time')pOT++;else if(r.status==='late')pL++;else if(r.status==='very-late')pVL++;}));
+  const tot=pOT+pL+pVL+pAb||1;
+  const bars=[{label:'On Time',count:pOT,color:'#22c55e'},{label:'Late',count:pL,color:'#f59e0b'},{label:'Very Late',count:pVL,color:'#dc2626'},{label:'Absent',count:pAb,color:'#3b82f6'}];
+  $('adminPerfChart').innerHTML=bars.map(b=>`<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:.8rem;font-weight:600;color:var(--muted);">${b.label}</span><span style="font-size:.8rem;font-weight:700;">${b.count}</span></div><div style="height:8px;background:var(--surface);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${Math.round(b.count/tot*100)}%;background:${b.color};border-radius:99px;"></div></div></div>`).join('');
+}
+
+function getLast30WorkDays() {
+  const days=[];
+  for(let i=0;i<30;i++){const d=new Date();d.setDate(d.getDate()-i);if(d.getDay()!==0)days.push(d.toISOString().slice(0,10));}
+  return days;
+}
+
+function renderStaffList() {
+  const filter = $('staffFilter').value;
+  const today  = todayStr();
+  const staff  = allStaffProfiles.filter(u=>u.role==='staff');
+  const filtered = staff.filter(s=>{
+    const rec=getLocalRecord(s.id,today);
+    if(filter==='all') return true;
+    if(filter==='absent') return !rec||!rec.clock_in;
+    if(!rec?.events?.length) return false;
+    const last=rec.events[rec.events.length-1];
+    if(filter==='clocked-in') return last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign';
+    if(filter==='on-break') return last.type==='start-break';
+    if(filter==='out-assign') return last.type==='out-assign';
+    if(filter==='clocked-out') return last.type==='clock-out';
+    return true;
+  });
+  $('staffListGrid').innerHTML = filtered.map(s=>{
+    const rec=getLocalRecord(s.id,today);
+    const ci=rec?.clock_in?new Date(rec.clock_in):null;
+    const co=rec?.clock_out?new Date(rec.clock_out):null;
+    const stat=rec?.status||'absent';
+    const sb2={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
+    let live='absent';
+    if(rec?.events?.length){const last=rec.events[rec.events.length-1];if(last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign')live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
+    return `<div class="card card-hover" style="padding:18px;cursor:pointer;" onclick="openDayDetail('${s.id}','${today}')">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="width:42px;height:42px;border-radius:12px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${s.full_name.charAt(0)}</div>
+        <div style="flex:1;min-width:0;"><p style="font-weight:700;font-size:.88rem;">${san(s.full_name)}</p><p style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.email)}</p></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <span class="badge ${sb2}">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+        <span class="badge ${ {'clocked-in':'badge-present','on-break':'badge-break','out-assign':'badge-out','clocked-out':'badge-staff','absent':'badge-absent'}[live]||'badge-absent' }">${live.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+      </div>
+      <div style="display:flex;gap:12px;font-size:.78rem;color:var(--muted);">
+        <span><i class="fas fa-sign-in-alt" style="margin-right:4px;color:var(--brand-mid);"></i>${ci?fmtTime(ci):'—'}</span>
+        <span><i class="fas fa-sign-out-alt" style="margin-right:4px;color:#dc2626;"></i>${co?fmtTime(co):'—'}</span>
+      </div>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted);text-align:center;padding:32px;grid-column:1/-1;">No staff matching filter</p>';
+}
+
+function populateAdminDropdowns() {
+  const staff = allStaffProfiles.filter(u=>u.role==='staff');
+  const opts  = '<option value="all">All Staff</option>'+staff.map(s=>`<option value="${s.id}">${san(s.full_name)}</option>`).join('');
+  $('rptStaff').innerHTML = opts;
+  const calSel = $('adminCalStaff');
+  calSel.innerHTML = '<option value="">Select staff…</option>'+allStaffProfiles.map(s=>`<option value="${s.id}">${san(s.full_name)} (${s.role})</option>`).join('');
+}
+
+// =====================================================
+//  REPORTS
+// =====================================================
+async function generateReport() {
+  const staffId = $('rptStaff').value;
+  const type    = $('rptType').value;
+  const from    = $('rptFrom').value;
+  const to      = $('rptTo').value;
+  if (!from||!to) { toast('Please select a date range','warn'); return; }
+
+  // Pull from Supabase for accurate data
+  if (navigator.onLine) {
+    let q = sb.from('clock_records').select('*').gte('date',from).lte('date',to);
+    if (staffId!=='all') q = q.eq('user_id',staffId);
+    const { data } = await q;
+    (data||[]).forEach(r=>{
+      const rec={user_id:r.user_id,user_name:r.user_name,date:r.date,status:r.status,clock_in:r.clock_in,clock_out:r.clock_out,break_start:r.break_start,break_end:r.break_end,assign_note:r.assign_note,events:r.events||[],_synced:true};
+      RECORDS[localKey(r.user_id,r.date)]=rec;
+    });
+    saveLocalRecords();
+  }
+
+  const staff = staffId==='all' ? allStaffProfiles.filter(u=>u.role==='staff') : allStaffProfiles.filter(u=>u.id===staffId);
+  const rows  = [];
+  staff.forEach(s=>{
+    let d=new Date(from);
+    while(d.toISOString().slice(0,10)<=to){
+      const ds=d.toISOString().slice(0,10);
+      if(d.getDay()!==0){
+        const rec=getLocalRecord(s.id,ds);
+        const stat=rec?.status||'absent';
+        if(type==='all'||type===stat){
+          const ci=rec?.clock_in?new Date(rec.clock_in):null;
+          const co=rec?.clock_out?new Date(rec.clock_out):null;
+          let workMin=0; if(ci&&co) workMin=Math.floor((co-ci)/60000);
+          rows.push({staff:s.full_name,date:ds,clockIn:ci?fmtTime(ci):'—',clockOut:co?fmtTime(co):'—',status:stat,workHours:workMin>0?`${Math.floor(workMin/60)}h ${workMin%60}m`:'—',note:rec?.assign_note||''});
+        }
+      }
+      d.setDate(d.getDate()+1);
+    }
+  });
+  window._reportRows = rows;
+  if (!rows.length) { $('reportResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No records found.</p>'; return; }
+  const sb2=s=>({'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[s]||'badge-absent');
+  $('reportResults').innerHTML=`<p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s)</p>
+    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+    <thead><tr style="background:var(--surface);">
+      <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th>
+      <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th>
+      <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">In</th>
+      <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Out</th>
+      <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th>
+      <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th>
+    </tr></thead><tbody>
+    ${rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}">
+      <td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td>
+      <td style="padding:9px 12px;font-family:monospace;">${r.date}</td>
+      <td style="padding:9px 12px;">${r.clockIn}</td>
+      <td style="padding:9px 12px;">${r.clockOut}</td>
+      <td style="padding:9px 12px;">${r.workHours}</td>
+      <td style="padding:9px 12px;"><span class="badge ${sb2(r.status)}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+function exportCSV() {
+  const rows=window._reportRows; if(!rows?.length){toast('Generate a report first','warn');return;}
+  const csv=['Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note',...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}"`)].join('\n');
+  downloadFile(csv,'attendance-report.csv','text/csv'); toast('CSV exported','success');
+}
+function exportPDF() {
+  const rows=window._reportRows; if(!rows?.length){toast('Generate a report first','warn');return;}
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f4f7f5;padding:8px 10px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:7px 10px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}</style></head><body><h1>NonStop Travels — Attendance Report</h1><p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p><table><thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Work</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</td></tr>`).join('')}</tbody></table></body></html>`;
+  const w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),400);
+  toast('PDF opened — use browser print','info');
+}
+function downloadFile(content,filename,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);}
+
+// =====================================================
+//  SETTINGS
+// =====================================================
+function saveSettings() {
+  const s = {
+    onTimeUntil: $('settingOnTime').value,
+    lateTo:      $('settingLateTo').value,
+    veryLateAfter: $('settingVeryLate').value,
+    officeIP:    $('settingIP').value.trim()
+  };
+  saveSettingsLocal(s);
+  toast('Settings saved','success');
+  checkOfficeNetwork();
+}
+
+// =====================================================
+//  NAVIGATION
+// =====================================================
+const SECTIONS = ['clock','calendar','messages','admin','stafflist','admincal','reports','settings'];
+function showSection(name) {
+  SECTIONS.forEach(s=>{const el=$(s+'Section');if(el)el.style.display='none';});
+  const el=$(name+'Section'); if(el) el.style.display='block';
+  const titles={clock:'Clock In/Out',calendar:'My Calendar',messages:'Messages',admin:'Dashboard',stafflist:'Staff Overview',admincal:'All Calendars',reports:'Reports & Export',settings:'Settings'};
+  $('pageTitle').textContent = titles[name]||name;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navMap={clock:'navClock',calendar:'navCalendar',messages:'navMessages',admin:'navAdmin',stafflist:'navStaffList',admincal:'navAdminCal',reports:'navReports',settings:'navSettings'};
+  $(navMap[name])?.classList.add('active');
+  if(name==='calendar') renderCalendar(CU.id,calYear,calMonth,'calGrid','calMonthTitle');
+  if(name==='messages') renderMessages();
+  if(name==='admin') loadAdminData();
+  if(name==='stafflist') renderStaffList();
+  if(name==='admincal'){
+    populateAdminDropdowns();
+    $('adminCalTitle').textContent=`${monthNames[adminCalMonth]} ${adminCalYear}`;
+    if(adminCalStaffId) loadAdminCalendar();
+  }
+  if(name==='reports') populateAdminDropdowns();
+  closeSidebar();
+}
+function openSidebar(){$('sidebar').classList.add('open');$('sidebarOverlay').classList.add('open');}
+function closeSidebar(){$('sidebar').classList.remove('open');$('sidebarOverlay').classList.remove('open');}
+
+// =====================================================
+//  KEYBOARD
+// =====================================================
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ $('dayModal').style.display='none'; $('noteModal').style.display='none'; closeSidebar(); }
+  if(e.key==='Enter'&&document.activeElement?.id==='loginPw') doLogin();
+});
+
+// =====================================================
+//  INIT
+// =====================================================
+window.addEventListener('load', async () => {
+  if(!navigator.onLine) $('offlineBanner').style.display='block';
+
+  // Check for existing Supabase session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    CU = session.user;
+    // Try to get profile online
+    if (navigator.onLine) {
+      const { data: profile } = await sb.from('profiles').select('*').eq('id',CU.id).single();
+      if (profile && profile.role !== 'applicant') {
+        CP = profile;
+        cacheProfile(profile);
+        await bootApp(false);
+        return;
+      } else if (profile && profile.role === 'applicant') {
+        await sb.auth.signOut();
+        hideLoading();
+        $('authScreen').style.display='flex';
+        return;
+      }
+    } else {
+      // Offline — use cached profile
+      const cached = getCachedProfile();
+      if (cached && cached.id === CU.id && cached.role !== 'applicant') {
+        CP = cached;
+        $('offlineAuthNote').style.display='flex';
+        await bootApp(true);
+        return;
+      }
+    }
+  }
+
+  hideLoading();
+  $('authScreen').style.display='flex';
+
+  // Listen for auth changes
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event==='SIGNED_OUT') {
+      $('mainApp').style.display='none';
+      $('authScreen').style.display='flex';
+      CU=null; CP=null;
+    }
+  });
+});
+</script>
+</body>
+</html>
