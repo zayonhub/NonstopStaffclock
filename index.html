@@ -4,207 +4,88 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NonStop Travels — Staff Clock</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-:root {
-  --brand:      #0d5c3a;
-  --brand-mid:  #138a52;
-  --brand-lite: #1db96b;
-  --brand-glow: rgba(29,185,107,.18);
-  --surface:    #f4f7f5;
-  --card:       #ffffff;
-  --border:     #e2ebe6;
-  --text:       #0f1f17;
-  --muted:      #6b8579;
-  --danger:     #dc2626;
-  --warn:       #d97706;
-  --info:       #0369a1;
-  --on-time:    #16a34a;
-  --late:       #d97706;
-  --very-late:  #dc2626;
-  --absent:     #2563eb;
-  --admin-c:    #7c3aed;
-}
+:root{--brand:#0d5c3a;--brand-mid:#138a52;--brand-lite:#1db96b;--brand-glow:rgba(29,185,107,.18);--surface:#f4f7f5;--card:#ffffff;--border:#e2ebe6;--text:#0f1f17;--muted:#6b8579;--danger:#dc2626;--warn:#d97706;}
 *{font-family:'Manrope',sans-serif;box-sizing:border-box;margin:0;padding:0;}
 h1,h2,h3,h4,h5,.syne{font-family:'Bricolage Grotesque',sans-serif;}
 body{background:var(--surface);color:var(--text);min-height:100vh;}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-thumb{background:var(--brand-mid);border-radius:99px;}
-::-webkit-scrollbar-track{background:transparent;}
-
-/* ===== SIDEBAR ===== */
-.sidebar{
-  width:250px;background:var(--brand);
-  background-image:radial-gradient(ellipse at top left,rgba(29,185,107,.18) 0%,transparent 60%);
-  position:fixed;left:0;top:0;height:100vh;
-  display:flex;flex-direction:column;z-index:50;
-  transition:transform .3s ease;
-}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-thumb{background:var(--brand-mid);border-radius:99px;}::-webkit-scrollbar-track{background:transparent;}
+.sidebar{width:250px;background:var(--brand);background-image:radial-gradient(ellipse at top left,rgba(29,185,107,.18) 0%,transparent 60%);position:fixed;left:0;top:0;height:100vh;display:flex;flex-direction:column;z-index:50;transition:transform .3s ease;}
 .nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;font-size:.85rem;font-weight:500;color:rgba(255,255,255,.72);cursor:pointer;transition:all .2s;position:relative;}
 .nav-item:hover{background:rgba(255,255,255,.1);color:#fff;}
 .nav-item.active{background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);}
 .nav-item i{width:17px;text-align:center;}
 .nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#ef4444;color:#fff;border-radius:99px;font-size:.62rem;font-weight:700;padding:2px 6px;min-width:17px;text-align:center;}
-
-/* ===== MAIN ===== */
 main{margin-left:250px;min-height:100vh;display:flex;flex-direction:column;}
 header{position:sticky;top:0;background:rgba(244,247,245,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;justify-content:space-between;z-index:40;gap:12px;}
-
-/* ===== CARDS ===== */
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;}
-.card-hover{transition:transform .18s,box-shadow .18s;}
-.card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,92,58,.1);}
-
-/* ===== BUTTONS ===== */
+.card-hover{transition:transform .18s,box-shadow .18s;}.card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,92,58,.1);}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;font-size:.86rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;outline:none;}
-.btn-primary{background:var(--brand-mid);color:#fff;}
-.btn-primary:hover{background:var(--brand);box-shadow:0 4px 14px var(--brand-glow);}
-.btn-secondary{background:transparent;color:var(--brand-mid);border:1.5px solid var(--brand-mid);}
-.btn-secondary:hover{background:var(--brand-glow);}
-.btn-ghost{background:transparent;color:var(--muted);}
-.btn-ghost:hover{background:var(--surface);color:var(--text);}
-.btn-danger{background:#fef2f2;color:var(--danger);border:1.5px solid #fca5a5;}
-.btn-danger:hover{background:#fee2e2;}
-.btn-warn{background:#fffbeb;color:#92400e;border:1.5px solid #fde68a;}
+.btn-primary{background:var(--brand-mid);color:#fff;}.btn-primary:hover{background:var(--brand);box-shadow:0 4px 14px var(--brand-glow);}
+.btn-secondary{background:transparent;color:var(--brand-mid);border:1.5px solid var(--brand-mid);}.btn-secondary:hover{background:var(--brand-glow);}
+.btn-ghost{background:transparent;color:var(--muted);}.btn-ghost:hover{background:var(--surface);color:var(--text);}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1.5px solid #fca5a5;}.btn-danger:hover{background:#fee2e2;}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
-
-/* ===== CLOCK BUTTONS ===== */
-.clock-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 14px;border-radius:16px;border:none;cursor:pointer;transition:all .2s;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:.85rem;}
+.clock-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 14px;border-radius:16px;border:none;cursor:pointer;transition:all .2s;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:.85rem;text-align:center;}
 .clock-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.12);}
 .clock-btn:disabled{opacity:.38;cursor:not-allowed;transform:none;}
 .clock-btn .icon{font-size:1.6rem;margin-bottom:2px;}
-
-/* ===== INPUTS ===== */
 .inp{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.86rem;background:var(--card);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Manrope',sans-serif;}
 .inp:focus{border-color:var(--brand-mid);box-shadow:0 0 0 3px var(--brand-glow);}
 label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.03em;text-transform:uppercase;}
-
-/* ===== BADGES ===== */
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:600;letter-spacing:.02em;}
-.badge-ontime{background:#dcfce7;color:#14532d;}
-.badge-late{background:#fef9c3;color:#854d0e;}
-.badge-verylate{background:#fee2e2;color:#7f1d1d;}
-.badge-absent{background:#dbeafe;color:#1e3a8a;}
-.badge-present{background:#d1fae5;color:#065f46;}
-.badge-admin{background:#ede9fe;color:#5b21b6;}
-.badge-staff{background:#e0f2fe;color:#075985;}
-.badge-break{background:#fef9c3;color:#854d0e;}
-.badge-out{background:#ffedd5;color:#9a3412;}
-.badge-green{background:#dcfce7;color:#14532d;}
-
-/* ===== TABS ===== */
-.tab-bar{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:12px;border:1px solid var(--border);flex-wrap:wrap;}
-.tab-btn{padding:8px 18px;border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:transparent;white-space:nowrap;}
-.tab-btn.active{background:var(--card);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08);}
-
-/* ===== MODAL ===== */
+.badge-ontime{background:#dcfce7;color:#14532d;}.badge-late{background:#fef9c3;color:#854d0e;}.badge-verylate{background:#fee2e2;color:#7f1d1d;}.badge-absent{background:#dbeafe;color:#1e3a8a;}.badge-present{background:#d1fae5;color:#065f46;}.badge-admin{background:#ede9fe;color:#5b21b6;}.badge-staff{background:#e0f2fe;color:#075985;}.badge-break{background:#fef9c3;color:#854d0e;}.badge-out{background:#ffedd5;color:#9a3412;}
 .modal-overlay{position:fixed;inset:0;background:rgba(10,20,15,.55);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;}
 .modal-box{background:var(--card);border-radius:20px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);}
 @keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .modal-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-radius:20px 20px 0 0;}
-.modal-body{overflow-y:auto;flex:1;padding:22px;}
-.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;}
-
-/* ===== TOAST ===== */
+.modal-body{overflow-y:auto;flex:1;padding:22px;}.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;}
 #toastContainer{position:fixed;bottom:22px;right:22px;z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 .toast-item{display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:14px;background:#0f1f17;color:#fff;font-size:.84rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.25);max-width:340px;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:all;}
 @keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(10px) scale(.95)}}
-
-/* ===== AUTH ===== */
 #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--brand);background-image:radial-gradient(ellipse 80% 80% at 10% 90%,rgba(29,185,107,.25) 0%,transparent 50%),radial-gradient(ellipse 60% 60% at 90% 10%,rgba(29,185,107,.15) 0%,transparent 50%);padding:16px;}
 .auth-card{background:rgba(255,255,255,.97);border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,.35);width:100%;max-width:440px;overflow:hidden;}
 .auth-header{background:var(--brand);background-image:radial-gradient(ellipse at bottom right,rgba(29,185,107,.4) 0%,transparent 60%);padding:32px 32px 24px;color:#fff;}
 .auth-body{padding:26px 32px 32px;}
-
-/* ===== CALENDAR ===== */
 .cal-day{width:100%;aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;border:2px solid transparent;font-size:.78rem;font-weight:600;gap:2px;}
-.cal-day:hover{transform:scale(1.06);border-color:var(--brand-mid);}
-.cal-day.empty{cursor:default;pointer-events:none;}
-.cal-day.today{border-color:var(--brand-lite)!important;box-shadow:0 0 0 3px rgba(29,185,107,.2);}
+.cal-day:hover{transform:scale(1.06);border-color:var(--brand-mid);}.cal-day.empty{cursor:default;pointer-events:none;}.cal-day.today{border-color:var(--brand-lite)!important;box-shadow:0 0 0 3px rgba(29,185,107,.2);}
 .cal-day .dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
-.day-ontime{background:#dcfce7;color:#16a34a;}
-.day-late{background:#fef9c3;color:#d97706;}
-.day-verylate{background:#fee2e2;color:#dc2626;}
-.day-absent{background:#dbeafe;color:#2563eb;}
-.day-weekend{background:#f9fafb;color:#9ca3af;}
-.day-future{background:var(--surface);color:#d1d5db;}
-
-/* ===== STATUS DOT ===== */
-.status-pulse{display:inline-flex;align-items:center;gap:6px;}
-.status-pulse::before{content:'';width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.status-clocked-in::before{background:#22c55e;animation:pulse 1.5s infinite;}
-.status-on-break::before{background:#f59e0b;animation:pulse 1.5s infinite;}
-.status-out-assign::before{background:#f97316;animation:pulse 1.5s infinite;}
-.status-clocked-out::before{background:#94a3b8;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 currentColor}50%{box-shadow:0 0 0 5px transparent}}
-
-/* ===== ANIMATIONS ===== */
+.day-ontime{background:#dcfce7;color:#16a34a;}.day-late{background:#fef9c3;color:#d97706;}.day-verylate{background:#fee2e2;color:#dc2626;}.day-absent{background:#dbeafe;color:#2563eb;}.day-weekend{background:#f9fafb;color:#9ca3af;}.day-future{background:var(--surface);color:#d1d5db;}
+.status-pulse{display:inline-flex;align-items:center;gap:6px;}.status-pulse::before{content:'';width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-clocked-in::before{background:#22c55e;animation:spulse 1.5s infinite;}.status-on-break::before{background:#f59e0b;animation:spulse 1.5s infinite;}.status-out-assign::before{background:#f97316;animation:spulse 1.5s infinite;}.status-clocked-out::before{background:#94a3b8;}
+@keyframes spulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .32s ease both;}
-.fu1{animation-delay:.05s}.fu2{animation-delay:.1s}.fu3{animation-delay:.15s}.fu4{animation-delay:.2s}
+.fade-up{animation:fadeUp .32s ease both;}.fu1{animation-delay:.05s}.fu2{animation-delay:.1s}.fu3{animation-delay:.15s}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
-.spinner-dark{border-color:rgba(13,92,58,.2);border-top-color:var(--brand-mid);}
-
-/* ===== LOADING OVERLAY ===== */
 #loadingOverlay{position:fixed;inset:0;background:var(--brand);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s;}
 .ldr-ring{animation:spin 1s linear infinite;}
-
-/* ===== OFFLINE BANNER ===== */
 #offlineBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#f59e0b;color:#fff;text-align:center;padding:8px;font-size:.83rem;font-weight:600;}
-
-/* ===== CHAT ===== */
 .msg-bubble{padding:10px 13px;border-radius:12px;max-width:82%;font-size:.84rem;line-height:1.55;}
 .msg-me{background:var(--brand-mid);color:#fff;border-radius:13px 13px 4px 13px;align-self:flex-end;}
 .msg-other{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:13px 13px 13px 4px;align-self:flex-start;}
-
-/* ===== MOBILE ===== */
 .mob-menu-btn{display:none;}
 #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49;}
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);}
-  .sidebar.open{transform:translateX(0);}
-  #sidebarOverlay.open{display:block;}
-  main{margin-left:0!important;}
-  .mob-menu-btn{display:flex!important;}
-  .hide-mob{display:none!important;}
-  .page-pad{padding:14px!important;}
-  header{padding:12px 16px!important;}
-  .clock-grid{grid-template-columns:repeat(2,1fr)!important;}
-  .stats-4{grid-template-columns:1fr 1fr!important;}
-}
-@media(max-width:480px){
-  .stats-4{grid-template-columns:1fr 1fr!important;}
-  .auth-body{padding:18px 20px 24px;}
-  .auth-header{padding:24px 20px 18px;}
-}
-
-/* ===== MISC ===== */
+@media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}#sidebarOverlay.open{display:block;}main{margin-left:0!important;}.mob-menu-btn{display:flex!important;}.hide-mob{display:none!important;}.page-pad{padding:14px!important;}header{padding:12px 16px!important;}.clock-grid{grid-template-columns:repeat(2,1fr)!important;}.stats-4{grid-template-columns:1fr 1fr!important;}}
+@media(max-width:480px){.stats-4{grid-template-columns:1fr 1fr!important;}.auth-body{padding:18px 20px 24px;}.auth-header{padding:24px 20px 18px;}}
 .section-page{animation:fadeUp .3s ease;}
-.divider{height:1px;background:var(--border);margin:16px 0;}
-.skeleton{background:linear-gradient(90deg,#e8f0ec 25%,#d4e4db 50%,#e8f0ec 75%);background-size:800px 100%;animation:shimmer 1.5s infinite;border-radius:8px;}
-@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
-mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loadingOverlay">
   <img src="https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png" alt="NonStop" style="height:56px;object-fit:contain;filter:brightness(0) invert(1);">
-  <svg width="42" height="42" viewBox="0 0 42 42" class="ldr-ring">
-    <circle cx="21" cy="21" r="17" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
-    <circle cx="21" cy="21" r="17" fill="none" stroke="#1db96b" stroke-width="3" stroke-dasharray="28 86" stroke-linecap="round"/>
-  </svg>
-  <p style="color:rgba(255,255,255,.65);font-family:'Bricolage Grotesque',sans-serif;font-size:.85rem;letter-spacing:.1em;">LOADING…</p>
+  <svg width="42" height="42" viewBox="0 0 42 42" class="ldr-ring"><circle cx="21" cy="21" r="17" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3"/><circle cx="21" cy="21" r="17" fill="none" stroke="#1db96b" stroke-width="3" stroke-dasharray="28 86" stroke-linecap="round"/></svg>
+  <p id="loadingMsg" style="color:rgba(255,255,255,.65);font-family:'Bricolage Grotesque',sans-serif;font-size:.85rem;letter-spacing:.1em;">LOADING…</p>
 </div>
 
-<!-- OFFLINE BANNER -->
 <div id="offlineBanner"><i class="fas fa-wifi-slash"></i> Offline — Clocks saved locally, will sync when reconnected.</div>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="authScreen" style="display:none;">
   <div class="auth-card">
     <div class="auth-header">
@@ -213,25 +94,22 @@ mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
       <p style="opacity:.7;font-size:.84rem;">NonStop Travels — Attendance System</p>
     </div>
     <div class="auth-body">
-      <div id="authErr" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:11px 13px;border-radius:10px;font-size:.82rem;margin-bottom:16px;display:none;align-items:center;gap:7px;">
+      <div id="authErr" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:11px 13px;border-radius:10px;font-size:.82rem;margin-bottom:16px;align-items:center;gap:7px;">
         <i class="fas fa-exclamation-circle"></i><span id="authErrTxt"></span>
       </div>
-      <div id="loginView">
-        <div class="fade-up fu1" style="margin-bottom:14px;">
-          <label class="lbl">Email Address</label>
-          <input type="email" id="loginEmail" class="inp" placeholder="you@nonstoptravels.co" autocomplete="email">
-        </div>
-        <div class="fade-up fu2" style="margin-bottom:18px;">
-          <label class="lbl">Password</label>
-          <div style="position:relative;">
-            <input type="password" id="loginPw" class="inp" style="padding-right:42px;" placeholder="••••••••" autocomplete="current-password">
-            <button type="button" onclick="togglePw('loginPw','pwIcon')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);background:none;border:none;cursor:pointer;font-size:.88rem;"><i id="pwIcon" class="fas fa-eye"></i></button>
-          </div>
-        </div>
-        <button onclick="doLogin()" id="loginBtn" class="btn btn-primary fade-up fu3" style="width:100%;justify-content:center;">
-          <span>Sign In</span><i class="fas fa-arrow-right"></i>
-        </button>
+      <div class="fade-up fu1" style="margin-bottom:14px;">
+        <label class="lbl">Email Address</label>
+        <input type="email" id="loginEmail" class="inp" placeholder="you@nonstoptravels.co" autocomplete="email">
       </div>
+      <div class="fade-up fu2" style="margin-bottom:18px;">
+        <label class="lbl">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="loginPw" class="inp" style="padding-right:42px;" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);background:none;border:none;cursor:pointer;font-size:.88rem;"><i id="pwIcon" class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <button onclick="doLogin()" id="loginBtn" class="btn btn-primary fade-up fu3" style="width:100%;justify-content:center;"><span>Sign In</span><i class="fas fa-arrow-right"></i></button>
+      <p style="font-size:.74rem;color:var(--muted);text-align:center;margin-top:14px;"><i class="fas fa-info-circle"></i> Use your NonStop Travels account credentials</p>
     </div>
   </div>
 </div>
@@ -239,47 +117,37 @@ mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
 <!-- MAIN APP -->
 <div id="mainApp" style="display:none;">
   <div id="sidebarOverlay" onclick="closeSidebar()"></div>
-  
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div style="padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1);">
       <div style="display:flex;align-items:center;gap:11px;">
         <img src="https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png" alt="NST" style="height:28px;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0;">
-        <div>
-          <div class="syne" style="font-size:1rem;font-weight:800;color:#fff;line-height:1.1;">NonStop</div>
-          <div style="font-size:.65rem;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;">Staff Clock</div>
-        </div>
+        <div><div class="syne" style="font-size:1rem;font-weight:800;color:#fff;line-height:1.1;">NonStop</div><div style="font-size:.65rem;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;">Staff Clock</div></div>
       </div>
     </div>
     <nav style="flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;">
-      <!-- Staff nav -->
       <div id="navClock" class="nav-item active" onclick="showSection('clock')"><i class="fas fa-clock"></i><span>Clock In/Out</span></div>
       <div id="navCalendar" class="nav-item" onclick="showSection('calendar')"><i class="fas fa-calendar-alt"></i><span>My Calendar</span></div>
-      <div id="navMessages" class="nav-item" onclick="showSection('messages')"><i class="fas fa-comment-dots"></i><span>Messages</span><span id="msgBadge" class="nav-badge" style="display:none;">0</span></div>
-      <!-- Admin nav -->
-      <div id="navAdmin" class="nav-item" style="display:none;" onclick="showSection('admin')"><i class="fas fa-tachometer-alt"></i><span>Admin Dashboard</span></div>
+      <div id="navMessages" class="nav-item" onclick="showSection('messages')"><i class="fas fa-comment-dots"></i><span>Messages</span><span id="msgBadge" class="nav-badge" style="display:none;"></span></div>
+      <div id="navAdmin" class="nav-item" style="display:none;" onclick="showSection('admin')"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></div>
       <div id="navStaffList" class="nav-item" style="display:none;" onclick="showSection('stafflist')"><i class="fas fa-users"></i><span>Staff Overview</span></div>
       <div id="navAdminCal" class="nav-item" style="display:none;" onclick="showSection('admincal')"><i class="fas fa-calendar-week"></i><span>All Calendars</span></div>
       <div id="navReports" class="nav-item" style="display:none;" onclick="showSection('reports')"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
-      <div id="navAdminMsg" class="nav-item" style="display:none;" onclick="showSection('adminmsg')"><i class="fas fa-inbox"></i><span>Messaging</span><span id="adminMsgBadge" class="nav-badge" style="display:none;">0</span></div>
+      <div id="navAdminMsg" class="nav-item" style="display:none;" onclick="showSection('adminmsg')"><i class="fas fa-inbox"></i><span>Messaging</span><span id="adminMsgBadge" class="nav-badge" style="display:none;"></span></div>
       <div id="navSettings" class="nav-item" style="display:none;" onclick="showSection('settings')"><i class="fas fa-cog"></i><span>Settings</span></div>
     </nav>
     <div style="padding:12px 10px;border-top:1px solid rgba(255,255,255,.1);">
       <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;background:rgba(255,255,255,.08);border-radius:11px;margin-bottom:7px;">
         <div id="sideAvatar" style="width:34px;height:34px;border-radius:9px;background:var(--brand-lite);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">U</div>
-        <div style="min-width:0;flex:1;">
-          <div id="sideName" style="color:#fff;font-weight:600;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">User</div>
-          <span id="sideRole" class="badge badge-staff" style="font-size:.62rem;">Staff</span>
-        </div>
-        <div id="onlineIndicator" style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;" title="Online"></div>
+        <div style="min-width:0;flex:1;"><div id="sideName" style="color:#fff;font-weight:600;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">User</div><span id="sideRole" class="badge badge-staff" style="font-size:.62rem;">Staff</span></div>
+        <div id="onlineIndicator" style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
       </div>
-      <button onclick="doLogout()" class="nav-item" style="width:100%;border:none;background:none;cursor:pointer;">
-        <i class="fas fa-sign-out-alt" style="color:rgba(255,255,255,.45);"></i><span style="color:rgba(255,255,255,.45);">Sign Out</span>
-      </button>
+      <div id="unsyncedBadge" style="display:none;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:6px 10px;margin-bottom:7px;font-size:.72rem;color:#fbbf24;text-align:center;">
+        <i class="fas fa-cloud-upload-alt"></i> <span id="unsyncedCount">0</span> pending sync
+      </div>
+      <button onclick="doLogout()" class="nav-item" style="width:100%;border:none;background:none;cursor:pointer;"><i class="fas fa-sign-out-alt" style="color:rgba(255,255,255,.45);"></i><span style="color:rgba(255,255,255,.45);">Sign Out</span></button>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <main>
     <header>
       <div style="display:flex;align-items:center;gap:11px;">
@@ -292,101 +160,51 @@ mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
         <span id="headerRole" class="badge badge-staff hide-mob">Staff</span>
       </div>
     </header>
+    <div style="padding:24px 28px;flex:1;" class="page-pad">
 
-    <div style="padding:24px 28px;flex:1;" class="page-pad" id="pageContent">
-
-      <!-- ===== CLOCK IN/OUT ===== -->
+      <!-- CLOCK -->
       <div id="clockSection" class="section-page">
-        <!-- Status Hero -->
         <div style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:20px;padding:28px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;" class="fade-up">
           <div style="position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:rgba(29,185,107,.18);border-radius:50%;"></div>
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
-            <div>
-              <p style="opacity:.7;font-size:.82rem;margin-bottom:3px;" id="clockGreet">Good morning,</p>
-              <h2 class="syne" id="clockName" style="font-size:1.8rem;font-weight:800;margin-bottom:6px;">Staff</h2>
-              <div id="clockStatusDisplay" class="status-pulse status-clocked-out" style="font-size:.86rem;font-weight:600;color:rgba(255,255,255,.85);">Not clocked in</div>
-            </div>
-            <div style="text-align:right;">
-              <div id="liveTimer" class="syne" style="font-size:2.4rem;font-weight:800;letter-spacing:.02em;line-height:1;">--:--:--</div>
-              <div style="font-size:.74rem;opacity:.6;margin-top:3px;" id="clockDate"></div>
-            </div>
+            <div><p style="opacity:.7;font-size:.82rem;margin-bottom:3px;" id="clockGreet">Good morning,</p><h2 class="syne" id="clockName" style="font-size:1.8rem;font-weight:800;margin-bottom:6px;">Staff</h2><div id="clockStatusDisplay" class="status-pulse status-clocked-out" style="font-size:.86rem;font-weight:600;color:rgba(255,255,255,.85);">Not clocked in</div></div>
+            <div style="text-align:right;"><div id="liveTimer" class="syne" style="font-size:2.4rem;font-weight:800;letter-spacing:.02em;line-height:1;">--:--:--</div><div style="font-size:.74rem;opacity:.6;margin-top:3px;" id="clockDate"></div></div>
           </div>
           <div id="locationStatus" style="margin-top:16px;background:rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:.82rem;">
-            <i class="fas fa-wifi" id="locIcon"></i>
-            <span id="locText">Checking office network…</span>
+            <i class="fas fa-circle-notch fa-spin" id="locIcon"></i><span id="locText">Checking office network…</span>
           </div>
         </div>
-
-        <!-- Today's summary -->
         <div id="todaySummary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;" class="stats-4 fade-up fu1"></div>
-
-        <!-- Action Buttons -->
-        <div class="card" style="padding:22px;margin-bottom:22px;" id="clockCard">
-          <h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:16px;">Clock Actions</h3>
-          <div id="clockButtons" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;" class="clock-grid"></div>
-        </div>
-
-        <!-- Today's Log -->
-        <div class="card" style="padding:22px;">
-          <h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:14px;">Today's Timeline</h3>
-          <div id="todayLog" style="display:flex;flex-direction:column;gap:8px;"></div>
-        </div>
+        <div class="card" style="padding:22px;margin-bottom:22px;"><h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:16px;">Clock Actions</h3><div id="clockButtons" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;" class="clock-grid"></div></div>
+        <div class="card" style="padding:22px;"><h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:14px;">Today's Timeline</h3><div id="todayLog" style="display:flex;flex-direction:column;gap:8px;"></div></div>
       </div>
 
-      <!-- ===== CALENDAR ===== -->
+      <!-- CALENDAR -->
       <div id="calendarSection" class="section-page" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-          <div>
-            <h3 class="syne" style="font-size:1.1rem;font-weight:700;" id="calMonthTitle">April 2025</h3>
-            <p style="font-size:.8rem;color:var(--muted);margin-top:2px;">Click any day to see details</p>
-          </div>
+          <div><h3 class="syne" style="font-size:1.1rem;font-weight:700;" id="calMonthTitle"></h3><p style="font-size:.8rem;color:var(--muted);margin-top:2px;">Click any day to see details</p></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <span class="badge badge-ontime"><i class="fas fa-circle" style="font-size:.5rem;"></i> On Time</span>
-              <span class="badge badge-late"><i class="fas fa-circle" style="font-size:.5rem;"></i> Late</span>
-              <span class="badge badge-verylate"><i class="fas fa-circle" style="font-size:.5rem;"></i> Very Late</span>
-              <span class="badge badge-absent"><i class="fas fa-circle" style="font-size:.5rem;"></i> Absent</span>
-            </div>
-            <div style="display:flex;gap:6px;">
-              <button onclick="changeCalMonth(-1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-left"></i></button>
-              <button onclick="changeCalMonth(1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-right"></i></button>
-            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="badge badge-ontime"><i class="fas fa-circle" style="font-size:.5rem;"></i> On Time</span><span class="badge badge-late"><i class="fas fa-circle" style="font-size:.5rem;"></i> Late</span><span class="badge badge-verylate"><i class="fas fa-circle" style="font-size:.5rem;"></i> Very Late</span><span class="badge badge-absent"><i class="fas fa-circle" style="font-size:.5rem;"></i> Absent</span></div>
+            <div style="display:flex;gap:6px;"><button onclick="changeCalMonth(-1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-left"></i></button><button onclick="changeCalMonth(1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-right"></i></button></div>
           </div>
         </div>
         <div class="card" style="padding:20px;">
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sun</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Mon</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Tue</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Wed</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Thu</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Fri</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sat</div>
-          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;"><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sun</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Mon</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Tue</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Wed</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Thu</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Fri</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sat</div></div>
           <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
-          <!-- Legend row -->
-          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-            <div style="font-size:.74rem;color:var(--muted);">📅 Click any colored day for full details</div>
-          </div>
+          <div style="font-size:.74rem;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">📅 Click any coloured day for full details</div>
         </div>
       </div>
 
-      <!-- ===== MESSAGES ===== -->
+      <!-- STAFF MESSAGES -->
       <div id="messagesSection" class="section-page" style="display:none;">
         <div class="card" style="height:calc(100vh - 160px);display:flex;flex-direction:column;min-height:400px;">
-          <div style="padding:18px 20px;border-bottom:1px solid var(--border);">
-            <h3 class="syne" style="font-size:1rem;font-weight:700;">Messages with Admin</h3>
-            <p style="font-size:.78rem;color:var(--muted);margin-top:2px;">Chat directly with your administrator</p>
-          </div>
+          <div style="padding:18px 20px;border-bottom:1px solid var(--border);"><h3 class="syne" style="font-size:1rem;font-weight:700;">Messages with Admin</h3><p style="font-size:.78rem;color:var(--muted);margin-top:2px;">Real-time chat with your administrator</p></div>
           <div id="msgList" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;"></div>
-          <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;">
-            <input type="text" id="msgInput" class="inp" placeholder="Type a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg()">
-            <button onclick="sendMsg()" class="btn btn-primary" style="padding:9px 16px;"><i class="fas fa-paper-plane"></i></button>
-          </div>
+          <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;"><input type="text" id="msgInput" class="inp" placeholder="Type a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg()"><button onclick="sendMsg()" class="btn btn-primary" style="padding:9px 16px;"><i class="fas fa-paper-plane"></i></button></div>
         </div>
       </div>
 
-      <!-- ===== ADMIN DASHBOARD ===== -->
+      <!-- ADMIN DASHBOARD -->
       <div id="adminSection" class="section-page" style="display:none;">
         <div style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:20px;padding:26px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;" class="fade-up">
           <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(29,185,107,.18);border-radius:50%;"></div>
@@ -394,99 +212,50 @@ mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
           <p style="opacity:.7;font-size:.85rem;" id="adminDateLabel">Today's attendance overview</p>
         </div>
         <div id="adminStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;" class="stats-4"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" id="adminTwoCol">
-          <div class="card" style="padding:20px;">
-            <h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Today's Staff Status</h3>
-            <div id="adminTodayList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;"></div>
-          </div>
-          <div class="card" style="padding:20px;">
-            <h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Performance Overview</h3>
-            <div id="adminPerfChart" style="display:flex;flex-direction:column;gap:10px;"></div>
-          </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="card" style="padding:20px;"><h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Today's Staff Status</h3><div id="adminTodayList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;"></div></div>
+          <div class="card" style="padding:20px;"><h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Performance Overview (30 days)</h3><div id="adminPerfChart" style="display:flex;flex-direction:column;gap:10px;"></div></div>
         </div>
       </div>
 
-      <!-- ===== STAFF LIST ===== -->
+      <!-- STAFF LIST -->
       <div id="stafflistSection" class="section-page" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-          <div>
-            <h3 class="syne" style="font-size:1.1rem;font-weight:700;">Staff Overview</h3>
-            <p style="font-size:.8rem;color:var(--muted);margin-top:2px;">Click any staff to view full activity</p>
-          </div>
+          <div><h3 class="syne" style="font-size:1.1rem;font-weight:700;">Staff Overview</h3><p style="font-size:.8rem;color:var(--muted);margin-top:2px;">Click any staff card to view today's detail</p></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <select id="staffFilter" class="inp" style="width:auto;padding:8px 12px;font-size:.82rem;" onchange="renderStaffList()">
-              <option value="all">All Staff</option>
-              <option value="clocked-in">Clocked In</option>
-              <option value="on-break">On Break</option>
-              <option value="out-assign">Out for Assignment</option>
-              <option value="clocked-out">Clocked Out</option>
-              <option value="absent">Absent</option>
-            </select>
+            <select id="staffFilter" class="inp" style="width:auto;padding:8px 12px;font-size:.82rem;" onchange="renderStaffList()"><option value="all">All Staff</option><option value="clocked-in">Clocked In</option><option value="on-break">On Break</option><option value="out-assign">Out for Assignment</option><option value="clocked-out">Clocked Out</option><option value="absent">Absent</option></select>
             <button onclick="loadAdminData()" class="btn btn-ghost" style="padding:8px 12px;"><i class="fas fa-sync-alt"></i></button>
           </div>
         </div>
         <div id="staffListGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
       </div>
 
-      <!-- ===== ADMIN CALENDARS ===== -->
+      <!-- ADMIN CALENDARS -->
       <div id="admincalSection" class="section-page" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
           <h3 class="syne" style="font-size:1.1rem;font-weight:700;">Staff Attendance Calendars</h3>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <select id="adminCalStaff" class="inp" style="width:auto;padding:8px 12px;font-size:.82rem;" onchange="loadAdminCalendar()">
-              <option value="">Select staff…</option>
-            </select>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="adminCalStaff" class="inp" style="width:auto;padding:8px 12px;font-size:.82rem;" onchange="loadAdminCalendar()"><option value="">Select staff…</option></select>
             <button onclick="changeAdminCalMonth(-1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-left"></i></button>
             <span id="adminCalTitle" style="font-size:.9rem;font-weight:700;min-width:110px;text-align:center;"></span>
             <button onclick="changeAdminCalMonth(1)" class="btn btn-ghost" style="padding:7px 11px;"><i class="fas fa-chevron-right"></i></button>
           </div>
         </div>
         <div class="card" style="padding:20px;">
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sun</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Mon</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Tue</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Wed</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Thu</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Fri</div>
-            <div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sat</div>
-          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;"><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sun</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Mon</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Tue</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Wed</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Thu</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Fri</div><div style="text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:6px 0;">Sat</div></div>
           <div id="adminCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
         </div>
       </div>
 
-      <!-- ===== REPORTS ===== -->
+      <!-- REPORTS -->
       <div id="reportsSection" class="section-page" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-          <h3 class="syne" style="font-size:1.1rem;font-weight:700;">Reports & Export</h3>
-        </div>
         <div class="card" style="padding:22px;margin-bottom:18px;">
           <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;">Generate Report</h4>
-          <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;flex-wrap:wrap;" id="reportFilters">
-            <div>
-              <label class="lbl">Staff Member</label>
-              <select id="rptStaff" class="inp" style="padding:9px 12px;">
-                <option value="all">All Staff</option>
-              </select>
-            </div>
-            <div>
-              <label class="lbl">Filter By</label>
-              <select id="rptType" class="inp" style="padding:9px 12px;">
-                <option value="all">All Statuses</option>
-                <option value="on-time">On Time</option>
-                <option value="late">Late</option>
-                <option value="very-late">Very Late</option>
-                <option value="absent">Absent</option>
-              </select>
-            </div>
-            <div>
-              <label class="lbl">From</label>
-              <input type="date" id="rptFrom" class="inp">
-            </div>
-            <div>
-              <label class="lbl">To</label>
-              <input type="date" id="rptTo" class="inp">
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
+            <div><label class="lbl">Staff Member</label><select id="rptStaff" class="inp" style="padding:9px 12px;"><option value="all">All Staff</option></select></div>
+            <div><label class="lbl">Filter By</label><select id="rptType" class="inp" style="padding:9px 12px;"><option value="all">All Statuses</option><option value="on-time">On Time</option><option value="late">Late</option><option value="very-late">Very Late</option><option value="absent">Absent</option></select></div>
+            <div><label class="lbl">From</label><input type="date" id="rptFrom" class="inp"></div>
+            <div><label class="lbl">To</label><input type="date" id="rptTo" class="inp"></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
             <button onclick="generateReport()" class="btn btn-primary"><i class="fas fa-search"></i> Generate</button>
@@ -494,443 +263,381 @@ mark{background:#a7f3d0;padding:0 2px;border-radius:3px;}
             <button onclick="exportPDF()" class="btn btn-secondary" style="border-color:#dc2626;color:#dc2626;"><i class="fas fa-file-pdf"></i> Export PDF</button>
           </div>
         </div>
-        <div class="card" style="padding:22px;">
-          <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Report Results</h4>
-          <div id="reportResults"></div>
-        </div>
+        <div class="card" style="padding:22px;"><h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Report Results</h4><div id="reportResults"><p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;">Generate a report above to see results.</p></div></div>
       </div>
 
-      <!-- ===== ADMIN MESSAGING ===== -->
+      <!-- ADMIN MESSAGING -->
       <div id="adminmsgSection" class="section-page" style="display:none;">
         <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;height:calc(100vh - 160px);min-height:400px;">
           <div class="card" style="display:flex;flex-direction:column;overflow:hidden;">
-            <div style="padding:16px;border-bottom:1px solid var(--border);">
-              <h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:10px;">Staff Chats</h3>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button onclick="openBroadcast()" class="btn btn-primary" style="width:100%;justify-content:center;font-size:.8rem;padding:8px;"><i class="fas fa-bullhorn"></i> Broadcast to All</button>
-              </div>
-            </div>
+            <div style="padding:16px;border-bottom:1px solid var(--border);"><h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:10px;">Staff Chats</h3><button onclick="openBroadcast()" class="btn btn-primary" style="width:100%;justify-content:center;font-size:.8rem;padding:8px;"><i class="fas fa-bullhorn"></i> Broadcast to All</button></div>
             <div id="chatStaffList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px;"></div>
           </div>
           <div class="card" style="display:flex;flex-direction:column;">
-            <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;" id="chatHeader">
+            <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
               <div id="chatHeaderAvatar" style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Bricolage Grotesque',sans-serif;flex-shrink:0;">?</div>
-              <div>
-                <p id="chatHeaderName" class="syne" style="font-weight:700;font-size:.9rem;">Select a staff member</p>
-                <p id="chatHeaderStatus" style="font-size:.74rem;color:var(--muted);">No conversation selected</p>
-              </div>
+              <div><p id="chatHeaderName" class="syne" style="font-weight:700;font-size:.9rem;">Select a staff member</p><p id="chatHeaderStatus" style="font-size:.74rem;color:var(--muted);">No conversation selected</p></div>
             </div>
-            <div id="adminMsgList" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
-              <div style="text-align:center;padding:40px;color:var(--muted);">
-                <i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i>
-                <p style="font-size:.85rem;">Select a staff member to chat</p>
-              </div>
-            </div>
-            <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;" id="adminMsgInputRow">
-              <input type="text" id="adminMsgInput" class="inp" placeholder="Type a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAdminMsg()" disabled>
-              <button onclick="sendAdminMsg()" class="btn btn-primary" style="padding:9px 14px;" disabled id="adminSendBtn"><i class="fas fa-paper-plane"></i></button>
-            </div>
+            <div id="adminMsgList" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"><div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p style="font-size:.85rem;">Select a staff member to chat</p></div></div>
+            <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;"><input type="text" id="adminMsgInput" class="inp" placeholder="Type a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAdminMsg()" disabled><button onclick="sendAdminMsg()" class="btn btn-primary" style="padding:9px 14px;" disabled id="adminSendBtn"><i class="fas fa-paper-plane"></i></button></div>
           </div>
         </div>
       </div>
 
-      <!-- ===== SETTINGS ===== -->
+      <!-- SETTINGS -->
       <div id="settingsSection" class="section-page" style="display:none;">
-        <div style="max-width:620px;">
+        <div style="max-width:600px;">
           <h3 class="syne" style="font-size:1.1rem;font-weight:700;margin-bottom:18px;">System Settings</h3>
-          
           <div class="card" style="padding:22px;margin-bottom:16px;">
             <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;"><i class="fas fa-clock" style="color:var(--brand-mid);margin-right:7px;"></i>Time Classification Rules</h4>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                  <label class="lbl">Work Start Time</label>
-                  <input type="time" id="settingStartTime" class="inp" value="08:00">
-                </div>
-                <div>
-                  <label class="lbl">On Time — Until</label>
-                  <input type="time" id="settingOnTime" class="inp" value="08:00">
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                  <label class="lbl">Late — From</label>
-                  <input type="time" id="settingLateFrom" class="inp" value="08:01">
-                </div>
-                <div>
-                  <label class="lbl">Late — Until</label>
-                  <input type="time" id="settingLateTo" class="inp" value="08:30">
-                </div>
-              </div>
-              <div>
-                <label class="lbl">Very Late — After</label>
-                <input type="time" id="settingVeryLate" class="inp" value="08:30">
-              </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div><label class="lbl">On Time — Until</label><input type="time" id="settingOnTime" class="inp" value="08:00"></div>
+              <div><label class="lbl">Late — Until</label><input type="time" id="settingLateTo" class="inp" value="08:30"></div>
             </div>
+            <p style="font-size:.74rem;color:var(--muted);margin-top:8px;"><i class="fas fa-info-circle"></i> After "Late" time = Very Late. Applies globally to all staff.</p>
           </div>
-
           <div class="card" style="padding:22px;margin-bottom:16px;">
             <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;"><i class="fas fa-wifi" style="color:var(--brand-mid);margin-right:7px;"></i>Office Network (Router IP)</h4>
             <div>
               <label class="lbl">Allowed Office IP Address</label>
-              <input type="text" id="settingIP" class="inp" placeholder="e.g. 192.168.1.1" value="">
-              <p style="font-size:.74rem;color:var(--muted);margin-top:6px;"><i class="fas fa-info-circle"></i> Staff can only clock in when connected to this IP. Leave blank to allow from anywhere (testing mode).</p>
+              <input type="text" id="settingIP" class="inp" placeholder="e.g. 41.200.12.34" value="">
+              <p style="font-size:.74rem;color:var(--muted);margin-top:6px;"><i class="fas fa-info-circle"></i> Staff can only clock in on this public IP. Leave blank = no restriction (testing mode).</p>
             </div>
           </div>
-
-          <div class="card" style="padding:22px;margin-bottom:16px;">
-            <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;"><i class="fas fa-user-plus" style="color:var(--brand-mid);margin-right:7px;"></i>Add Staff Account</h4>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                  <label class="lbl">Full Name</label>
-                  <input type="text" id="newStaffName" class="inp" placeholder="Jane Doe">
-                </div>
-                <div>
-                  <label class="lbl">Email</label>
-                  <input type="email" id="newStaffEmail" class="inp" placeholder="jane@nonstop.co">
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                  <label class="lbl">Password</label>
-                  <input type="password" id="newStaffPw" class="inp" placeholder="Min 6 chars">
-                </div>
-                <div>
-                  <label class="lbl">Role</label>
-                  <select id="newStaffRole" class="inp">
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-              </div>
-              <button onclick="addStaffAccount()" class="btn btn-primary" style="width:fit-content;"><i class="fas fa-user-plus"></i> Create Account</button>
-            </div>
-          </div>
-
-          <button onclick="saveSettings()" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:.9rem;"><i class="fas fa-save"></i> Save All Settings</button>
+          <button onclick="saveSettings()" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:.9rem;"><i class="fas fa-save"></i> Save Settings to Database</button>
         </div>
       </div>
 
-    </div><!-- /page-pad -->
+    </div>
   </main>
 </div>
 
-<!-- ===== DAY DETAIL MODAL ===== -->
+<!-- DAY DETAIL MODAL -->
 <div id="dayModal" class="modal-overlay" style="display:none;">
   <div class="modal-box" style="max-width:480px;">
-    <div class="modal-header">
-      <div>
-        <h3 id="dayModalTitle" class="syne" style="font-size:1.05rem;font-weight:700;"></h3>
-        <p id="dayModalSub" style="font-size:.78rem;color:var(--muted);margin-top:2px;"></p>
-      </div>
-      <button onclick="closeDayModal()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button>
-    </div>
+    <div class="modal-header"><div><h3 id="dayModalTitle" class="syne" style="font-size:1.05rem;font-weight:700;"></h3><p id="dayModalSub" style="font-size:.78rem;color:var(--muted);margin-top:2px;"></p></div><button onclick="closeDayModal()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button></div>
     <div class="modal-body" id="dayModalBody"></div>
   </div>
 </div>
 
-<!-- ===== NOTE MODAL (for Out for Assignment) ===== -->
+<!-- OUT FOR ASSIGNMENT MODAL -->
 <div id="noteModal" class="modal-overlay" style="display:none;">
   <div class="modal-box" style="max-width:420px;">
-    <div class="modal-header">
-      <h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-car" style="color:var(--warn);margin-right:8px;"></i>Out for Assignment</h3>
-      <button onclick="closeNoteModal()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <label class="lbl">Assignment Note (required)</label>
-      <textarea id="assignNote" class="inp" rows="3" style="resize:none;" placeholder="Describe your assignment (e.g. Client visit at VI, Document delivery to Lekki…)"></textarea>
-      <p style="font-size:.74rem;color:var(--muted);margin-top:6px;">This note is visible to the admin.</p>
-    </div>
-    <div class="modal-footer">
-      <button onclick="closeNoteModal()" class="btn btn-ghost">Cancel</button>
-      <button onclick="confirmOutAssign()" class="btn btn-primary"><i class="fas fa-check"></i> Confirm</button>
-    </div>
+    <div class="modal-header"><h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-car" style="color:var(--warn);margin-right:8px;"></i>Out for Assignment</h3><button onclick="closeNoteModal()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body"><label class="lbl">Assignment Note (required)</label><textarea id="assignNote" class="inp" rows="3" style="resize:none;" placeholder="Describe your assignment…"></textarea><p style="font-size:.74rem;color:var(--muted);margin-top:6px;">This note is visible to the admin.</p></div>
+    <div class="modal-footer"><button onclick="closeNoteModal()" class="btn btn-ghost">Cancel</button><button onclick="confirmOutAssign()" class="btn btn-primary"><i class="fas fa-check"></i> Confirm</button></div>
   </div>
 </div>
 
-<!-- ===== BROADCAST MODAL ===== -->
+<!-- BROADCAST MODAL -->
 <div id="broadcastModal" class="modal-overlay" style="display:none;">
   <div class="modal-box" style="max-width:460px;">
-    <div class="modal-header">
-      <h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-bullhorn" style="color:var(--brand-mid);margin-right:8px;"></i>Broadcast Message</h3>
-      <button onclick="closeBroadcast()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <label class="lbl">Message to All Staff</label>
-      <textarea id="broadcastMsg" class="inp" rows="4" style="resize:none;" placeholder="Type your message to all staff…"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button onclick="closeBroadcast()" class="btn btn-ghost">Cancel</button>
-      <button onclick="sendBroadcast()" class="btn btn-primary"><i class="fas fa-bullhorn"></i> Send to All</button>
-    </div>
+    <div class="modal-header"><h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-bullhorn" style="color:var(--brand-mid);margin-right:8px;"></i>Broadcast Message</h3><button onclick="closeBroadcast()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body"><label class="lbl">Message to All Staff</label><textarea id="broadcastMsg" class="inp" rows="4" style="resize:none;" placeholder="Type your message to all staff…"></textarea></div>
+    <div class="modal-footer"><button onclick="closeBroadcast()" class="btn btn-ghost">Cancel</button><button onclick="sendBroadcast()" class="btn btn-primary"><i class="fas fa-bullhorn"></i> Send to All</button></div>
   </div>
 </div>
 
-<!-- TOAST CONTAINER -->
 <div id="toastContainer"></div>
 
 <script>
 // ================================================================
-//  APP STATE & CONFIG
+//  SUPABASE — same project as AMS
 // ================================================================
-const LOGO = 'https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png';
-// Global (shared) keys — not user-specific
-const SETTINGS_KEY  = 'nst_clock_settings';   // shared: settings are global
-const USERS_KEY     = 'nst_clock_users';
+const SB_URL = 'https://asupemsmwzrovucpvqyt.supabase.co';
+const SB_KEY = 'sb_publishable_h3Kb-0pknHcYItkGeyEI-Q_urYDrPD9';
+const sb = window.supabase.createClient(SB_URL, SB_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true }
+});
 
-// User-scoped key helpers — namespaced by userId so multiple staff
-// on the same PC never overwrite each other's offline data
+// ================================================================
+//  CONFIG
+// ================================================================
+const AUTO_CLOCKOUT_TIME = '17:10'; // change if needed
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// localStorage keys — namespaced by userId so multiple staff on one PC
+// never collide with each other's offline data
+const SETTINGS_KEY = 'nst_clk_settings';   // shared (settings are global)
 function offlineKey(uid)  { return 'nst_offline_'  + uid; }
 function recordsKey(uid)  { return 'nst_records_'  + uid; }
 function messagesKey(uid) { return 'nst_messages_' + uid; }
-function sessionKey(uid)  { return 'nst_session_'  + uid; }
 function profileKey(uid)  { return 'nst_profile_'  + uid; }
 
-let CU = null; // current user
-let APP_SETTINGS = loadSettings();
-let USERS = loadUsers();
-let RECORDS = loadRecords();
-let MESSAGES = loadMessages();
-let currentStatus = 'clocked-out'; // clocked-in | on-break | out-assign | clocked-out
-let sessionStart = null; // when current session started (for live timer)
+// ================================================================
+//  STATE
+// ================================================================
+let CU = null;   // supabase auth user
+let CP = null;   // profile row from profiles table
+let RECORDS = {};          // local cache: key = "date_userId"
+let MESSAGES = {};         // local cache for offline message preview
+let APP_SETTINGS = loadSettingsLocal();
+let allStaffProfiles = []; // admin only
+let currentStatus = 'clocked-out';
+let sessionStart = null;
 let liveTimerInterval = null;
 let clockInterval = null;
 let pollInterval = null;
-let calYear, calMonth; // for staff calendar
+let calYear, calMonth;
 let adminCalYear, adminCalMonth, adminCalStaffId;
 let currentAdminChatUser = null;
+let _autoClockoutFired = '';
 
-// Default settings
-function defaultSettings() {
-  return {
-    startTime: '08:00',
-    onTimeUntil: '08:00',
-    lateFrom: '08:01',
-    lateTo: '08:30',
-    veryLateAfter: '08:30',
-    officeIP: '',
-    lastSyncedAt: null
-  };
+// ================================================================
+//  SETTINGS (local + Supabase)
+// ================================================================
+function defaultSettings() { return { onTimeUntil:'08:00', lateTo:'08:30', officeIP:'' }; }
+function loadSettingsLocal() {
+  try { return { ...defaultSettings(), ...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}') }; }
+  catch(e) { return defaultSettings(); }
 }
-function loadSettings() {
-  try { return {...defaultSettings(), ...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}; } catch(e) { return defaultSettings(); }
-}
-function saveSettingsData(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); APP_SETTINGS = s; }
+function saveSettingsLocal(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); APP_SETTINGS = s; }
 
-// Pull settings from Supabase so admin IP changes apply to ALL devices instantly
 async function loadSettingsFromDB() {
   if (!navigator.onLine) return;
   try {
-    const { data, error } = await sb.from('clock_settings').select('*').eq('id', 1).single();
-    if (error || !data) return;
-    const remote = {
-      onTimeUntil:   data.on_time_until || '08:00',
-      lateTo:        data.late_until    || '08:30',
-      veryLateAfter: data.late_until    || '08:30',
-      officeIP:      data.office_ip     || ''
-    };
-    saveSettingsData(remote);
-    const ip = $('settingIP');
-    if (ip) {
-      const ot = $('settingOnTime');  if(ot)  ot.value  = remote.onTimeUntil;
-      const lt = $('settingLateTo');  if(lt)  lt.value  = remote.lateTo;
-      const vl = $('settingVeryLate');if(vl)  vl.value  = remote.veryLateAfter;
-      ip.value = remote.officeIP;
-    }
-  } catch(e) { /* silently fall back to local */ }
+    const { data } = await sb.from('clock_settings').select('*').eq('id',1).single();
+    if (!data) return;
+    const s = { onTimeUntil: data.on_time_until||'08:00', lateTo: data.late_until||'08:30', officeIP: data.office_ip||'' };
+    saveSettingsLocal(s);
+    if ($('settingOnTime'))  { $('settingOnTime').value = s.onTimeUntil; $('settingLateTo').value = s.lateTo; $('settingIP').value = s.officeIP; }
+  } catch(e) {}
 }
 
-// Default users (admin + sample staff)
-function defaultUsers() {
-  return [
-    { id:'admin_1', name:'Admin', email:'admin@nonstoptravels.co', password:'admin123', role:'admin', createdAt: new Date().toISOString() },
-    { id:'staff_1', name:'Amaka Okonkwo', email:'amaka@nonstoptravels.co', password:'staff123', role:'staff', createdAt: new Date().toISOString() },
-    { id:'staff_2', name:'Chidi Eze', email:'chidi@nonstoptravels.co', password:'staff123', role:'staff', createdAt: new Date().toISOString() },
-    { id:'staff_3', name:'Fatima Bello', email:'fatima@nonstoptravels.co', password:'staff123', role:'staff', createdAt: new Date().toISOString() },
-  ];
+async function saveSettings() {
+  const s = { onTimeUntil:$('settingOnTime').value, lateTo:$('settingLateTo').value, officeIP:$('settingIP').value.trim() };
+  saveSettingsLocal(s);
+  if (navigator.onLine) {
+    const { error } = await sb.from('clock_settings').upsert({ id:1, on_time_until:s.onTimeUntil, late_until:s.lateTo, office_ip:s.officeIP, updated_at:nowTs() }, { onConflict:'id' });
+    if (error) toast('Saved locally — DB error: '+error.message, 'warn');
+    else       toast('Settings saved & applied to all devices ✓');
+  } else { toast('Saved locally — will sync when back online','warn'); }
+  checkOfficeNetwork();
 }
-function loadUsers() {
-  try { const u = JSON.parse(localStorage.getItem(USERS_KEY)||'null'); return u && u.length ? u : defaultUsers(); } catch(e) { return defaultUsers(); }
-}
-function saveUsers() { localStorage.setItem(USERS_KEY, JSON.stringify(USERS)); }
 
-function loadRecords(uid) {
-  if (!uid) return {};
+// ================================================================
+//  PER-USER OFFLINE RECORDS
+// ================================================================
+function loadUserRecords(uid) {
   try { return JSON.parse(localStorage.getItem(recordsKey(uid))||'{}'); } catch(e) { return {}; }
 }
-function saveRecords() {
-  if (!CU) return;
-  localStorage.setItem(recordsKey(CU.id), JSON.stringify(RECORDS));
+function saveUserRecords(uid) {
+  localStorage.setItem(recordsKey(uid), JSON.stringify(RECORDS));
+  updateUnsyncedBadge();
+}
+function updateUnsyncedBadge() {
+  const n = Object.values(RECORDS).filter(r=>!r._synced).length;
+  const b = $('unsyncedBadge');
+  if (b) { b.style.display = n>0?'block':'none'; const c=$('unsyncedCount'); if(c) c.textContent=n; }
 }
 
-function loadMessages(uid) {
-  if (!uid) return {};
-  try { return JSON.parse(localStorage.getItem(messagesKey(uid))||'{}'); } catch(e) { return {}; }
+// ================================================================
+//  OFFLINE PROFILE CACHE (per user)
+// ================================================================
+function cacheProfile(p) { try { localStorage.setItem(profileKey(p.id), JSON.stringify(p)); } catch(e){} }
+function getCachedProfile(uid) { try { return JSON.parse(localStorage.getItem(profileKey(uid))||'null'); } catch(e) { return null; } }
+
+// ================================================================
+//  SUPABASE SYNC — push unsynced local records to clock_records
+// ================================================================
+async function syncToSupabase() {
+  if (!navigator.onLine || !CU) return;
+  const unsynced = Object.values(RECORDS).filter(r => !r._synced && r.user_id === CU.id);
+  if (!unsynced.length) return;
+  for (const rec of unsynced) {
+    try {
+      const payload = {
+        user_id:     rec.user_id,
+        user_name:   rec.user_name || CP?.full_name || '',
+        date:        rec.date,
+        status:      rec.status,
+        clock_in:    rec.clock_in    || null,
+        clock_out:   rec.clock_out   || null,
+        break_start: rec.break_start || null,
+        break_end:   rec.break_end   || null,
+        assign_note: rec.assign_note || null,
+        events:      rec.events      || [],
+        updated_at:  nowTs()
+      };
+      const { error } = await sb.from('clock_records').upsert(payload, { onConflict:'user_id,date' });
+      if (!error) { rec._synced = true; RECORDS[rec.date+'_'+rec.user_id] = rec; }
+    } catch(e) {}
+  }
+  saveUserRecords(CU.id);
 }
-function saveMessages() {
-  if (!CU) return;
-  localStorage.setItem(messagesKey(CU.id), JSON.stringify(MESSAGES));
+
+// Pull records for a month (admin viewing other staff)
+async function pullMonthRecords(userId, year, month) {
+  if (!navigator.onLine) return;
+  const from = `${year}-${pad(month+1)}-01`;
+  const to   = `${year}-${pad(month+1)}-${new Date(year,month+1,0).getDate()}`;
+  const { data } = await sb.from('clock_records').select('*').eq('user_id',userId).gte('date',from).lte('date',to);
+  (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r); });
+}
+
+// Pull today for all staff (admin dashboard)
+async function pullTodayAll() {
+  if (!navigator.onLine) return;
+  const { data } = await sb.from('clock_records').select('*').eq('date',todayStr());
+  (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r); });
+}
+
+function dbRecToLocal(r) {
+  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, events:r.events||[], _synced:true };
 }
 
 // ================================================================
 //  UTILITIES
 // ================================================================
-const $=id=>document.getElementById(id);
-const san=s=>s?String(s).replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])):'';
-const pad=n=>String(n).padStart(2,'0');
-const fmtTime=d=>d?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'—';
-const fmtTimeFull=d=>d?`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`:'—';
-const fmtDate=d=>d?new Date(d).toLocaleDateString('en-NG',{year:'numeric',month:'short',day:'numeric'}):'—';
-const todayStr=()=>new Date().toISOString().slice(0,10);
-const nowTs=()=>new Date().toISOString();
-const greet=()=>{const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening';};
+const $ = id => document.getElementById(id);
+const san = s => s?String(s).replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])):'';
+const pad = n => String(n).padStart(2,'0');
+const fmtTime = d => d?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'—';
+const fmtTimeFull = d => d?`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`:'—';
+const todayStr = () => new Date().toISOString().slice(0,10);
+const nowTs = () => new Date().toISOString();
+const greet = () => { const h=new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; };
 
-// ================================================================
-//  TOAST
-// ================================================================
 function toast(msg, type='success', dur=3500) {
-  const icons = {success:'fas fa-check-circle',error:'fas fa-exclamation-circle',info:'fas fa-info-circle',warn:'fas fa-exclamation-triangle'};
-  const colors = {success:'#1db96b',error:'#ef4444',info:'#3b82f6',warn:'#f59e0b'};
-  const c = $('toastContainer');
-  const el = document.createElement('div');
-  el.className = 'toast-item';
-  el.innerHTML = `<i class="${icons[type]||icons.success}" style="color:${colors[type]||colors.success};font-size:.95rem;flex-shrink:0;"></i><span>${san(msg)}</span>`;
-  c.appendChild(el);
-  setTimeout(()=>{ el.style.animation='toastOut .3s ease forwards'; setTimeout(()=>el.remove(),300); }, dur);
+  const icons={success:'fas fa-check-circle',error:'fas fa-exclamation-circle',info:'fas fa-info-circle',warn:'fas fa-exclamation-triangle'};
+  const colors={success:'#1db96b',error:'#ef4444',info:'#3b82f6',warn:'#f59e0b'};
+  const el=document.createElement('div'); el.className='toast-item';
+  el.innerHTML=`<i class="${icons[type]}" style="color:${colors[type]};font-size:.95rem;flex-shrink:0;"></i><span>${san(msg)}</span>`;
+  $('toastContainer').appendChild(el);
+  setTimeout(()=>{el.style.animation='toastOut .3s ease forwards';setTimeout(()=>el.remove(),300);},dur);
 }
+
+function setLoadMsg(m) { const e=$('loadingMsg'); if(e) e.textContent=m; }
+function hideLoading() { const o=$('loadingOverlay'); o.style.opacity='0'; setTimeout(()=>o.style.display='none',500); }
+function showAuthScreen() { hideLoading(); $('authScreen').style.display='flex'; }
 
 // ================================================================
 //  AUTH
 // ================================================================
-function togglePw(id, iconId) {
-  const el=$(id); el.type = el.type==='password'?'text':'password';
-  $(iconId).className = el.type==='password'?'fas fa-eye':'fas fa-eye-slash';
-}
-function showAuthErr(msg) {
-  const el=$('authErr'); $('authErrTxt').textContent=msg;
-  el.style.display='flex';
-}
+function togglePw() { const e=$('loginPw'); e.type=e.type==='password'?'text':'password'; $('pwIcon').className=e.type==='password'?'fas fa-eye':'fas fa-eye-slash'; }
+function showAuthErr(m) { const e=$('authErr'); $('authErrTxt').textContent=m; e.style.display='flex'; }
+function clearAuthErr() { $('authErr').style.display='none'; }
+
 async function doLogin() {
-  const email=$('loginEmail').value.trim().toLowerCase();
-  const pw=$('loginPw').value;
-  if(!email||!pw){showAuthErr('Please enter email and password');return;}
-  const user = USERS.find(u=>u.email.toLowerCase()===email && u.password===pw);
-  if(!user){showAuthErr('Invalid email or password');return;}
-  CU = user;
-  // Load this specific user's offline records and messages (not a shared store)
-  RECORDS  = loadRecords(user.id);
-  MESSAGES = loadMessages(user.id);
-  localStorage.setItem(sessionKey(user.id), JSON.stringify({userId:user.id, ts:nowTs()}));
-  await bootApp();
-}
-function doLogout() {
-  clearInterval(liveTimerInterval);
-  clearInterval(clockInterval);
-  clearInterval(pollInterval);
-  const sessionKeyToRemove = CU ? sessionKey(CU.id) : null;
-  CU = null;
-  if (sessionKeyToRemove) localStorage.removeItem(sessionKeyToRemove);
-  $('mainApp').style.display='none';
-  $('authScreen').style.display='flex';
-  toast('Signed out','info');
-}
-function tryAutoLogin() {
+  clearAuthErr();
+  const email=$('loginEmail').value.trim(), pw=$('loginPw').value;
+  if(!email||!pw){ showAuthErr('Please enter your email and password.'); return; }
+  const btn=$('loginBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Signing in…';
   try {
-    // Scan all localStorage keys for any valid user session
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || !k.startsWith('nst_session_')) continue;
-      const sess = JSON.parse(localStorage.getItem(k)||'null');
-      if (!sess || !sess.userId) continue;
-      const user = USERS.find(u => u.id === sess.userId);
-      if (!user) continue;
-      // Session valid — restore this user
-      CU = user;
-      RECORDS  = loadRecords(user.id);
-      MESSAGES = loadMessages(user.id);
-      return true;
+    if (!navigator.onLine) {
+      // Offline — try to find cached profile matching this email
+      showAuthErr('You are offline. Please connect to the internet to sign in for the first time.'); return;
     }
-    return false;
-  } catch(e) { return false; }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) { showAuthErr(error.message); return; }
+    await bootApp(data.user);
+  } catch(e) {
+    showAuthErr('Login failed: ' + (e.message||'Unknown error'));
+  } finally {
+    btn.disabled=false; btn.innerHTML='<span>Sign In</span><i class="fas fa-arrow-right"></i>';
+  }
+}
+
+async function doLogout() {
+  clearInterval(liveTimerInterval); clearInterval(clockInterval); clearInterval(pollInterval);
+  await sb.auth.signOut().catch(()=>{});
+  CU=null; CP=null; RECORDS={}; MESSAGES={}; allStaffProfiles=[];
+  $('mainApp').style.display='none'; $('authScreen').style.display='flex';
+  $('loginEmail').value=''; $('loginPw').value='';
+  toast('Signed out','info');
 }
 
 // ================================================================
 //  BOOT
 // ================================================================
-async function bootApp() {
-  const isAdmin = CU.role==='admin';
+async function bootApp(user) {
+  CU = user;
+  setLoadMsg('Loading profile…');
 
-  // Sidebar nav visibility
+  // Load profile from AMS profiles table
+  const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (pErr || !profile) { showAuthErr('Profile not found. Contact your administrator.'); $('authScreen').style.display='flex'; return; }
+
+  // Block applicants
+  if (profile.role === 'applicant') { showAuthErr('Access denied — this system is for staff only.'); await sb.auth.signOut(); $('authScreen').style.display='flex'; return; }
+
+  CP = profile;
+  cacheProfile(profile);
+
+  // Load this user's offline records
+  RECORDS = loadUserRecords(user.id);
+
+  const isAdmin = CP.role === 'admin';
+  const name = CP.full_name || user.email.split('@')[0];
+
+  // Sidebar
   ['navClock','navCalendar','navMessages'].forEach(id=>$(id).style.display='flex');
   ['navAdmin','navStaffList','navAdminCal','navReports','navAdminMsg','navSettings'].forEach(id=>{
-    $(id).style.display = isAdmin ? 'flex':'none';
+    $(id).style.display = isAdmin?'flex':'none';
   });
-
-  // User info
-  $('sideAvatar').textContent = CU.name.charAt(0).toUpperCase();
-  $('sideName').textContent = CU.name;
-  $('sideRole').textContent = CU.role.charAt(0).toUpperCase()+CU.role.slice(1);
-  $('sideRole').className = `badge badge-${CU.role}`;
+  $('sideAvatar').textContent = name.charAt(0).toUpperCase();
+  $('sideName').textContent = name;
+  $('sideRole').textContent = CP.role.charAt(0).toUpperCase()+CP.role.slice(1);
+  $('sideRole').className = `badge badge-${CP.role}`;
   $('headerRole').textContent = $('sideRole').textContent;
-  $('headerRole').className = `badge badge-${CU.role} hide-mob`;
-
-  // Clock greeting
+  $('headerRole').className = `badge badge-${CP.role} hide-mob`;
   $('clockGreet').textContent = greet()+',';
-  $('clockName').textContent = CU.name.split(' ')[0];
+  $('clockName').textContent = name.split(' ')[0];
+  $('onlineIndicator').style.background = navigator.onLine?'#22c55e':'#ef4444';
 
-  // Restore today's clocking state
-  restoreClockState();
+  setLoadMsg('Loading settings…');
+  await loadSettingsFromDB();
+  if (isAdmin) { $('settingOnTime').value=APP_SETTINGS.onTimeUntil||'08:00'; $('settingLateTo').value=APP_SETTINGS.lateTo||'08:30'; $('settingIP').value=APP_SETTINGS.officeIP||''; }
 
-  // Header clock
-  startHeaderClock();
-
-  // Check IP / network
-  checkOfficeNetwork();
-
-  // Sync offline records
-  syncOfflineRecords();
-
-  // Pull global settings from DB so this device gets latest IP
-  if (!isOffline) await loadSettingsFromDB();
-
-  // Poll for new messages every 10s
-  clearInterval(pollInterval);
-  pollInterval = setInterval(async ()=>{
-    updateMessageBadges();
-    if(!$('messagesSection').style.display||$('messagesSection').style.display!=='none') renderMessages();
-    if(isAdmin && $('adminmsgSection').style.display!=='none') renderAdminMsgList();
-    if(isAdmin) loadAdminData();
-    await loadSettingsFromDB();   // pick up IP changes made by admin
-    checkOfficeNetwork();
-  }, 10000);
-
-  APP_SETTINGS = loadSettings();
-  if(isAdmin) {
+  if (isAdmin) {
+    setLoadMsg('Loading staff…');
+    const { data: staffData } = await sb.from('profiles').select('id,full_name,email,role').order('full_name');
+    allStaffProfiles = staffData || [];
     populateAdminDropdowns();
-    loadAdminData();
     loadAdminCalendarDropdown();
-    // Prefill settings
-    $('settingStartTime').value = APP_SETTINGS.startTime;
-    $('settingOnTime').value = APP_SETTINGS.onTimeUntil;
-    $('settingLateFrom').value = APP_SETTINGS.lateFrom;
-    $('settingLateTo').value = APP_SETTINGS.lateTo;
-    $('settingVeryLate').value = APP_SETTINGS.veryLateAfter;
-    $('settingIP').value = APP_SETTINGS.officeIP||'';
+    setLoadMsg('Loading attendance…');
+    await pullTodayAll();
+    loadAdminData();
   }
 
-  // Init calendar
+  // Restore clock state from local cache
+  setLoadMsg('Restoring clock state…');
+  await loadTodayFromDB();
+  restoreClockState();
+
+  // Sync any offline records
+  await syncToSupabase();
+  updateUnsyncedBadge();
+
+  // Calendar
   const now = new Date();
-  calYear = now.getFullYear(); calMonth = now.getMonth();
-  adminCalYear = now.getFullYear(); adminCalMonth = now.getMonth();
+  calYear=now.getFullYear(); calMonth=now.getMonth();
+  adminCalYear=now.getFullYear(); adminCalMonth=now.getMonth();
+  const fom = new Date(now.getFullYear(),now.getMonth(),1);
+  $('rptFrom').value = fom.toISOString().slice(0,10);
+  $('rptTo').value   = now.toISOString().slice(0,10);
 
-  // Default report dates
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  $('rptFrom').value = firstOfMonth.toISOString().slice(0,10);
-  $('rptTo').value = now.toISOString().slice(0,10);
+  startHeaderClock();
+  checkOfficeNetwork();
 
-  updateMessageBadges();
+  // Poll every 15s
+  clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    if (!CU) return;
+    updateMsgBadges();
+    await loadSettingsFromDB();
+    checkOfficeNetwork();
+    if ($('messagesSection').style.display!=='none') renderMessages();
+    if (isAdmin) {
+      await pullTodayAll();
+      if ($('adminSection').style.display!=='none') loadAdminData();
+      if ($('adminmsgSection').style.display!=='none' && currentAdminChatUser) renderAdminMsgList();
+    }
+    await syncToSupabase();
+  }, 15000);
 
+  updateMsgBadges();
   $('authScreen').style.display='none';
   $('mainApp').style.display='flex';
   showSection('clock');
@@ -941,1132 +648,513 @@ async function bootApp() {
 }
 
 // ================================================================
-//  HEADER CLOCK + AUTO CLOCK-OUT
+//  HEADER CLOCK + AUTO CLOCK-OUT AT 17:10
 // ================================================================
-const AUTO_CLOCKOUT_TIME = '17:10'; // HH:MM — change here if needed
-let _autoClockoutFired = ''; // tracks which date auto-clockout already ran
-
 function checkAutoClockout() {
   if (!CU) return;
-  const now    = new Date();
-  const today  = todayStr();
-  const hhmm   = pad(now.getHours()) + ':' + pad(now.getMinutes());
-
-  // Only fire once per day, at or after AUTO_CLOCKOUT_TIME
+  const now=new Date(), today=todayStr();
+  const hhmm=pad(now.getHours())+':'+pad(now.getMinutes());
   if (hhmm < AUTO_CLOCKOUT_TIME) return;
   if (_autoClockoutFired === today) return;
-
   const rec = getTodayRecord();
-  // Only act if staff is still in an active state (not already clocked out)
-  if (!rec || !rec.clock_in) return;              // never clocked in — skip
-  if (rec.clock_out) return;                      // already clocked out — skip
-  const lastEvent = rec.events[rec.events.length - 1];
-  if (lastEvent && lastEvent.type === 'clock-out') return; // safety check
-
-  _autoClockoutFired = today;  // mark so it doesn't repeat
-
-  // Perform the automatic clock-out
-  const ts = new Date(today + 'T' + AUTO_CLOCKOUT_TIME + ':00').toISOString();
+  if (!rec || !rec.clock_in || rec.clock_out) return;
+  const last = rec.events[rec.events.length-1];
+  if (last && last.type==='clock-out') return;
+  _autoClockoutFired = today;
+  const ts = new Date(today+'T'+AUTO_CLOCKOUT_TIME+':00').toISOString();
   rec.clock_out = ts;
-  rec.events.push({ type: 'clock-out', ts, note: 'Auto clock-out at ' + AUTO_CLOCKOUT_TIME });
+  rec.events.push({ type:'clock-out', ts, note:'Auto clock-out at '+AUTO_CLOCKOUT_TIME });
+  rec._synced = false;
   setTodayRecord(rec);
-  currentStatus = 'clocked-out';
-  stopLiveTimer();
-  updateStatusDisplay();
-  renderClockButtons();
-  renderTodaySummary();
-  renderTodayLog();
-  syncOfflineRecords();
-
-  toast('⏰ Auto clocked out at ' + AUTO_CLOCKOUT_TIME + ' — have a great evening!', 'info', 6000);
+  currentStatus='clocked-out'; stopLiveTimer(); updateStatusDisplay();
+  renderClockButtons(); renderTodaySummary(); renderTodayLog();
+  syncToSupabase();
+  toast('⏰ Auto clocked out at '+AUTO_CLOCKOUT_TIME+' — have a great evening!','info',6000);
 }
 
 function startHeaderClock() {
   clearInterval(clockInterval);
   function tick() {
-    const now = new Date();
-    $('headerClock').textContent = fmtTimeFull(now);
-    $('headerDate').textContent = now.toLocaleDateString('en-NG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    $('clockDate').textContent   = now.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    checkAutoClockout(); // runs every second, self-guards with _autoClockoutFired
+    const n=new Date();
+    $('headerClock').textContent = fmtTimeFull(n);
+    $('headerDate').textContent  = n.toLocaleDateString('en-NG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    $('clockDate').textContent   = n.toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    checkAutoClockout();
   }
-  tick();
-  clockInterval = setInterval(tick, 1000);
+  tick(); clockInterval=setInterval(tick,1000);
 }
 
 // ================================================================
 //  NETWORK CHECK
 // ================================================================
 async function checkOfficeNetwork() {
-  const locIcon = $('locIcon');
-  const locText = $('locText');
-  const officeIP = APP_SETTINGS.officeIP;
-
-  if(!officeIP) {
-    locIcon.className='fas fa-wifi'; locIcon.style.color='#22c55e';
-    locText.textContent='Testing mode — no IP restriction set';
-    window._networkAllowed = true;
-    renderClockButtons();
-    return;
-  }
-
-  locIcon.className='fas fa-circle-notch fa-spin'; locIcon.style.color='rgba(255,255,255,.7)';
-  locText.textContent='Checking office network…';
-
+  const li=$('locIcon'), lt=$('locText'), ip=APP_SETTINGS.officeIP;
+  if (!ip) { li.className='fas fa-wifi'; li.style.color='#22c55e'; lt.textContent='Testing mode — no IP restriction set'; window._netOk=true; renderClockButtons(); return; }
+  li.className='fas fa-circle-notch fa-spin'; li.style.color='rgba(255,255,255,.7)'; lt.textContent='Checking office network…';
   try {
-    // Check public IP via API
-    const resp = await fetch('https://api.ipify.org?format=json', {signal:AbortSignal.timeout(5000)});
-    const data = await resp.json();
-    const publicIP = data.ip;
-    if(publicIP === officeIP) {
-      locIcon.className='fas fa-wifi'; locIcon.style.color='#22c55e';
-      locText.textContent=`Connected to office network (${publicIP})`;
-      window._networkAllowed = true;
-    } else {
-      locIcon.className='fas fa-ban'; locIcon.style.color='#f87171';
-      locText.textContent=`Not on office network (Current: ${publicIP})`;
-      window._networkAllowed = false;
-    }
-  } catch(e) {
-    // Offline or API failed — allow offline clocking
-    locIcon.className='fas fa-cloud-slash'; locIcon.style.color='#fbbf24';
-    locText.textContent='Could not verify network — offline clocking enabled';
-    window._networkAllowed = true; // allow offline
-  }
+    const r=await fetch('https://api.ipify.org?format=json',{signal:AbortSignal.timeout(5000)});
+    const d=await r.json();
+    if (d.ip===ip) { li.className='fas fa-wifi'; li.style.color='#22c55e'; lt.textContent=`Connected to office network (${d.ip})`; window._netOk=true; }
+    else           { li.className='fas fa-ban';  li.style.color='#f87171'; lt.textContent=`Not on office network (Your IP: ${d.ip})`; window._netOk=false; }
+  } catch(e) { li.className='fas fa-cloud'; li.style.color='#fbbf24'; lt.textContent='Network check failed — offline clocking enabled'; window._netOk=true; }
   renderClockButtons();
 }
 
 // ================================================================
-//  OFFLINE
+//  ONLINE / OFFLINE
 // ================================================================
-window.addEventListener('online', ()=>{
+window.addEventListener('online', async ()=>{
   $('offlineBanner').style.display='none';
   $('onlineIndicator').style.background='#22c55e';
-  syncOfflineRecords();
-  toast('Back online — records synced','success');
+  toast('Back online — syncing records…','info');
+  await syncToSupabase();
   checkOfficeNetwork();
+  if (CP?.role==='admin') await pullTodayAll();
 });
 window.addEventListener('offline', ()=>{
   $('offlineBanner').style.display='block';
   $('onlineIndicator').style.background='#ef4444';
-  toast('Offline mode — clocks saved locally','warn');
+  toast('Offline — clocks saved locally','warn');
+  checkOfficeNetwork();
 });
 
-function syncOfflineRecords() {
-  // Offline records are already in localStorage = RECORDS, same storage
-  // Mark any pending offline as synced
-  try {
-    const pending = JSON.parse(localStorage.getItem(offlineKey(CU.id))||'[]');
-    if(pending.length && navigator.onLine) {
-      pending.forEach(r=>{
-        const dayKey = r.date+'_'+r.userId;
-        if(!RECORDS[dayKey]) RECORDS[dayKey] = r;
-      });
-      saveRecords();
-      localStorage.removeItem(offlineKey(CU.id));
-      toast(`Synced ${pending.length} offline record(s)`,'success');
-    }
-  } catch(e) {}
+// ================================================================
+//  CLOCK RECORDS — local + Supabase
+// ================================================================
+async function loadTodayFromDB() {
+  if (!navigator.onLine) return;
+  const today=todayStr();
+  const { data } = await sb.from('clock_records').select('*').eq('user_id',CU.id).eq('date',today).maybeSingle();
+  if (data) {
+    const local = RECORDS[today+'_'+CU.id];
+    // Prefer local if newer / unsynced
+    if (!local || local._synced) { RECORDS[today+'_'+CU.id] = dbRecToLocal(data); saveUserRecords(CU.id); }
+  }
 }
 
-// ================================================================
-//  CLOCK STATE
-// ================================================================
-function getTodayRecord() {
-  const key = todayStr()+'_'+CU.id;
-  return RECORDS[key] || null;
-}
-
+function getTodayRecord() { return RECORDS[todayStr()+'_'+CU.id] || null; }
 function setTodayRecord(rec) {
-  const key = todayStr()+'_'+CU.id;
-  RECORDS[key] = rec;
-  saveRecords();
-  // If offline, also save to offline queue
-  if(!navigator.onLine) {
+  RECORDS[rec.date+'_'+rec.user_id] = rec;
+  saveUserRecords(CU.id);
+  // Also save to offline queue if offline
+  if (!navigator.onLine) {
     try {
-      const pending = JSON.parse(localStorage.getItem(offlineKey(CU.id))||'[]');
-      const idx = pending.findIndex(r=>r.date===rec.date&&r.userId===r.userId);
-      if(idx>=0) pending[idx]=rec; else pending.push(rec);
-      localStorage.setItem(offlineKey(CU.id), JSON.stringify(pending));
-    } catch(e) {}
+      const q = JSON.parse(localStorage.getItem(offlineKey(CU.id))||'[]');
+      const i = q.findIndex(r=>r.date===rec.date&&r.user_id===rec.user_id);
+      if(i>=0) q[i]=rec; else q.push(rec);
+      localStorage.setItem(offlineKey(CU.id), JSON.stringify(q));
+    } catch(e){}
   }
 }
 
 function restoreClockState() {
-  const rec = getTodayRecord();
-  if(!rec) { currentStatus='clocked-out'; stopLiveTimer(); updateStatusDisplay(); return; }
-  const last = rec.events[rec.events.length-1];
-  if(!last) { currentStatus='clocked-out'; stopLiveTimer(); updateStatusDisplay(); return; }
-  if(last.type==='clock-in') { currentStatus='clocked-in'; sessionStart=new Date(last.ts); startLiveTimer(); }
-  else if(last.type==='start-break') { currentStatus='on-break'; sessionStart=new Date(last.ts); startLiveTimer(); }
-  else if(last.type==='end-break') { currentStatus='clocked-in'; sessionStart=new Date(last.ts); startLiveTimer(); }
-  else if(last.type==='out-assign') { currentStatus='out-assign'; sessionStart=new Date(last.ts); startLiveTimer(); }
-  else if(last.type==='back-assign') { currentStatus='clocked-in'; sessionStart=new Date(last.ts); startLiveTimer(); }
-  else if(last.type==='clock-out') { currentStatus='clocked-out'; stopLiveTimer(); }
+  const rec=getTodayRecord();
+  if(!rec||!rec.events.length){currentStatus='clocked-out';stopLiveTimer();updateStatusDisplay();return;}
+  const last=rec.events[rec.events.length-1];
+  if(['clock-in','end-break','back-assign'].includes(last.type)){currentStatus='clocked-in';sessionStart=new Date(last.ts);startLiveTimer();}
+  else if(last.type==='start-break'){currentStatus='on-break';sessionStart=new Date(last.ts);startLiveTimer();}
+  else if(last.type==='out-assign'){currentStatus='out-assign';sessionStart=new Date(last.ts);startLiveTimer();}
+  else if(last.type==='clock-out'){currentStatus='clocked-out';stopLiveTimer();}
   updateStatusDisplay();
 }
 
-function clockAction(type, note='') {
-  // Network check for clock-in
-  if(type==='clock-in' && window._networkAllowed===false) {
-    toast('You must be on the office network to clock in','error'); return;
-  }
-
-  const now = new Date();
-  const ts = now.toISOString();
-  let rec = getTodayRecord() || { userId:CU.id, userName:CU.name, date:todayStr(), events:[], status:'absent', online:navigator.onLine };
-  rec.events.push({ type, ts, note });
-
-  // Determine attendance status from first clock-in
-  if(type==='clock-in') {
-    rec.clockIn = ts;
-    rec.status = getAttendanceStatus(now);
-    sessionStart = now;
-    startLiveTimer();
-    currentStatus='clocked-in';
-  } else if(type==='start-break') {
-    rec.breakStart = ts;
-    currentStatus='on-break';
-    sessionStart = now;
-  } else if(type==='end-break') {
-    rec.breakEnd = ts;
-    currentStatus='clocked-in';
-    sessionStart = now;
-  } else if(type==='out-assign') {
-    rec.outAssign = ts;
-    rec.assignNote = note;
-    currentStatus='out-assign';
-    sessionStart = now;
-  } else if(type==='back-assign') {
-    currentStatus='clocked-in';
-    sessionStart = now;
-  } else if(type==='clock-out') {
-    rec.clockOut = ts;
-    currentStatus='clocked-out';
-    stopLiveTimer();
-  }
-
+async function clockAction(type, note='') {
+  if (type==='clock-in' && window._netOk===false) { toast('You must be on the office network to clock in','error'); return; }
+  const now=new Date(), ts=now.toISOString();
+  let rec = getTodayRecord() || { user_id:CU.id, user_name:CP.full_name||'', date:todayStr(), status:'absent', events:[], clock_in:null, clock_out:null, break_start:null, break_end:null, assign_note:null, _synced:false };
+  rec.events = [...rec.events, {type,ts,note}];
+  rec._synced = false;
+  if(type==='clock-in'){rec.clock_in=ts;rec.status=getAStatus(now);currentStatus='clocked-in';sessionStart=now;startLiveTimer();}
+  else if(type==='start-break'){rec.break_start=ts;currentStatus='on-break';sessionStart=now;}
+  else if(type==='end-break'){rec.break_end=ts;currentStatus='clocked-in';sessionStart=now;}
+  else if(type==='out-assign'){rec.assign_note=note;currentStatus='out-assign';sessionStart=now;}
+  else if(type==='back-assign'){currentStatus='clocked-in';sessionStart=now;}
+  else if(type==='clock-out'){rec.clock_out=ts;currentStatus='clocked-out';stopLiveTimer();}
   setTodayRecord(rec);
-  updateStatusDisplay();
-  renderClockButtons();
-  renderTodaySummary();
-  renderTodayLog();
-
-  const labels={
-    'clock-in':'Clocked In ✅','start-break':'Break Started ☕','end-break':'Break Ended 🔁',
-    'out-assign':'Out for Assignment 🚗','back-assign':'Back from Assignment','clock-out':'Clocked Out 🔚'
-  };
-  toast(labels[type]||type,'success');
+  updateStatusDisplay(); renderClockButtons(); renderTodaySummary(); renderTodayLog();
+  const labels={'clock-in':'Clocked In ✅','start-break':'Break Started ☕','end-break':'Break Ended 🔁','out-assign':'Out for Assignment 🚗','back-assign':'Back from Assignment','clock-out':'Clocked Out 🔚'};
+  toast(labels[type]||type);
+  syncToSupabase();
 }
 
-function getAttendanceStatus(clockInTime) {
-  const h = clockInTime.getHours(), m = clockInTime.getMinutes();
-  const t = h*60+m;
-  const [oh,om] = APP_SETTINGS.onTimeUntil.split(':').map(Number);
-  const [lth,ltm] = APP_SETTINGS.lateTo.split(':').map(Number);
-  const onTimeT = oh*60+om;
-  const lateToT = lth*60+ltm;
-  if(t<=onTimeT) return 'on-time';
-  if(t<=lateToT) return 'late';
+function getAStatus(t) {
+  const m=t.getHours()*60+t.getMinutes();
+  const [oh,om]=(APP_SETTINGS.onTimeUntil||'08:00').split(':').map(Number);
+  const [lh,lm]=(APP_SETTINGS.lateTo||'08:30').split(':').map(Number);
+  if(m<=oh*60+om) return 'on-time';
+  if(m<=lh*60+lm) return 'late';
   return 'very-late';
 }
 
 function updateStatusDisplay() {
-  const statusMap = {
-    'clocked-in':'Clocked In',
-    'on-break':'On Break',
-    'out-assign':'Out for Assignment',
-    'clocked-out':'Not clocked in'
-  };
-  const cssMap = {
-    'clocked-in':'status-clocked-in',
-    'on-break':'status-on-break',
-    'out-assign':'status-out-assign',
-    'clocked-out':'status-clocked-out'
-  };
-  $('clockStatusDisplay').textContent = statusMap[currentStatus]||'Unknown';
-  $('clockStatusDisplay').className = `status-pulse ${cssMap[currentStatus]||''}`;
+  const sm={'clocked-in':'Clocked In','on-break':'On Break','out-assign':'Out for Assignment','clocked-out':'Not clocked in'};
+  const cm={'clocked-in':'status-clocked-in','on-break':'status-on-break','out-assign':'status-out-assign','clocked-out':'status-clocked-out'};
+  $('clockStatusDisplay').textContent=sm[currentStatus]||'Unknown';
+  $('clockStatusDisplay').className=`status-pulse ${cm[currentStatus]||''}`;
 }
-
-// Live timer
-function startLiveTimer() {
-  clearInterval(liveTimerInterval);
-  function tick() {
-    if(!sessionStart) return;
-    const elapsed = Math.floor((new Date()-sessionStart)/1000);
-    const h=Math.floor(elapsed/3600), m=Math.floor((elapsed%3600)/60), s=elapsed%60;
-    $('liveTimer').textContent=`${pad(h)}:${pad(m)}:${pad(s)}`;
-  }
-  tick();
-  liveTimerInterval=setInterval(tick,1000);
-}
-function stopLiveTimer() {
-  clearInterval(liveTimerInterval);
-  $('liveTimer').textContent='--:--:--';
-}
+function startLiveTimer(){clearInterval(liveTimerInterval);const t=()=>{if(!sessionStart)return;const e=Math.floor((new Date()-sessionStart)/1000);$('liveTimer').textContent=`${pad(Math.floor(e/3600))}:${pad(Math.floor((e%3600)/60))}:${pad(e%60)}`;};t();liveTimerInterval=setInterval(t,1000);}
+function stopLiveTimer(){clearInterval(liveTimerInterval);$('liveTimer').textContent='--:--:--';}
 
 // ================================================================
 //  CLOCK BUTTONS
 // ================================================================
 function renderClockButtons() {
-  const s=currentStatus;
-  const allowed = window._networkAllowed !== false;
-  const buttons = [
-    {
-      type:'clock-in', label:'Clock In', icon:'✅',
-      color:'#f0fdf4', border:'#86efac', text:'#166534',
-      enabled: s==='clocked-out' && allowed
-    },
-    {
-      type:'start-break', label:'Start Break', icon:'☕',
-      color:'#fffbeb', border:'#fde68a', text:'#92400e',
-      enabled: s==='clocked-in'
-    },
-    {
-      type:'end-break', label:'End Break', icon:'🔁',
-      color:'#eff6ff', border:'#bfdbfe', text:'#1e40af',
-      enabled: s==='on-break'
-    },
-    {
-      type:'out-assign', label:'Out for Assignment', icon:'🚗',
-      color:'#fff7ed', border:'#fed7aa', text:'#9a3412',
-      enabled: s==='clocked-in'
-    },
-    {
-      type:'clock-out', label:'Clock Out', icon:'🔚',
-      color:'#fef2f2', border:'#fca5a5', text:'#991b1b',
-      enabled: s==='clocked-in' || s==='out-assign'
-    }
+  const s=currentStatus, ok=window._netOk!==false;
+  let btns=[
+    {type:'clock-in',label:'Clock In',icon:'✅',color:'#f0fdf4',border:'#86efac',text:'#166534',en:s==='clocked-out'&&ok},
+    {type:'start-break',label:'Start Break',icon:'☕',color:'#fffbeb',border:'#fde68a',text:'#92400e',en:s==='clocked-in'},
+    {type:'end-break',label:'End Break',icon:'🔁',color:'#eff6ff',border:'#bfdbfe',text:'#1e40af',en:s==='on-break'},
+    {type:'out-assign',label:'Out for Assignment',icon:'🚗',color:'#fff7ed',border:'#fed7aa',text:'#9a3412',en:s==='clocked-in'},
+    {type:'clock-out',label:'Clock Out',icon:'🔚',color:'#fef2f2',border:'#fca5a5',text:'#991b1b',en:s==='clocked-in'||s==='out-assign'},
   ];
-  // Also add "Back from Assignment" when out-assign
-  if(s==='out-assign') {
-    buttons.splice(4,0,{type:'back-assign',label:'Back from Assignment',icon:'🏢',color:'#f0fdf4',border:'#86efac',text:'#166534',enabled:true});
-  }
-
-  $('clockButtons').innerHTML = buttons.map(b=>`
-    <button class="clock-btn card-hover" ${!b.enabled?'disabled':''} onclick="handleClockBtn('${b.type}')"
-      style="background:${b.color};border:2px solid ${b.enabled?b.border:'var(--border)'};color:${b.text};${!b.enabled?'opacity:.38;':''}"
-      title="${b.enabled?'':'Not available in current status'}">
-      <span class="icon">${b.icon}</span>
-      <span>${b.label}</span>
-    </button>`).join('');
+  if(s==='out-assign') btns.splice(4,0,{type:'back-assign',label:'Back from Assignment',icon:'🏢',color:'#f0fdf4',border:'#86efac',text:'#166534',en:true});
+  $('clockButtons').innerHTML=btns.map(b=>`<button class="clock-btn card-hover" ${!b.en?'disabled':''} onclick="handleClockBtn('${b.type}')" style="background:${b.color};border:2px solid ${b.en?b.border:'var(--border)'};color:${b.text};"><span class="icon">${b.icon}</span><span>${b.label}</span></button>`).join('');
 }
-
-function handleClockBtn(type) {
-  if(type==='out-assign') { $('assignNote').value=''; $('noteModal').style.display='flex'; return; }
-  clockAction(type);
-}
-function closeNoteModal() { $('noteModal').style.display='none'; }
-function confirmOutAssign() {
-  const note=$('assignNote').value.trim();
-  if(!note){toast('Please enter an assignment note','warn');return;}
-  closeNoteModal();
-  clockAction('out-assign',note);
-}
+function handleClockBtn(type){if(type==='out-assign'){$('assignNote').value='';$('noteModal').style.display='flex';return;}clockAction(type);}
+function closeNoteModal(){$('noteModal').style.display='none';}
+function confirmOutAssign(){const n=$('assignNote').value.trim();if(!n){toast('Please enter an assignment note','warn');return;}closeNoteModal();clockAction('out-assign',n);}
 
 // ================================================================
-//  TODAY SUMMARY
+//  TODAY SUMMARY & LOG
 // ================================================================
 function renderTodaySummary() {
-  const rec = getTodayRecord();
-  const ci = rec?.clockIn ? new Date(rec.clockIn) : null;
-  const co = rec?.clockOut ? new Date(rec.clockOut) : null;
-  const breakStart = rec?.breakStart ? new Date(rec.breakStart) : null;
-  const breakEnd = rec?.breakEnd ? new Date(rec.breakEnd) : null;
-
-  // Total work time
-  let workMin = 0;
-  if(ci && co) workMin = Math.floor((co-ci)/60000);
-  else if(ci) workMin = Math.floor((new Date()-ci)/60000);
-
-  // Break duration
-  let breakMin = 0;
-  if(breakStart && breakEnd) breakMin = Math.floor((breakEnd-breakStart)/60000);
-
-  const statusLabel = rec?.status||'absent';
-  const statusClass = {'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[statusLabel]||'badge-absent';
-
+  const rec=getTodayRecord();
+  const ci=rec?.clock_in?new Date(rec.clock_in):null, co=rec?.clock_out?new Date(rec.clock_out):null;
+  let wm=0;if(ci&&co)wm=Math.floor((co-ci)/60000);else if(ci)wm=Math.floor((new Date()-ci)/60000);
+  const stat=rec?.status||'absent';
+  const sc={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
   $('todaySummary').innerHTML=`
-    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock In</div>
-      <div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</div>
-    </div>
-    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock Out</div>
-      <div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</div>
-    </div>
-    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Work Time</div>
-      <div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${workMin>0?`${Math.floor(workMin/60)}h ${workMin%60}m`:'—'}</div>
-    </div>
-    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Status</div>
-      <span class="badge ${statusClass}" style="width:fit-content;">${statusLabel.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
-    </div>`;
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock In</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</div></div>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock Out</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</div></div>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Work Time</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—'}</div></div>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Status</div><span class="badge ${sc}" style="width:fit-content;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>`;
 }
-
 function renderTodayLog() {
-  const rec = getTodayRecord();
-  const el=$('todayLog');
+  const rec=getTodayRecord(),el=$('todayLog');
   if(!rec||!rec.events.length){el.innerHTML='<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;">No activity today yet</p>';return;}
-  const typeMap={
-    'clock-in':{icon:'fas fa-sign-in-alt',color:'#22c55e',label:'Clocked In'},
-    'start-break':{icon:'fas fa-coffee',color:'#f59e0b',label:'Break Started'},
-    'end-break':{icon:'fas fa-redo',color:'#3b82f6',label:'Break Ended'},
-    'out-assign':{icon:'fas fa-car',color:'#f97316',label:'Out for Assignment'},
-    'back-assign':{icon:'fas fa-building',color:'#22c55e',label:'Back from Assignment'},
-    'clock-out':{icon:'fas fa-sign-out-alt',color:'#dc2626',label:'Clocked Out'},
-  };
-  el.innerHTML=rec.events.map((e,i)=>{
-    const m=typeMap[e.type]||{icon:'fas fa-circle',color:'#9ca3af',label:e.type};
-    const t=new Date(e.ts);
-    return `<div style="display:flex;align-items:flex-start;gap:12px;">
-      <div style="width:34px;height:34px;border-radius:10px;background:${m.color}18;color:${m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i class="${m.icon}" style="font-size:.88rem;"></i>
-      </div>
-      <div style="flex:1;padding-top:2px;">
-        <p style="font-weight:600;font-size:.85rem;">${m.label}</p>
-        <p style="font-size:.75rem;color:var(--muted);">${fmtTimeFull(t)}${e.note?` · <em>${san(e.note)}</em>`:''}</p>
-      </div>
-      ${i<rec.events.length-1?`<div style="width:1px;height:16px;background:var(--border);position:absolute;left:29px;margin-top:34px;"></div>`:''}
-    </div>`;
-  }).join('');
+  const tm={'clock-in':{icon:'fas fa-sign-in-alt',color:'#22c55e',label:'Clocked In'},'start-break':{icon:'fas fa-coffee',color:'#f59e0b',label:'Break Started'},'end-break':{icon:'fas fa-redo',color:'#3b82f6',label:'Break Ended'},'out-assign':{icon:'fas fa-car',color:'#f97316',label:'Out for Assignment'},'back-assign':{icon:'fas fa-building',color:'#22c55e',label:'Back from Assignment'},'clock-out':{icon:'fas fa-sign-out-alt',color:'#dc2626',label:'Clocked Out'}};
+  el.innerHTML=rec.events.map(e=>{const m=tm[e.type]||{icon:'fas fa-circle',color:'#9ca3af',label:e.type};const t=new Date(e.ts);return `<div style="display:flex;align-items:flex-start;gap:12px;"><div style="width:34px;height:34px;border-radius:10px;background:${m.color}18;color:${m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="${m.icon}" style="font-size:.88rem;"></i></div><div style="flex:1;padding-top:2px;"><p style="font-weight:600;font-size:.85rem;">${m.label}</p><p style="font-size:.75rem;color:var(--muted);">${fmtTimeFull(t)}${e.note?` · <em>${san(e.note)}</em>`:''}</p></div></div>`;}).join('');
 }
 
 // ================================================================
 //  CALENDAR
 // ================================================================
-function getRecordForDay(userId, dateStr) {
-  return RECORDS[dateStr+'_'+userId]||null;
+function dayStatus(rec, dateStr) {
+  const dow=new Date(dateStr+'T12:00:00').getDay();
+  if(dow===0) return 'weekend';
+  if(dateStr>todayStr()) return 'future';
+  if(!rec?.clock_in) return 'absent';
+  return rec.status||'on-time';
 }
+const dayClass={'on-time':'day-ontime','late':'day-late','very-late':'day-verylate','absent':'day-absent','weekend':'day-weekend','future':'day-future'};
 
-function getDayClass(userId, dateStr) {
-  const d = new Date(dateStr);
-  const dow = d.getDay();
-  if(dow===0) return 'day-weekend';
-  if(dateStr > todayStr()) return 'day-future';
-  const rec = getRecordForDay(userId, dateStr);
-  if(!rec || !rec.clockIn) return 'day-absent';
-  const s = rec.status||'on-time';
-  if(s==='on-time') return 'day-ontime';
-  if(s==='late') return 'day-late';
-  if(s==='very-late') return 'day-verylate';
-  return 'day-absent';
-}
-
-function renderCalendar(userId, year, month, gridId, titleId) {
-  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  if(titleId) $(titleId).textContent=`${monthNames[month]} ${year}`;
-  const grid=$(gridId); if(!grid) return;
-
-  const firstDay = new Date(year,month,1).getDay();
-  const daysInMonth = new Date(year,month+1,0).getDate();
-  let html='';
-  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
-  for(let d=1;d<=daysInMonth;d++){
+async function renderCalendar(userId, year, month, gridId, titleId) {
+  if(titleId) $(titleId).textContent=`${MONTHS[month]} ${year}`;
+  const grid=$(gridId);if(!grid)return;
+  await pullMonthRecords(userId,year,month);
+  const first=new Date(year,month,1).getDay(), days=new Date(year,month+1,0).getDate();
+  let h='';
+  for(let i=0;i<first;i++) h+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
     const ds=`${year}-${pad(month+1)}-${pad(d)}`;
-    const cls=getDayClass(userId,ds);
-    const isToday=ds===todayStr();
-    const rec=getRecordForDay(userId,ds);
-    const ci=rec?.clockIn?fmtTime(new Date(rec.clockIn)):'';
-    html+=`<div class="cal-day ${cls}${isToday?' today':''}" onclick="openDayDetail('${userId}','${ds}')" title="${ds}${ci?' · '+ci:''}">
-      <span>${d}</span>
-      ${ci?`<span class="dot"></span>`:''}
-    </div>`;
+    const rec=RECORDS[ds+'_'+userId]||null;
+    const st=dayStatus(rec,ds), cl=dayClass[st]||'day-absent', isT=ds===todayStr();
+    const ci=rec?.clock_in?fmtTime(new Date(rec.clock_in)):'';
+    h+=`<div class="cal-day ${cl}${isT?' today':''}" onclick="openDayDetail('${userId}','${ds}')" title="${ds}${ci?' · '+ci:''}"><span>${d}</span>${ci?`<span class="dot"></span>`:''}</div>`;
   }
-  grid.innerHTML=html;
+  grid.innerHTML=h;
 }
 
-function changeCalMonth(dir) {
-  calMonth+=dir;
-  if(calMonth<0){calMonth=11;calYear--;}
-  if(calMonth>11){calMonth=0;calYear++;}
-  renderCalendar(CU.id,calYear,calMonth,'calGrid','calMonthTitle');
-}
-function changeAdminCalMonth(dir) {
-  adminCalMonth+=dir;
-  if(adminCalMonth<0){adminCalMonth=11;adminCalYear--;}
-  if(adminCalMonth>11){adminCalMonth=0;adminCalYear++;}
-  renderCalendar(adminCalStaffId||CU.id,adminCalYear,adminCalMonth,'adminCalGrid','adminCalTitle');
-}
-function loadAdminCalendar() {
-  adminCalStaffId=$('adminCalStaff').value;
-  if(!adminCalStaffId){$('adminCalGrid').innerHTML='<p style="text-align:center;color:var(--muted);padding:24px;grid-column:1/-1;">Select a staff member</p>';return;}
-  renderCalendar(adminCalStaffId,adminCalYear,adminCalMonth,'adminCalGrid','adminCalTitle');
-}
-function loadAdminCalendarDropdown() {
-  const sel=$('adminCalStaff');
-  const staff=USERS.filter(u=>u.role==='staff'||u.role==='admin');
-  sel.innerHTML='<option value="">Select staff…</option>'+staff.map(s=>`<option value="${s.id}">${san(s.name)}</option>`).join('');
-}
+function changeCalMonth(dir){calMonth+=dir;if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;}renderCalendar(CU.id,calYear,calMonth,'calGrid','calMonthTitle');}
+function changeAdminCalMonth(dir){adminCalMonth+=dir;if(adminCalMonth<0){adminCalMonth=11;adminCalYear--;}if(adminCalMonth>11){adminCalMonth=0;adminCalYear++;}if(adminCalStaffId)renderCalendar(adminCalStaffId,adminCalYear,adminCalMonth,'adminCalGrid','adminCalTitle');else $('adminCalTitle').textContent=`${MONTHS[adminCalMonth]} ${adminCalYear}`;}
+function loadAdminCalendar(){adminCalStaffId=$('adminCalStaff').value;if(!adminCalStaffId){$('adminCalGrid').innerHTML='<p style="text-align:center;color:var(--muted);padding:24px;grid-column:1/-1;">Select a staff member</p>';return;}renderCalendar(adminCalStaffId,adminCalYear,adminCalMonth,'adminCalGrid','adminCalTitle');}
+function loadAdminCalendarDropdown(){const sel=$('adminCalStaff');sel.innerHTML='<option value="">Select staff…</option>'+allStaffProfiles.map(s=>`<option value="${s.id}">${san(s.full_name||s.email)}</option>`).join('');}
 
 // ================================================================
 //  DAY DETAIL MODAL
 // ================================================================
-function openDayDetail(userId, dateStr) {
-  const rec = getRecordForDay(userId,dateStr);
-  const user=USERS.find(u=>u.id===userId)||{name:'Unknown'};
-  const d=new Date(dateStr);
-  const dow=d.getDay();
-  const isWeekend=dow===0;
-  const isFuture=dateStr>todayStr();
-
+async function openDayDetail(userId, dateStr) {
+  if(navigator.onLine) await pullMonthRecords(userId, new Date(dateStr+'T12:00:00').getFullYear(), new Date(dateStr+'T12:00:00').getMonth());
+  const rec=RECORDS[dateStr+'_'+userId]||null;
+  const user=allStaffProfiles.find(u=>u.id===userId)||CP;
+  const name=user?.full_name||user?.email||'Staff';
+  const st=dayStatus(rec,dateStr);
+  const stL={'on-time':'On Time ✅','late':'Late 🟠','very-late':'Very Late 🔴','absent':'Absent 🔵','weekend':'Sunday — rest day','future':'Upcoming'};
   $('dayModalTitle').textContent=new Date(dateStr+'T12:00:00').toLocaleDateString('en-NG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const cls=getDayClass(userId,dateStr);
-  const statusLabels={'day-ontime':'On Time ✅','day-late':'Late 🟠','day-verylate':'Very Late 🔴','day-absent':'Absent 🔵','day-weekend':'Weekend','day-future':'Upcoming'};
-  $('dayModalSub').textContent=`${user.name} · ${statusLabels[cls]||''}`;
-
-  if(isWeekend){$('dayModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px;">Sunday — not a working day.</p>';$('dayModal').style.display='flex';return;}
-  if(isFuture){$('dayModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px;">This day is in the future.</p>';$('dayModal').style.display='flex';return;}
-
-  if(!rec||!rec.clockIn){
-    $('dayModalBody').innerHTML=`<div style="text-align:center;padding:24px;"><div style="font-size:2.5rem;margin-bottom:10px;">🔵</div><p style="font-weight:600;font-size:.95rem;">Absent</p><p style="font-size:.82rem;color:var(--muted);margin-top:4px;">No clock-in recorded for this day.</p></div>`;
-    $('dayModal').style.display='flex';return;
-  }
-
-  const ci=rec.clockIn?new Date(rec.clockIn):null;
-  const co=rec.clockOut?new Date(rec.clockOut):null;
-  const bs=rec.breakStart?new Date(rec.breakStart):null;
-  const be=rec.breakEnd?new Date(rec.breakEnd):null;
-
-  let workMin=0;
-  if(ci&&co) workMin=Math.floor((co-ci)/60000);
-  let breakMin=0;
-  if(bs&&be) breakMin=Math.floor((be-bs)/60000);
-
-  const statusCls={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[rec.status]||'badge-absent';
-
+  $('dayModalSub').textContent=`${name} · ${stL[st]||''}`;
+  if(st==='weekend'){$('dayModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px;">Sunday — not a working day.</p>';$('dayModal').style.display='flex';return;}
+  if(st==='future'){$('dayModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px;">This day is in the future.</p>';$('dayModal').style.display='flex';return;}
+  if(!rec?.clock_in){$('dayModalBody').innerHTML=`<div style="text-align:center;padding:24px;"><div style="font-size:2.5rem;margin-bottom:10px;">🔵</div><p style="font-weight:600;">Absent</p><p style="font-size:.82rem;color:var(--muted);margin-top:4px;">No clock-in recorded.</p></div>`;$('dayModal').style.display='flex';return;}
+  const ci=new Date(rec.clock_in),co=rec.clock_out?new Date(rec.clock_out):null,bs=rec.break_start?new Date(rec.break_start):null,be=rec.break_end?new Date(rec.break_end):null;
+  let wm=0;if(co)wm=Math.floor((co-ci)/60000);let bm=0;if(bs&&be)bm=Math.floor((be-bs)/60000);
+  const sc={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[rec.status]||'badge-absent';
   $('dayModalBody').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
-      <div style="background:var(--surface);border-radius:12px;padding:14px;">
-        <p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Clock In</p>
-        <p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</p>
-      </div>
-      <div style="background:var(--surface);border-radius:12px;padding:14px;">
-        <p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Clock Out</p>
-        <p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</p>
-      </div>
-      <div style="background:var(--surface);border-radius:12px;padding:14px;">
-        <p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Break Time</p>
-        <p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${bs?fmtTime(bs):'-'} ${be?'→ '+fmtTime(be):''}</p>
-        ${breakMin>0?`<p style="font-size:.74rem;color:var(--muted);margin-top:3px;">${breakMin} min</p>`:''}
-      </div>
-      <div style="background:var(--surface);border-radius:12px;padding:14px;">
-        <p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Work Time</p>
-        <p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${workMin>0?`${Math.floor(workMin/60)}h ${workMin%60}m`:'—'}</p>
-      </div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Clock In</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${fmtTime(ci)}</p></div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Clock Out</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</p></div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Break</p><p style="font-size:.95rem;font-weight:700;color:var(--brand);">${bs?fmtTime(bs)+(be?' → '+fmtTime(be):'…'):'—'}</p>${bm>0?`<p style="font-size:.74rem;color:var(--muted);">${bm} min</p>`:''}</div>
+      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Work Time</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—'}</p></div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span class="badge ${statusCls}" style="font-size:.82rem;padding:5px 12px;">${(rec.status||'absent').replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
-    </div>
-    ${rec.assignNote?`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px;"><p style="font-size:.74rem;font-weight:600;color:#9a3412;margin-bottom:4px;"><i class="fas fa-car"></i> Assignment Note</p><p style="font-size:.84rem;">${san(rec.assignNote)}</p></div>`:''}
-    <div>
-      <p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Full Timeline</p>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${(rec.events||[]).map(e=>{
-          const typeMap={'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};
-          const t=new Date(e.ts);
-          return `<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;">
-            <span style="font-family:monospace;font-weight:700;color:var(--brand);min-width:60px;">${fmtTime(t)}</span>
-            <span style="font-weight:600;">${typeMap[e.type]||e.type}</span>
-            ${e.note?`<span style="color:var(--muted);font-size:.76rem;"> — ${san(e.note)}</span>`:''}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-
+    <div style="margin-bottom:12px;"><span class="badge ${sc}" style="font-size:.82rem;padding:5px 12px;">${(rec.status||'absent').replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>
+    ${rec.assign_note?`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px;"><p style="font-size:.74rem;font-weight:600;color:#9a3412;margin-bottom:4px;"><i class="fas fa-car"></i> Assignment Note</p><p style="font-size:.84rem;">${san(rec.assign_note)}</p></div>`:''}
+    <p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Timeline</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">${(rec.events||[]).map(e=>{const t=new Date(e.ts);const nl={'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};return `<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;"><span style="font-family:monospace;font-weight:700;color:var(--brand);min-width:60px;">${fmtTime(t)}</span><span style="font-weight:600;">${nl[e.type]||e.type}</span>${e.note?`<span style="color:var(--muted);font-size:.76rem;"> — ${san(e.note)}</span>`:''}</div>`;}).join('')}</div>`;
   $('dayModal').style.display='flex';
 }
-function closeDayModal(){ $('dayModal').style.display='none'; }
+function closeDayModal(){$('dayModal').style.display='none';}
 
 // ================================================================
-//  MESSAGES
+//  MESSAGING (via profile_notes — same table as AMS)
 // ================================================================
-function getThreadKey(uid1, uid2) { return [uid1,uid2].sort().join('__'); }
-
-function renderMessages() {
-  const el=$('msgList'); if(!el||!CU) return;
-
-  // Find admin
-  const admin=USERS.find(u=>u.role==='admin');
-  if(!admin){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No admin found.</p>';return;}
-
-  const key=getThreadKey(CU.id,admin.id);
-  const thread=(MESSAGES[key]||[]);
-  if(!thread.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p style="font-size:.85rem;">No messages yet — start the conversation!</p></div>';return;}
-
-  el.innerHTML=thread.map(m=>{
-    const isMe=m.senderId===CU.id;
-    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};">
-      <div class="msg-bubble ${isMe?'msg-me':'msg-other'}">${san(m.content)}</div>
-      <span style="font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 4px;">${fmtTime(new Date(m.ts))}</span>
-    </div>`;
-  }).join('');
+async function renderMessages() {
+  const el=$('msgList');if(!el||!CU)return;
+  if(!navigator.onLine){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-wifi-slash" style="font-size:2rem;margin-bottom:10px;display:block;opacity:.4;"></i><p>Offline — messages unavailable</p></div>';return;}
+  const {data}=await sb.from('profile_notes').select('*,author:author_id(full_name,role)').eq('profile_id',CU.id).order('created_at',{ascending:true});
+  const msgs=data||[];
+  if(!msgs.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p>No messages yet</p></div>';return;}
+  el.innerHTML=msgs.map(m=>{const isMe=m.author_id===CU.id;return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};"><div class="msg-bubble ${isMe?'msg-me':'msg-other'}">${san(m.content)}</div><span style="font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 4px;">${fmtTime(new Date(m.created_at))} · ${san(m.author?.full_name||'Admin')}</span></div>`;}).join('');
   el.scrollTop=el.scrollHeight;
-
   // Mark as read
-  const readKey='nst_read_'+CU.id+'_'+key;
-  localStorage.setItem(readKey, thread.length);
-  updateMessageBadges();
+  const readKey='nst_msg_read_'+CU.id;
+  localStorage.setItem(readKey, msgs.length);
+  $('msgBadge').style.display='none';
+}
+async function sendMsg(){
+  const content=$('msgInput').value.trim();if(!content||!CU)return;
+  if(!navigator.onLine){toast('Cannot send messages while offline','warn');return;}
+  const {error}=await sb.from('profile_notes').insert([{profile_id:CU.id,author_id:CU.id,content}]);
+  if(error){toast('Send failed: '+error.message,'error');return;}
+  $('msgInput').value='';await renderMessages();
+}
+async function updateMsgBadges(){
+  if(!CU||!navigator.onLine)return;
+  try{
+    if(CP.role==='staff'){
+      const {count}=await sb.from('profile_notes').select('id',{count:'exact',head:true}).eq('profile_id',CU.id).neq('author_id',CU.id);
+      const read=parseInt(localStorage.getItem('nst_msg_read_'+CU.id)||'0');
+      const u=Math.max(0,(count||0)-read);
+      if(u>0){$('msgBadge').textContent=u;$('msgBadge').style.display='block';}else $('msgBadge').style.display='none';
+    }
+    if(CP.role==='admin'){
+      const sIds=allStaffProfiles.filter(u=>u.role==='staff').map(u=>u.id);
+      if(!sIds.length)return;
+      const since=new Date(Date.now()-24*3600000).toISOString();
+      const {count}=await sb.from('profile_notes').select('id',{count:'exact',head:true}).in('author_id',sIds).gte('created_at',since);
+      const b=$('adminMsgBadge');
+      if(count>0){b.textContent=count;b.style.display='block';}else b.style.display='none';
+    }
+  }catch(e){}
 }
 
-function sendMsg() {
-  const content=$('msgInput').value.trim(); if(!content||!CU) return;
-  const admin=USERS.find(u=>u.role==='admin'); if(!admin) return;
-  const key=getThreadKey(CU.id,admin.id);
-  if(!MESSAGES[key]) MESSAGES[key]=[];
-  MESSAGES[key].push({senderId:CU.id,receiverId:admin.id,content,ts:nowTs()});
-  saveMessages();
-  $('msgInput').value='';
-  renderMessages();
+// Admin messaging
+async function renderChatStaffList(){
+  const el=$('chatStaffList');if(!el)return;
+  const staff=allStaffProfiles.filter(u=>u.role==='staff');
+  el.innerHTML=staff.map(s=>`<div onclick="selectAdminChat('${s.id}')" style="display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;cursor:pointer;background:${currentAdminChatUser===s.id?'var(--brand-glow)':'transparent'};border:1px solid ${currentAdminChatUser===s.id?'var(--border)':'transparent'};transition:all .15s;">
+    <div style="width:34px;height:34px;border-radius:9px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0).toUpperCase()}</div>
+    <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${san(s.email)}</p></div>
+  </div>`).join('')||'<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:20px;">No staff found</p>';
 }
-
-function updateMessageBadges() {
-  if(!CU) return;
-  let totalUnread=0;
-  if(CU.role==='staff'){
-    const admin=USERS.find(u=>u.role==='admin'); if(!admin) return;
-    const key=getThreadKey(CU.id,admin.id);
-    const thread=MESSAGES[key]||[];
-    const readKey='nst_read_'+CU.id+'_'+key;
-    const lastRead=parseInt(localStorage.getItem(readKey)||'0');
-    const unread=thread.filter((m,i)=>i>=lastRead&&m.senderId!==CU.id).length;
-    totalUnread=unread;
-  }
-  if(CU.role==='admin'){
-    USERS.filter(u=>u.role==='staff').forEach(s=>{
-      const key=getThreadKey(CU.id,s.id);
-      const thread=MESSAGES[key]||[];
-      const readKey='nst_read_'+CU.id+'_'+key;
-      const lastRead=parseInt(localStorage.getItem(readKey)||'0');
-      const unread=thread.filter((m,i)=>i>=lastRead&&m.senderId!==CU.id).length;
-      totalUnread+=unread;
-    });
-  }
-  const badge=$('msgBadge');
-  const adminBadge=$('adminMsgBadge');
-  if(CU.role==='staff'){
-    if(totalUnread>0){badge.textContent=totalUnread;badge.style.display='block';}else badge.style.display='none';
-  }
-  if(CU.role==='admin'){
-    if(totalUnread>0){if(adminBadge){adminBadge.textContent=totalUnread;adminBadge.style.display='block';}}
-    else if(adminBadge) adminBadge.style.display='none';
-  }
+async function selectAdminChat(staffId){
+  currentAdminChatUser=staffId;const s=allStaffProfiles.find(u=>u.id===staffId);if(!s)return;
+  $('chatHeaderAvatar').textContent=(s.full_name||s.email).charAt(0).toUpperCase();
+  $('chatHeaderName').textContent=s.full_name||s.email;
+  $('chatHeaderStatus').textContent=s.email;
+  $('adminMsgInput').disabled=false;$('adminSendBtn').disabled=false;
+  renderChatStaffList();await renderAdminMsgList();
 }
-
-// ADMIN MESSAGING
-function renderChatStaffList() {
-  const el=$('chatStaffList'); if(!el) return;
-  const staff=USERS.filter(u=>u.role==='staff');
-  el.innerHTML=staff.map(s=>{
-    const key=getThreadKey(CU.id,s.id);
-    const thread=MESSAGES[key]||[];
-    const readKey='nst_read_'+CU.id+'_'+key;
-    const lastRead=parseInt(localStorage.getItem(readKey)||'0');
-    const unread=thread.filter((m,i)=>i>=lastRead&&m.senderId!==CU.id).length;
-    const isActive=currentAdminChatUser===s.id;
-    return `<div onclick="selectAdminChat('${s.id}')" style="display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;cursor:pointer;background:${isActive?'var(--brand-glow)':'transparent'};border:1px solid ${isActive?'var(--border)':'transparent'};transition:all .15s;">
-      <div style="width:34px;height:34px;border-radius:9px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${s.name.charAt(0).toUpperCase()}</div>
-      <div style="flex:1;min-width:0;">
-        <p style="font-weight:600;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.name)}</p>
-        <p style="font-size:.72rem;color:var(--muted);">${thread.length} msg${thread.length!==1?'s':''}</p>
-      </div>
-      ${unread>0?`<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:.62rem;font-weight:700;padding:2px 6px;">${unread}</span>`:''}
-    </div>`;
-  }).join('')||'<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:20px;">No staff found</p>';
-}
-
-function selectAdminChat(staffId) {
-  currentAdminChatUser=staffId;
-  const staff=USERS.find(u=>u.id===staffId);
-  if(!staff) return;
-  $('chatHeaderAvatar').textContent=staff.name.charAt(0).toUpperCase();
-  $('chatHeaderName').textContent=staff.name;
-  $('chatHeaderStatus').textContent=staff.email;
-  $('adminMsgInput').disabled=false;
-  $('adminSendBtn').disabled=false;
-  renderChatStaffList();
-  renderAdminMsgList();
-
-  // Mark read
-  const key=getThreadKey(CU.id,staffId);
-  const thread=MESSAGES[key]||[];
-  localStorage.setItem('nst_read_'+CU.id+'_'+key, thread.length);
-  updateMessageBadges();
-}
-
-function renderAdminMsgList() {
-  const el=$('adminMsgList'); if(!el||!currentAdminChatUser) return;
-  const key=getThreadKey(CU.id,currentAdminChatUser);
-  const thread=MESSAGES[key]||[];
-  if(!thread.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p style="font-size:.85rem;">No messages yet</p></div>';return;}
-  el.innerHTML=thread.map(m=>{
-    const isMe=m.senderId===CU.id;
-    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};">
-      <div class="msg-bubble ${isMe?'msg-me':'msg-other'}">${san(m.content)}</div>
-      <span style="font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 4px;">${fmtTime(new Date(m.ts))}</span>
-    </div>`;
-  }).join('');
+async function renderAdminMsgList(){
+  const el=$('adminMsgList');if(!el||!currentAdminChatUser)return;
+  if(!navigator.onLine){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><p>Offline</p></div>';return;}
+  const {data}=await sb.from('profile_notes').select('*,author:author_id(full_name,role)').eq('profile_id',currentAdminChatUser).order('created_at',{ascending:true});
+  const msgs=data||[];
+  if(!msgs.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p>No messages yet</p></div>';return;}
+  el.innerHTML=msgs.map(m=>{const isMe=m.author_id===CU.id;return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};"><div class="msg-bubble ${isMe?'msg-me':'msg-other'}">${san(m.content)}</div><span style="font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 4px;">${fmtTime(new Date(m.created_at))} · ${san(m.author?.full_name||'?')}</span></div>`;}).join('');
   el.scrollTop=el.scrollHeight;
 }
-
-function sendAdminMsg() {
-  if(!currentAdminChatUser) return;
-  const content=$('adminMsgInput').value.trim(); if(!content) return;
-  const key=getThreadKey(CU.id,currentAdminChatUser);
-  if(!MESSAGES[key]) MESSAGES[key]=[];
-  MESSAGES[key].push({senderId:CU.id,receiverId:currentAdminChatUser,content,ts:nowTs()});
-  saveMessages();
-  $('adminMsgInput').value='';
-  renderAdminMsgList();
-  renderChatStaffList();
-  toast('Message sent','success',1500);
+async function sendAdminMsg(){
+  if(!currentAdminChatUser)return;const content=$('adminMsgInput').value.trim();if(!content)return;
+  const {error}=await sb.from('profile_notes').insert([{profile_id:currentAdminChatUser,author_id:CU.id,content}]);
+  if(error){toast('Failed','error');return;}
+  $('adminMsgInput').value='';await renderAdminMsgList();renderChatStaffList();toast('Sent','success',1500);
 }
-
 function openBroadcast(){$('broadcastMsg').value='';$('broadcastModal').style.display='flex';}
 function closeBroadcast(){$('broadcastModal').style.display='none';}
-function sendBroadcast(){
-  const msg=$('broadcastMsg').value.trim(); if(!msg) return;
-  const staff=USERS.filter(u=>u.role==='staff');
-  staff.forEach(s=>{
-    const key=getThreadKey(CU.id,s.id);
-    if(!MESSAGES[key]) MESSAGES[key]=[];
-    MESSAGES[key].push({senderId:CU.id,receiverId:s.id,content:`📢 BROADCAST: ${msg}`,ts:nowTs()});
-  });
-  saveMessages();
-  closeBroadcast();
-  toast(`Broadcast sent to ${staff.length} staff`,'success');
-  renderChatStaffList();
-  if(currentAdminChatUser) renderAdminMsgList();
+async function sendBroadcast(){
+  const msg=$('broadcastMsg').value.trim();if(!msg)return;
+  const staff=allStaffProfiles.filter(u=>u.role==='staff');
+  const rows=staff.map(s=>({profile_id:s.id,author_id:CU.id,content:`📢 BROADCAST: ${msg}`}));
+  const {error}=await sb.from('profile_notes').insert(rows);
+  if(error){toast('Broadcast failed','error');return;}
+  closeBroadcast();toast(`Broadcast sent to ${staff.length} staff`);
+  if(currentAdminChatUser)renderAdminMsgList();
 }
 
 // ================================================================
 //  ADMIN DATA
 // ================================================================
-function loadAdminData() {
-  const today=todayStr();
-  const staff=USERS.filter(u=>u.role==='staff');
-  let present=0,absent=0,late=0,onTime=0;
-
-  staff.forEach(s=>{
-    const rec=getRecordForDay(s.id,today);
-    if(rec&&rec.clockIn){
-      present++;
-      if(rec.status==='on-time') onTime++;
-      else if(rec.status==='late'||rec.status==='very-late') late++;
-    } else { absent++; }
-  });
-
+async function loadAdminData() {
+  if(navigator.onLine) await pullTodayAll();
+  const today=todayStr(),staff=allStaffProfiles.filter(u=>u.role==='staff');
+  let pres=0,late=0,abs=0;
+  staff.forEach(s=>{const r=RECORDS[today+'_'+s.id];if(r?.clock_in){pres++;if(r.status!=='on-time')late++;}else abs++;});
   $('adminStats').innerHTML=`
-    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;">
-      <div style="width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-users"></i></div>
-      <div class="syne" style="font-size:1.7rem;font-weight:800;color:var(--brand);">${staff.length}</div>
-      <p style="font-size:.78rem;color:var(--muted);font-weight:500;">Total Staff</p>
-    </div>
-    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;">
-      <div style="width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-check-circle"></i></div>
-      <div class="syne" style="font-size:1.7rem;font-weight:800;color:#16a34a;">${present}</div>
-      <p style="font-size:.78rem;color:var(--muted);font-weight:500;">Present Today</p>
-    </div>
-    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;">
-      <div style="width:42px;height:42px;border-radius:12px;background:#dbeafe;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-user-clock"></i></div>
-      <div class="syne" style="font-size:1.7rem;font-weight:800;color:#d97706;">${late}</div>
-      <p style="font-size:.78rem;color:var(--muted);font-weight:500;">Late Today</p>
-    </div>
-    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;">
-      <div style="width:42px;height:42px;border-radius:12px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-user-minus"></i></div>
-      <div class="syne" style="font-size:1.7rem;font-weight:800;color:#dc2626;">${absent}</div>
-      <p style="font-size:.78rem;color:var(--muted);font-weight:500;">Absent Today</p>
-    </div>`;
-
-  $('adminDateLabel').textContent=`${new Date().toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} — ${present}/${staff.length} present`;
-
-  // Today's staff list
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-users"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:var(--brand);">${staff.length}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Total Staff</p></div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-check-circle"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:#16a34a;">${pres}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Present Today</p></div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#fef9c3;color:#d97706;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-user-clock"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:#d97706;">${late}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Late Today</p></div>
+    <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:8px;"><div style="width:42px;height:42px;border-radius:12px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fas fa-user-minus"></i></div><div class="syne" style="font-size:1.7rem;font-weight:800;color:#dc2626;">${abs}</div><p style="font-size:.78rem;color:var(--muted);font-weight:500;">Absent Today</p></div>`;
+  $('adminDateLabel').textContent=`${new Date().toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} — ${pres}/${staff.length} present`;
+  const icons={'clocked-in':'🟢','on-break':'🟡','out-assign':'🟠','clocked-out':'⚪'};
   $('adminTodayList').innerHTML=staff.map(s=>{
-    const rec=getRecordForDay(s.id,today);
-    const ci=rec?.clockIn?new Date(rec.clockIn):null;
-    const stat=rec?.status||'absent';
-    const statBadge={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
-    const statusIcons={'clocked-in':'🟢','on-break':'🟡','out-assign':'🟠','clocked-out':'⚪'};
-    // Check current live status from latest event
-    let liveStatus='clocked-out';
-    if(rec&&rec.events.length){const last=rec.events[rec.events.length-1];if(last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign')liveStatus='clocked-in';else if(last.type==='start-break')liveStatus='on-break';else if(last.type==='out-assign')liveStatus='out-assign';else if(last.type==='clock-out')liveStatus='clocked-out';}
-
-    return `<div onclick="showStaffDetail('${s.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;background:var(--card);" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${s.name.charAt(0)}</div>
-      <div style="flex:1;min-width:0;">
-        <p style="font-weight:600;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.name)}</p>
-        <p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${statusIcons[liveStatus]||''}</p>
-      </div>
-      <span class="badge ${statBadge}" style="font-size:.7rem;">${stat.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+    const r=RECORDS[today+'_'+s.id];const ci=r?.clock_in?new Date(r.clock_in):null;const stat=r?.status||'absent';
+    const sb2={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
+    let live='clocked-out';if(r?.events?.length){const last=r.events[r.events.length-1];if(['clock-in','end-break','back-assign'].includes(last.type))live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
+    return `<div onclick="openDayDetail('${s.id}','${today}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0)}</div>
+      <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${icons[live]||''}</p></div>
+      <span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
     </div>`;
   }).join('');
-
-  // Performance chart
-  const allDays=getAllWorkDays(30);
-  let perfOnTime=0,perfLate=0,perfVeryLate=0,perfAbsent=0;
-  staff.forEach(s=>allDays.forEach(ds=>{
-    const rec=getRecordForDay(s.id,ds);
-    if(!rec||!rec.clockIn) perfAbsent++;
-    else if(rec.status==='on-time') perfOnTime++;
-    else if(rec.status==='late') perfLate++;
-    else if(rec.status==='very-late') perfVeryLate++;
-  }));
-  const perfTotal=perfOnTime+perfLate+perfVeryLate+perfAbsent||1;
-  const bars=[
-    {label:'On Time',count:perfOnTime,color:'#22c55e'},
-    {label:'Late',count:perfLate,color:'#f59e0b'},
-    {label:'Very Late',count:perfVeryLate,color:'#dc2626'},
-    {label:'Absent',count:perfAbsent,color:'#3b82f6'},
-  ];
-  $('adminPerfChart').innerHTML=bars.map(b=>`
-    <div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-size:.8rem;font-weight:600;color:var(--muted);">${b.label}</span>
-        <span style="font-size:.8rem;font-weight:700;">${b.count}</span>
-      </div>
-      <div style="height:8px;background:var(--surface);border-radius:99px;overflow:hidden;">
-        <div style="height:100%;width:${Math.round(b.count/perfTotal*100)}%;background:${b.color};border-radius:99px;transition:width .8s;"></div>
-      </div>
-    </div>`).join('');
-
-  $('adminTwoCol').style.gridTemplateColumns='1fr 1fr';
-}
-
-function getAllWorkDays(lastN) {
-  const days=[];
-  for(let i=0;i<lastN;i++){
-    const d=new Date(); d.setDate(d.getDate()-i);
-    const dow=d.getDay();
-    if(dow!==0) days.push(d.toISOString().slice(0,10));
+  // 30-day perf from Supabase
+  if(navigator.onLine){
+    try{
+      const from=new Date();from.setDate(from.getDate()-30);
+      const {data}=await sb.from('clock_records').select('status').in('user_id',staff.map(s=>s.id)).gte('date',from.toISOString().slice(0,10));
+      let ot=0,lt2=0,vl=0;(data||[]).forEach(r=>{if(r.status==='on-time')ot++;else if(r.status==='late')lt2++;else if(r.status==='very-late')vl++;});
+      let wd=0;const d=new Date(from);while(d<=new Date()){if(d.getDay()!==0)wd++;d.setDate(d.getDate()+1);}
+      const ab=Math.max(0,wd*staff.length-ot-lt2-vl),tot=ot+lt2+vl+ab||1;
+      const bars=[{label:'On Time',count:ot,color:'#22c55e'},{label:'Late',count:lt2,color:'#f59e0b'},{label:'Very Late',count:vl,color:'#dc2626'},{label:'Absent',count:ab,color:'#3b82f6'}];
+      $('adminPerfChart').innerHTML=bars.map(b=>`<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:.8rem;font-weight:600;color:var(--muted);">${b.label}</span><span style="font-size:.8rem;font-weight:700;">${b.count}</span></div><div style="height:8px;background:var(--surface);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${Math.round(b.count/tot*100)}%;background:${b.color};border-radius:99px;"></div></div></div>`).join('');
+    }catch(e){}
   }
-  return days;
 }
 
-function renderStaffList() {
-  const filter=$('staffFilter').value;
-  const today=todayStr();
-  const staff=USERS.filter(u=>u.role==='staff');
-
+async function renderStaffList(){
+  const filter=$('staffFilter').value,today=todayStr();
+  if(navigator.onLine)await pullTodayAll();
+  const staff=allStaffProfiles.filter(u=>u.role==='staff');
   const filtered=staff.filter(s=>{
-    const rec=getRecordForDay(s.id,today);
-    if(filter==='all') return true;
-    if(filter==='absent') return !rec||!rec.clockIn;
-    if(!rec||!rec.events.length) return false;
-    const last=rec.events[rec.events.length-1];
-    if(filter==='clocked-in') return last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign';
-    if(filter==='on-break') return last.type==='start-break';
-    if(filter==='out-assign') return last.type==='out-assign';
-    if(filter==='clocked-out') return last.type==='clock-out';
-    return true;
+    const r=RECORDS[today+'_'+s.id];
+    if(filter==='all')return true;if(filter==='absent')return!r?.clock_in;
+    if(!r?.events?.length)return false;const last=r.events[r.events.length-1];
+    if(filter==='clocked-in')return['clock-in','end-break','back-assign'].includes(last.type);
+    if(filter==='on-break')return last.type==='start-break';
+    if(filter==='out-assign')return last.type==='out-assign';
+    if(filter==='clocked-out')return last.type==='clock-out';return true;
   });
-
   $('staffListGrid').innerHTML=filtered.map(s=>{
-    const rec=getRecordForDay(s.id,today);
-    const ci=rec?.clockIn?new Date(rec.clockIn):null;
-    const co=rec?.clockOut?new Date(rec.clockOut):null;
-    const stat=rec?.status||'absent';
-    const statBadge={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
-    let liveStatus='absent';
-    if(rec&&rec.events.length){const last=rec.events[rec.events.length-1];if(last.type==='clock-in'||last.type==='end-break'||last.type==='back-assign')liveStatus='clocked-in';else if(last.type==='start-break')liveStatus='on-break';else if(last.type==='out-assign')liveStatus='out-assign';else if(last.type==='clock-out')liveStatus='clocked-out';}
-
-    return `<div class="card card-hover" style="padding:18px;cursor:pointer;" onclick="showStaffDetail('${s.id}')">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <div style="width:42px;height:42px;border-radius:12px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${s.name.charAt(0)}</div>
-        <div style="flex:1;min-width:0;">
-          <p style="font-weight:700;font-size:.88rem;">${san(s.name)}</p>
-          <p style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.email)}</p>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
-        <span class="badge ${statBadge}">${stat.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
-        <span class="badge ${{'clocked-in':'badge-present','on-break':'badge-break','out-assign':'badge-out','clocked-out':'badge-staff','absent':'badge-absent'}[liveStatus]||'badge-absent'}">${liveStatus.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
-      </div>
-      <div style="display:flex;gap:12px;font-size:.78rem;color:var(--muted);">
-        <span><i class="fas fa-sign-in-alt" style="margin-right:4px;color:var(--brand-mid);"></i>${ci?fmtTime(ci):'—'}</span>
-        <span><i class="fas fa-sign-out-alt" style="margin-right:4px;color:#dc2626;"></i>${co?fmtTime(co):'—'}</span>
-      </div>
+    const r=RECORDS[today+'_'+s.id];const ci=r?.clock_in?new Date(r.clock_in):null,co=r?.clock_out?new Date(r.clock_out):null;
+    const stat=r?.status||'absent';const sb2={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
+    let live='absent';if(r?.events?.length){const last=r.events[r.events.length-1];if(['clock-in','end-break','back-assign'].includes(last.type))live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
+    const liveBadge={'clocked-in':'badge-present','on-break':'badge-break','out-assign':'badge-out','clocked-out':'badge-staff','absent':'badge-absent'}[live]||'badge-absent';
+    return `<div class="card card-hover" style="padding:18px;cursor:pointer;" onclick="openDayDetail('${s.id}','${today}')">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:42px;height:42px;border-radius:12px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0).toUpperCase()}</div><div style="flex:1;min-width:0;"><p style="font-weight:700;font-size:.88rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.email)}</p></div></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;"><span class="badge ${sb2}">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span><span class="badge ${liveBadge}">${live.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>
+      <div style="display:flex;gap:12px;font-size:.78rem;color:var(--muted);"><span><i class="fas fa-sign-in-alt" style="margin-right:4px;color:var(--brand-mid);"></i>${ci?fmtTime(ci):'—'}</span><span><i class="fas fa-sign-out-alt" style="margin-right:4px;color:#dc2626;"></i>${co?fmtTime(co):'—'}</span></div>
     </div>`;
   }).join('')||'<p style="color:var(--muted);text-align:center;padding:32px;grid-column:1/-1;">No staff matching filter</p>';
 }
 
-function showStaffDetail(staffId) {
-  const today=todayStr();
-  openDayDetail(staffId,today);
-}
-
-function populateAdminDropdowns() {
-  const staff=USERS.filter(u=>u.role==='staff');
-  const opts='<option value="all">All Staff</option>'+staff.map(s=>`<option value="${s.id}">${san(s.name)}</option>`).join('');
-  $('rptStaff').innerHTML=opts;
+function populateAdminDropdowns(){
+  const staff=allStaffProfiles.filter(u=>u.role==='staff');
+  $('rptStaff').innerHTML='<option value="all">All Staff</option>'+staff.map(s=>`<option value="${s.id}">${san(s.full_name||s.email)}</option>`).join('');
 }
 
 // ================================================================
 //  REPORTS
 // ================================================================
-function generateReport() {
-  const staffId=$('rptStaff').value;
-  const type=$('rptType').value;
-  const from=$('rptFrom').value;
-  const to=$('rptTo').value;
+async function generateReport(){
+  const staffId=$('rptStaff').value,type=$('rptType').value,from=$('rptFrom').value,to=$('rptTo').value;
   if(!from||!to){toast('Please select a date range','warn');return;}
-
-  const staff=staffId==='all'?USERS.filter(u=>u.role==='staff'):[USERS.find(u=>u.id===staffId)].filter(Boolean);
+  $('reportResults').innerHTML='<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</p>';
+  // Pull from Supabase
+  if(navigator.onLine){
+    let q=sb.from('clock_records').select('*').gte('date',from).lte('date',to);
+    if(staffId!=='all')q=q.eq('user_id',staffId);
+    const {data}=await q;
+    (data||[]).forEach(r=>{RECORDS[r.date+'_'+r.user_id]=dbRecToLocal(r);});
+  }
+  const staff=staffId==='all'?allStaffProfiles.filter(u=>u.role==='staff'):[allStaffProfiles.find(u=>u.id===staffId)].filter(Boolean);
   const rows=[];
-
   staff.forEach(s=>{
     let d=new Date(from);
     while(d.toISOString().slice(0,10)<=to){
       const ds=d.toISOString().slice(0,10);
-      const dow=d.getDay();
-      if(dow!==0){
-        const rec=getRecordForDay(s.id,ds);
-        const stat=rec?.status||'absent';
-        if(type==='all'||type===stat||(type==='very-late'&&stat==='very-late')){
-          const ci=rec?.clockIn?new Date(rec.clockIn):null;
-          const co=rec?.clockOut?new Date(rec.clockOut):null;
-          let workMin=0;
-          if(ci&&co) workMin=Math.floor((co-ci)/60000);
-          rows.push({
-            staff:s.name,date:ds,clockIn:ci?fmtTime(ci):'—',clockOut:co?fmtTime(co):'—',
-            status:stat,workHours:workMin>0?`${Math.floor(workMin/60)}h ${workMin%60}m`:'—',
-            note:rec?.assignNote||''
-          });
+      if(d.getDay()!==0){
+        const r=RECORDS[ds+'_'+s.id];const stat=r?.status||'absent';
+        if(type==='all'||type===stat){
+          const ci=r?.clock_in?new Date(r.clock_in):null,co=r?.clock_out?new Date(r.clock_out):null;
+          let wm=0;if(ci&&co)wm=Math.floor((co-ci)/60000);
+          rows.push({staff:s.full_name||s.email,date:ds,clockIn:ci?fmtTime(ci):'—',clockOut:co?fmtTime(co):'—',status:stat,workHours:wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—',note:r?.assign_note||''});
         }
       }
       d.setDate(d.getDate()+1);
     }
   });
-
   window._reportRows=rows;
-
-  if(!rows.length){$('reportResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No records found for the selected filters.</p>';return;}
-
-  const statBadge=s=>({'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[s]||'badge-absent');
-
-  $('reportResults').innerHTML=`
-    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s) found</p>
-    <div style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
-      <thead>
-        <tr style="background:var(--surface);">
-          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Clock In</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Clock Out</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}">
-          <td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td>
-          <td style="padding:9px 12px;font-family:monospace;">${r.date}</td>
-          <td style="padding:9px 12px;">${r.clockIn}</td>
-          <td style="padding:9px 12px;">${r.clockOut}</td>
-          <td style="padding:9px 12px;">${r.workHours}</td>
-          <td style="padding:9px 12px;"><span class="badge ${statBadge(r.status)}">${r.status.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-    </div>`;
+  if(!rows.length){$('reportResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No records found.</p>';return;}
+  const sb2=s=>({'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[s]||'badge-absent');
+  $('reportResults').innerHTML=`<p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s)</p><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="background:var(--surface);"><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">In</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Out</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th></tr></thead><tbody>${rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}"><td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td><td style="padding:9px 12px;font-family:monospace;">${r.date}</td><td style="padding:9px 12px;">${r.clockIn}</td><td style="padding:9px 12px;">${r.clockOut}</td><td style="padding:9px 12px;">${r.workHours}</td><td style="padding:9px 12px;"><span class="badge ${sb2(r.status)}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td></tr>`).join('')}</tbody></table></div>`;
 }
-
-function exportCSV() {
-  const rows=window._reportRows;
-  if(!rows||!rows.length){toast('Generate a report first','warn');return;}
-  const header='Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note';
-  const csv=[header,...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}"`)].join('\n');
-  downloadFile(csv,'attendance-report.csv','text/csv');
-  toast('CSV exported','success');
-}
-
-function exportPDF() {
-  const rows=window._reportRows;
-  if(!rows||!rows.length){toast('Generate a report first','warn');return;}
-
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a;margin-bottom:4px}p{color:#6b8579;margin-bottom:20px;font-size:13px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f4f7f5;padding:8px 10px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:7px 10px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}</style>
-  </head><body>
-  <h1>NonStop Travels — Attendance Report</h1>
-  <p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p>
-  <table><thead><tr><th>Staff</th><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Work</th><th>Status</th></tr></thead><tbody>
-  ${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</td></tr>`).join('')}
-  </tbody></table></body></html>`;
-
-  const w=window.open('','_blank');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(()=>w.print(),400);
-  toast('PDF opened — use browser print','info');
-}
-
-function downloadFile(content,filename,type){
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([content],{type}));
-  a.download=filename;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-}
-
-// ================================================================
-//  SETTINGS
-// ================================================================
-async function saveSettings() {
-  const s={
-    onTimeUntil:$('settingOnTime').value,
-    lateTo:$('settingLateTo').value,
-    veryLateAfter:$('settingVeryLate').value,
-    officeIP:$('settingIP').value.trim()
-  };
-  saveSettingsData(s);
-  if (navigator.onLine) {
-    const { error } = await sb.from('clock_settings').upsert({
-      id:            1,
-      on_time_until: s.onTimeUntil,
-      late_until:    s.lateTo,
-      office_ip:     s.officeIP,
-      updated_at:    new Date().toISOString()
-    }, { onConflict: 'id' });
-    if (error) toast('Saved locally — DB error: ' + error.message, 'warn');
-    else       toast('Settings saved & applied to all devices ✓', 'success');
-  } else {
-    toast('Saved locally — will sync when back online', 'warn');
-  }
-  checkOfficeNetwork();
-}
-
-function addStaffAccount() {
-  const name=$('newStaffName').value.trim();
-  const email=$('newStaffEmail').value.trim();
-  const pw=$('newStaffPw').value;
-  const role=$('newStaffRole').value;
-  if(!name||!email||!pw){toast('Please fill all fields','warn');return;}
-  if(pw.length<6){toast('Password must be at least 6 characters','warn');return;}
-  if(USERS.find(u=>u.email.toLowerCase()===email.toLowerCase())){toast('Email already exists','error');return;}
-  const newUser={id:'staff_'+Date.now(),name,email,password:pw,role,createdAt:nowTs()};
-  USERS.push(newUser);
-  saveUsers();
-  toast(`${role.charAt(0).toUpperCase()+role.slice(1)} account created for ${name}`,'success');
-  $('newStaffName').value='';$('newStaffEmail').value='';$('newStaffPw').value='';
-  populateAdminDropdowns();
-  loadAdminCalendarDropdown();
-}
+function exportCSV(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const csv=['Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note',...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}"`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='attendance-report.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('CSV exported');}
+function exportPDF(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f4f7f5;padding:8px 10px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:7px 10px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}</style></head><body><h1>NonStop Travels — Attendance Report</h1><p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p><table><thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Work</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</td></tr>`).join('')}</tbody></table></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);toast('PDF ready — use browser print','info');}
 
 // ================================================================
 //  NAVIGATION
 // ================================================================
 const SECTIONS=['clock','calendar','messages','admin','stafflist','admincal','reports','adminmsg','settings'];
-function showSection(name) {
-  SECTIONS.forEach(s=>{ const el=$(s+'Section'); if(el) el.style.display='none'; });
-  const el=$(name+'Section'); if(el) el.style.display='block';
+function showSection(name){
+  SECTIONS.forEach(s=>{const e=$(s+'Section');if(e)e.style.display='none';});
+  const el=$(name+'Section');if(el)el.style.display='block';
   const titles={clock:'Clock In/Out',calendar:'My Calendar',messages:'Messages',admin:'Dashboard',stafflist:'Staff Overview',admincal:'All Calendars',reports:'Reports & Export',adminmsg:'Messaging',settings:'Settings'};
   $('pageTitle').textContent=titles[name]||name;
-
-  // Remove active from all
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const navMap={clock:'navClock',calendar:'navCalendar',messages:'navMessages',admin:'navAdmin',stafflist:'navStaffList',admincal:'navAdminCal',reports:'navReports',adminmsg:'navAdminMsg',settings:'navSettings'};
-  $(navMap[name])?.classList.add('active');
-
-  // Section-specific init
-  if(name==='calendar') renderCalendar(CU.id,calYear,calMonth,'calGrid','calMonthTitle');
-  if(name==='messages') renderMessages();
-  if(name==='admin') loadAdminData();
-  if(name==='stafflist') renderStaffList();
-  if(name==='admincal'){loadAdminCalendarDropdown();if(adminCalStaffId) renderCalendar(adminCalStaffId,adminCalYear,adminCalMonth,'adminCalGrid','adminCalTitle');else{const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];$('adminCalTitle').textContent=`${mn[adminCalMonth]} ${adminCalYear}`;}}
+  const nm={clock:'navClock',calendar:'navCalendar',messages:'navMessages',admin:'navAdmin',stafflist:'navStaffList',admincal:'navAdminCal',reports:'navReports',adminmsg:'navAdminMsg',settings:'navSettings'};
+  $(nm[name])?.classList.add('active');
+  if(name==='calendar')renderCalendar(CU.id,calYear,calMonth,'calGrid','calMonthTitle');
+  if(name==='messages')renderMessages();
+  if(name==='admin')loadAdminData();
+  if(name==='stafflist')renderStaffList();
+  if(name==='admincal'){loadAdminCalendarDropdown();$('adminCalTitle').textContent=`${MONTHS[adminCalMonth]} ${adminCalYear}`;}
   if(name==='adminmsg'){renderChatStaffList();if(currentAdminChatUser)renderAdminMsgList();}
-  if(name==='reports'){populateAdminDropdowns();}
-
+  if(name==='reports')populateAdminDropdowns();
   closeSidebar();
 }
-
 function openSidebar(){$('sidebar').classList.add('open');$('sidebarOverlay').classList.add('open');}
 function closeSidebar(){$('sidebar').classList.remove('open');$('sidebarOverlay').classList.remove('open');}
 
-// ================================================================
-//  KEYBOARD
-// ================================================================
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    $('dayModal').style.display='none';
-    $('noteModal').style.display='none';
-    $('broadcastModal').style.display='none';
-    closeSidebar();
-  }
-  if(e.key==='Enter'&&document.activeElement?.id==='loginPw') doLogin();
+  if(e.key==='Escape'){$('dayModal').style.display='none';$('noteModal').style.display='none';$('broadcastModal').style.display='none';closeSidebar();}
+  if(e.key==='Enter'&&document.activeElement?.id==='loginPw')doLogin();
 });
 
 // ================================================================
 //  INIT
 // ================================================================
-window.addEventListener('load', async ()=>{
-  // Init network flag
-  window._networkAllowed = true;
+window.addEventListener('load', async () => {
+  if(!navigator.onLine) $('offlineBanner').style.display='block';
 
-  if(!navigator.onLine) {
-    $('offlineBanner').style.display='block';
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event==='SIGNED_OUT') {
+      CU=null; CP=null; RECORDS={}; allStaffProfiles=[];
+      clearInterval(pollInterval); clearInterval(clockInterval); clearInterval(liveTimerInterval);
+      $('mainApp').style.display='none'; $('authScreen').style.display='flex';
+    }
+  });
+
+  setLoadMsg('Checking session…');
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      await bootApp(session.user);
+    } else {
+      showAuthScreen();
+    }
+  } catch(e) {
+    console.error('Init error:', e);
+    showAuthScreen();
   }
-
-  // Try auto-login from session
-  if(tryAutoLogin()) {
-    await bootApp();
-  } else {
-    $('loadingOverlay').style.opacity='0';
-    setTimeout(()=>{ $('loadingOverlay').style.display='none'; $('authScreen').style.display='flex'; },500);
-  }
-
-  // Generate some demo attendance records for the sample staff
-  seedDemoData();
 });
-
-function seedDemoData() {
-  // Only seed if no records exist
-  if(Object.keys(RECORDS).length > 0) return;
-  const staff=USERS.filter(u=>u.role==='staff');
-  const today=new Date();
-  for(let dayOffset=30;dayOffset>=0;dayOffset--){
-    const d=new Date(today);d.setDate(today.getDate()-dayOffset);
-    const dow=d.getDay(); if(dow===0) continue;
-    const ds=d.toISOString().slice(0,10);
-    if(ds>=todayStr()) continue; // don't seed today or future
-    staff.forEach(s=>{
-      const rand=Math.random();
-      if(rand<0.12) return; // 12% absent
-      const statusRand=Math.random();
-      let clockInHour=8, clockInMin=0;
-      let status='on-time';
-      if(statusRand>0.85){clockInHour=8;clockInMin=45+Math.floor(Math.random()*30);status='very-late';}
-      else if(statusRand>0.65){clockInHour=8;clockInMin=5+Math.floor(Math.random()*20);status='late';}
-      else{clockInMin=Math.floor(Math.random()*20);}
-
-      const ci=new Date(d);ci.setHours(clockInHour,clockInMin,Math.floor(Math.random()*60));
-      const co=new Date(ci);co.setHours(17,Math.floor(Math.random()*30));
-      const bs=new Date(ci);bs.setHours(12,30,0);
-      const be=new Date(bs);be.setHours(13,0,0);
-
-      const key=ds+'_'+s.id;
-      RECORDS[key]={
-        userId:s.id,userName:s.name,date:ds,status,online:true,
-        clockIn:ci.toISOString(),clockOut:co.toISOString(),
-        breakStart:bs.toISOString(),breakEnd:be.toISOString(),
-        events:[
-          {type:'clock-in',ts:ci.toISOString(),note:''},
-          {type:'start-break',ts:bs.toISOString(),note:''},
-          {type:'end-break',ts:be.toISOString(),note:''},
-          {type:'clock-out',ts:co.toISOString(),note:''},
-        ]
-      };
-    });
-  }
-  saveRecords();
-}
-
-// Fade out loading after boot
-function hideLoading(){
-  const ol=$('loadingOverlay');
-  ol.style.opacity='0';
-  setTimeout(()=>ol.style.display='none',500);
-}
-// bootApp hides loading itself — no override needed
 </script>
 </body>
 </html>
