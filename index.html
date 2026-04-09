@@ -828,8 +828,9 @@ function doLogout() {
   clearInterval(liveTimerInterval);
   clearInterval(clockInterval);
   clearInterval(pollInterval);
+  const sessionKeyToRemove = CU ? sessionKey(CU.id) : null;
   CU = null;
-  if (CU) localStorage.removeItem(sessionKey(CU.id));
+  if (sessionKeyToRemove) localStorage.removeItem(sessionKeyToRemove);
   $('mainApp').style.display='none';
   $('authScreen').style.display='flex';
   toast('Signed out','info');
@@ -1997,7 +1998,7 @@ document.addEventListener('keydown',e=>{
 // ================================================================
 //  INIT
 // ================================================================
-window.addEventListener('load', ()=>{
+window.addEventListener('load', async ()=>{
   // Init network flag
   window._networkAllowed = true;
 
