@@ -811,7 +811,7 @@ function showAuthErr(msg) {
   const el=$('authErr'); $('authErrTxt').textContent=msg;
   el.style.display='flex';
 }
-function doLogin() {
+async function doLogin() {
   const email=$('loginEmail').value.trim().toLowerCase();
   const pw=$('loginPw').value;
   if(!email||!pw){showAuthErr('Please enter email and password');return;}
@@ -822,7 +822,7 @@ function doLogin() {
   RECORDS  = loadRecords(user.id);
   MESSAGES = loadMessages(user.id);
   localStorage.setItem(sessionKey(user.id), JSON.stringify({userId:user.id, ts:nowTs()}));
-  bootApp();
+  await bootApp();
 }
 function doLogout() {
   clearInterval(liveTimerInterval);
@@ -857,7 +857,7 @@ function tryAutoLogin() {
 // ================================================================
 //  BOOT
 // ================================================================
-function bootApp() {
+async function bootApp() {
   const isAdmin = CU.role==='admin';
 
   // Sidebar nav visibility
@@ -895,7 +895,7 @@ function bootApp() {
 
   // Poll for new messages every 10s
   clearInterval(pollInterval);
-  pollInterval = setInterval(()=>{
+  pollInterval = setInterval(async ()=>{
     updateMessageBadges();
     if(!$('messagesSection').style.display||$('messagesSection').style.display!=='none') renderMessages();
     if(isAdmin && $('adminmsgSection').style.display!=='none') renderAdminMsgList();
@@ -936,6 +936,7 @@ function bootApp() {
   renderClockButtons();
   renderTodaySummary();
   renderTodayLog();
+  hideLoading();
 }
 
 // ================================================================
@@ -2006,7 +2007,7 @@ window.addEventListener('load', ()=>{
 
   // Try auto-login from session
   if(tryAutoLogin()) {
-    bootApp();
+    await bootApp();
   } else {
     $('loadingOverlay').style.opacity='0';
     setTimeout(()=>{ $('loadingOverlay').style.display='none'; $('authScreen').style.display='flex'; },500);
@@ -2064,12 +2065,7 @@ function hideLoading(){
   ol.style.opacity='0';
   setTimeout(()=>ol.style.display='none',500);
 }
-// Override bootApp to hide loading
-const _origBoot=bootApp;
-window.bootApp=function(){
-  _origBoot();
-  setTimeout(hideLoading,600);
-};
+// bootApp hides loading itself — no override needed
 </script>
 </body>
 </html>
