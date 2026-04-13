@@ -884,11 +884,15 @@ function renderTodaySummary() {
   let wm=0;if(ci&&co)wm=Math.floor((co-ci)/60000);else if(ci)wm=Math.floor((new Date()-ci)/60000);
   const stat=rec?.status||'absent';
   const sc={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
+  const faceCard = rec?.face_stamp_url
+    ? `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px;grid-column:span 4;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;"><i class="fas fa-camera" style="color:var(--brand-mid);margin-right:5px;"></i>Today's Face Stamp</div><img src="${rec.face_stamp_url}" alt="Face stamp" style="width:100%;max-width:180px;border-radius:12px;border:3px solid var(--brand-lite);display:block;" onerror="this.parentElement.parentElement.style.display='none'"></div>`
+    : '';
   $('todaySummary').innerHTML=`
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock In</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</div></div>
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock Out</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</div></div>
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Work Time</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—'}</div></div>
-    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Status</div><span class="badge ${sc}" style="width:fit-content;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>`;
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Status</div><span class="badge ${sc}" style="width:fit-content;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>
+    ${faceCard}`;
 }
 function renderTodayLog() {
   const rec=getTodayRecord(),el=$('todayLog');
@@ -1102,15 +1106,19 @@ async function loadAdminData() {
     const r=RECORDS[today+'_'+s.id];const ci=r?.clock_in?new Date(r.clock_in):null;const stat=r?.status||'absent';
     const sb2={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
     let live='clocked-out';if(r?.events?.length){const last=r.events[r.events.length-1];if(['clock-in','end-break','back-assign'].includes(last.type))live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
-    return `<div onclick="openDayDetail('${s.id}','${today}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="position:relative;flex-shrink:0;">
-        ${r?.face_stamp_url
-          ? `<img src="${r.face_stamp_url}" alt="face" style="width:36px;height:36px;border-radius:10px;object-fit:cover;border:2px solid var(--brand-lite);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-          : ''}
-        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:${r?.face_stamp_url?'none':'flex'};align-items:center;justify-content:center;font-weight:700;font-size:.88rem;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0)}</div>
+    const faceThumb = r?.face_stamp_url
+      ? `<div style="width:100%;border-radius:0 0 10px 10px;overflow:hidden;border-top:1px solid var(--border);background:#000;max-height:120px;">
+           <img src="${r.face_stamp_url}" alt="face" style="width:100%;max-height:120px;object-fit:cover;object-position:center top;display:block;"
+             onerror="this.parentElement.style.display='none'">
+         </div>`
+      : '';
+    return `<div onclick="openDayDetail('${s.id}','${today}')" style="display:flex;flex-direction:column;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;overflow:hidden;" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;font-family:'Bricolage Grotesque',sans-serif;flex-shrink:0;">${(s.full_name||s.email).charAt(0)}</div>
+        <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${icons[live]||''}</p></div>
+        <span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
       </div>
-      <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${icons[live]||''}${r?.face_stamp_url?' <i class=\"fas fa-camera\" style=\"color:var(--brand-mid);font-size:.65rem;\"></i>':''}</p></div>
-      <span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+      ${faceThumb}
     </div>`;
   }).join('');
   // 30-day perf from Supabase
