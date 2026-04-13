@@ -486,6 +486,23 @@ async function syncToSupabase() {
   if (!unsynced.length) return;
   for (const rec of unsynced) {
     try {
+      let faceUrl = rec.face_stamp_url || null;
+
+      // If face_stamp_url is a base64 data URL (stored offline), upload it to storage now
+      if (faceUrl && faceUrl.startsWith('data:')) {
+        try {
+          const res = await fetch(faceUrl);
+          const blob = await res.blob();
+          const filename = `${rec.user_id}/${rec.date}_clockin.jpg`;
+          const { error: upErr } = await sb.storage.from('face-stamps').upload(filename, blob, { contentType: 'image/jpeg', upsert: true });
+          if (!upErr) {
+            const { data: urlData } = sb.storage.from('face-stamps').getPublicUrl(filename);
+            faceUrl = urlData.publicUrl;
+            rec.face_stamp_url = faceUrl; // update local record with the real URL
+          }
+        } catch(e) { console.warn('Offline face stamp upload failed during sync', e); }
+      }
+
       const payload = {
         user_id:     rec.user_id,
         user_name:   rec.user_name || CP?.full_name || '',
@@ -496,7 +513,7 @@ async function syncToSupabase() {
         break_start: rec.break_start || null,
         break_end:   rec.break_end   || null,
         assign_note:    rec.assign_note     || null,
-        face_stamp_url: rec.face_stamp_url || null,
+        face_stamp_url: faceUrl,
         events:         rec.events         || [],
         updated_at:  nowTs()
       };
@@ -513,18 +530,21 @@ async function pullMonthRecords(userId, year, month) {
   const from = `${year}-${pad(month+1)}-01`;
   const to   = `${year}-${pad(month+1)}-${new Date(year,month+1,0).getDate()}`;
   const { data } = await sb.from('clock_records').select('*').eq('user_id',userId).gte('date',from).lte('date',to);
-  (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r); });
+  (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r, RECORDS[r.date+'_'+r.user_id]); });
 }
 
 // Pull today for all staff (admin dashboard)
 async function pullTodayAll() {
   if (!navigator.onLine) return;
   const { data } = await sb.from('clock_records').select('*').eq('date',todayStr());
-  (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r); });
+  (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r, RECORDS[r.date+'_'+r.user_id]); });
 }
 
-function dbRecToLocal(r) {
-  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, face_stamp_url:r.face_stamp_url||null, events:r.events||[], _synced:true };
+function dbRecToLocal(r, existingRec) {
+  // Preserve a locally-held face_stamp_url if the DB row doesn't have one yet
+  // (e.g. base64 from offline capture, or upload still pending)
+  const faceUrl = r.face_stamp_url || (existingRec && existingRec.face_stamp_url) || null;
+  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, face_stamp_url:faceUrl, events:r.events||[], _synced:true };
 }
 
 // ================================================================
@@ -769,7 +789,7 @@ async function loadTodayFromDB() {
   if (data) {
     const local = RECORDS[today+'_'+CU.id];
     // Prefer local if newer / unsynced
-    if (!local || local._synced) { RECORDS[today+'_'+CU.id] = dbRecToLocal(data); saveUserRecords(CU.id); }
+    if (!local || local._synced) { RECORDS[today+'_'+CU.id] = dbRecToLocal(data, local); saveUserRecords(CU.id); }
   }
 }
 
@@ -1198,9 +1218,8 @@ async function openCamera() {
   $('captureBtn').style.display        = 'inline-flex';
   $('retakeBtn').style.display         = 'none';
   $('confirmClockInBtn').style.display = 'none';
-  $('confirmClockInBtn').innerHTML     = '<i class="fas fa-check"></i> Clock In';
+  $('confirmClockInBtn').textContent   = 'Clock In';
   $('confirmClockInBtn').style.background = '#16a34a';
-  $('confirmClockInBtn').disabled      = false;
   $('cameraStatus').textContent        = 'Starting camera…';
   $('cameraStatus').style.color        = 'var(--muted)';
 
