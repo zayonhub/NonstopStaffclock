@@ -1198,8 +1198,9 @@ async function openCamera() {
   $('captureBtn').style.display        = 'inline-flex';
   $('retakeBtn').style.display         = 'none';
   $('confirmClockInBtn').style.display = 'none';
-  $('confirmClockInBtn').textContent   = 'Clock In';
+  $('confirmClockInBtn').innerHTML     = '<i class="fas fa-check"></i> Clock In';
   $('confirmClockInBtn').style.background = '#16a34a';
+  $('confirmClockInBtn').disabled      = false;
   $('cameraStatus').textContent        = 'Starting camera…';
   $('cameraStatus').style.color        = 'var(--muted)';
 
