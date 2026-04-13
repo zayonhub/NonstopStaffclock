@@ -929,23 +929,49 @@ async function openDayDetail(userId, dateStr) {
   const ci=new Date(rec.clock_in),co=rec.clock_out?new Date(rec.clock_out):null,bs=rec.break_start?new Date(rec.break_start):null,be=rec.break_end?new Date(rec.break_end):null;
   let wm=0;if(co)wm=Math.floor((co-ci)/60000);let bm=0;if(bs&&be)bm=Math.floor((be-bs)/60000);
   const sc={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[rec.status]||'badge-absent';
-  $('dayModalBody').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
-      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Clock In</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${fmtTime(ci)}</p></div>
-      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Clock Out</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</p></div>
-      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Break</p><p style="font-size:.95rem;font-weight:700;color:var(--brand);">${bs?fmtTime(bs)+(be?' → '+fmtTime(be):'…'):'—'}</p>${bm>0?`<p style="font-size:.74rem;color:var(--muted);">${bm} min</p>`:''}</div>
-      <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Work Time</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—'}</p></div>
-    </div>
-    <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span class="badge ${sc}" style="font-size:.82rem;padding:5px 12px;">${(rec.status||'absent').replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
-    </div>
-    ${rec.face_stamp_url?`<div style="margin-bottom:16px;background:var(--surface);border-radius:14px;padding:14px;">
-      <p style="font-size:.74rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;"><i class="fas fa-camera" style="color:var(--brand-mid);margin-right:5px;"></i>Face Stamp at Clock-In</p>
-      <img src="${rec.face_stamp_url}" alt="Face stamp" style="width:100%;max-width:240px;border-radius:10px;border:2px solid var(--border);display:block;">
-    </div>`:''}
-    ${rec.assign_note?`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px;"><p style="font-size:.74rem;font-weight:600;color:#9a3412;margin-bottom:4px;"><i class="fas fa-car"></i> Assignment Note</p><p style="font-size:.84rem;">${san(rec.assign_note)}</p></div>`:''}
-    <p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Timeline</p>
-    <div style="display:flex;flex-direction:column;gap:6px;">${(rec.events||[]).map(e=>{const t=new Date(e.ts);const nl={'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};return `<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;"><span style="font-family:monospace;font-weight:700;color:var(--brand);min-width:60px;">${fmtTime(t)}</span><span style="font-weight:600;">${nl[e.type]||e.type}</span>${e.note?`<span style="color:var(--muted);font-size:.76rem;"> — ${san(e.note)}</span>`:''}</div>`;}).join('')}</div>`;
+  // Build day detail HTML in safe parts — avoids nested template literal bugs
+  const faceSection = rec.face_stamp_url
+    ? '<div style="margin-bottom:16px;background:var(--surface);border-radius:14px;padding:14px;">'
+      + '<p style="font-size:.74rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">'
+      + '<i class="fas fa-camera" style="color:var(--brand-mid);margin-right:5px;"></i>Face Stamp at Clock-In</p>'
+      + '<img src="' + rec.face_stamp_url + '" alt="Face stamp" style="width:100%;max-width:260px;border-radius:12px;border:3px solid var(--brand-lite);display:block;">'
+      + '</div>'
+    : '';
+
+  const assignSection = rec.assign_note
+    ? '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px;">'
+      + '<p style="font-size:.74rem;font-weight:600;color:#9a3412;margin-bottom:4px;"><i class="fas fa-car"></i> Assignment Note</p>'
+      + '<p style="font-size:.84rem;">' + san(rec.assign_note) + '</p></div>'
+    : '';
+
+  const breakStr = bs ? fmtTime(bs) + (be ? ' → ' + fmtTime(be) : '…') : '—';
+  const breakMin = bm > 0 ? '<p style="font-size:.74rem;color:var(--muted);">' + bm + ' min</p>' : '';
+  const workStr  = wm > 0 ? Math.floor(wm/60) + 'h ' + (wm%60) + 'm' : '—';
+  const statusLabel = (rec.status||'absent').replace(/-/g,' ').replace(/\w/g,l=>l.toUpperCase());
+
+  const typeLabels = {'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};
+  const timelineHtml = (rec.events||[]).map(e => {
+    const t = new Date(e.ts);
+    return '<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;">'
+      + '<span style="font-family:monospace;font-weight:700;color:var(--brand);min-width:60px;">' + fmtTime(t) + '</span>'
+      + '<span style="font-weight:600;">' + (typeLabels[e.type]||e.type) + '</span>'
+      + (e.note ? '<span style="color:var(--muted);font-size:.76rem;"> — ' + san(e.note) + '</span>' : '')
+      + '</div>';
+  }).join('');
+
+  $('dayModalBody').innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
+    + '<div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Clock In</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">' + fmtTime(ci) + '</p></div>'
+    + '<div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Clock Out</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">' + (co?fmtTime(co):'—') + '</p></div>'
+    + '<div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Break</p><p style="font-size:.95rem;font-weight:700;color:var(--brand);">' + breakStr + '</p>' + breakMin + '</div>'
+    + '<div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Work Time</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">' + workStr + '</p></div>'
+    + '</div>'
+    + '<div style="margin-bottom:12px;"><span class="badge ' + sc + '" style="font-size:.82rem;padding:5px 12px;">' + statusLabel + '</span></div>'
+    + faceSection
+    + assignSection
+    + '<p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Timeline</p>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;">' + timelineHtml + '</div>';
+
   $('dayModal').style.display='flex';
 }
 function closeDayModal(){$('dayModal').style.display='none';}
