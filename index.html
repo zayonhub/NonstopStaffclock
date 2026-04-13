@@ -338,12 +338,52 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
   </div>
 </div>
 
+<!-- CAMERA MODAL -->
+<div id="cameraModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-camera" style="color:var(--brand-mid);margin-right:8px;"></i>Face Stamp — Clock In</h3>
+      <button onclick="cancelCamera()" class="btn btn-ghost" style="padding:7px;"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px;">
+      <p style="font-size:.83rem;color:var(--muted);text-align:center;">Position your face in the frame, then tap <strong>Capture</strong>.</p>
+      <div style="position:relative;width:100%;max-width:320px;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:4/3;">
+        <video id="cameraFeed" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+        <canvas id="cameraCanvas" style="display:none;"></canvas>
+        <!-- Overlay circle guide -->
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+          <div style="width:160px;height:160px;border-radius:50%;border:3px solid rgba(29,185,107,.7);box-shadow:0 0 0 4px rgba(29,185,107,.2);"></div>
+        </div>
+      </div>
+      <div id="cameraPreview" style="display:none;width:100%;max-width:320px;border-radius:14px;overflow:hidden;border:3px solid var(--brand-lite);">
+        <img id="capturedPhoto" style="width:100%;display:block;" alt="Face stamp">
+      </div>
+      <div id="cameraStatus" style="font-size:.82rem;color:var(--muted);text-align:center;"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;gap:12px;">
+      <button onclick="cancelCamera()" class="btn btn-ghost">Cancel</button>
+      <button onclick="retakePhoto()" id="retakeBtn" class="btn btn-secondary" style="display:none;"><i class="fas fa-redo"></i> Retake</button>
+      <button onclick="capturePhoto()" id="captureBtn" class="btn btn-primary"><i class="fas fa-camera"></i> Capture</button>
+      <button onclick="confirmClockIn()" id="confirmClockInBtn" class="btn btn-primary" style="display:none;background:#16a34a;"><i class="fas fa-check"></i> Clock In</button>
+    </div>
+  </div>
+</div>
+
 <div id="toastContainer"></div>
 
 <script>
 // ================================================================
 //  SUPABASE — same project as AMS
 // ================================================================
+/*
+  SUPABASE SETUP REQUIRED (run once in SQL Editor):
+  ─────────────────────────────────────────────────
+  alter table clock_records add column if not exists face_stamp_url text;
+
+  -- In Supabase Dashboard → Storage → New Bucket:
+  --   Name: face-stamps
+  --   Public: YES
+*/
 const SB_URL = 'https://asupemsmwzrovucpvqyt.supabase.co';
 const SB_KEY = 'sb_publishable_h3Kb-0pknHcYItkGeyEI-Q_urYDrPD9';
 const sb = window.supabase.createClient(SB_URL, SB_KEY, {
@@ -455,8 +495,9 @@ async function syncToSupabase() {
         clock_out:   rec.clock_out   || null,
         break_start: rec.break_start || null,
         break_end:   rec.break_end   || null,
-        assign_note: rec.assign_note || null,
-        events:      rec.events      || [],
+        assign_note:    rec.assign_note     || null,
+        face_stamp_url: rec.face_stamp_url || null,
+        events:         rec.events         || [],
         updated_at:  nowTs()
       };
       const { error } = await sb.from('clock_records').upsert(payload, { onConflict:'user_id,date' });
@@ -483,7 +524,7 @@ async function pullTodayAll() {
 }
 
 function dbRecToLocal(r) {
-  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, events:r.events||[], _synced:true };
+  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, face_stamp_url:r.face_stamp_url||null, events:r.events||[], _synced:true };
 }
 
 // ================================================================
@@ -758,13 +799,13 @@ function restoreClockState() {
   updateStatusDisplay();
 }
 
-async function clockAction(type, note='') {
+async function clockAction(type, note='', faceUrl=null) {
   if (type==='clock-in' && window._netOk===false) { toast('You must be on the office network to clock in','error'); return; }
   const now=new Date(), ts=now.toISOString();
-  let rec = getTodayRecord() || { user_id:CU.id, user_name:CP.full_name||'', date:todayStr(), status:'absent', events:[], clock_in:null, clock_out:null, break_start:null, break_end:null, assign_note:null, _synced:false };
+  let rec = getTodayRecord() || { user_id:CU.id, user_name:CP.full_name||'', date:todayStr(), status:'absent', events:[], clock_in:null, clock_out:null, break_start:null, break_end:null, assign_note:null, face_stamp_url:null, _synced:false };
   rec.events = [...rec.events, {type,ts,note}];
   rec._synced = false;
-  if(type==='clock-in'){rec.clock_in=ts;rec.status=getAStatus(now);currentStatus='clocked-in';sessionStart=now;startLiveTimer();}
+  if(type==='clock-in'){rec.clock_in=ts;rec.status=getAStatus(now);if(faceUrl)rec.face_stamp_url=faceUrl;currentStatus='clocked-in';sessionStart=now;startLiveTimer();}
   else if(type==='start-break'){rec.break_start=ts;currentStatus='on-break';sessionStart=now;}
   else if(type==='end-break'){rec.break_end=ts;currentStatus='clocked-in';sessionStart=now;}
   else if(type==='out-assign'){rec.assign_note=note;currentStatus='out-assign';sessionStart=now;}
@@ -810,7 +851,7 @@ function renderClockButtons() {
   if(s==='out-assign') btns.splice(4,0,{type:'back-assign',label:'Back from Assignment',icon:'🏢',color:'#f0fdf4',border:'#86efac',text:'#166534',en:true});
   $('clockButtons').innerHTML=btns.map(b=>`<button class="clock-btn card-hover" ${!b.en?'disabled':''} onclick="handleClockBtn('${b.type}')" style="background:${b.color};border:2px solid ${b.en?b.border:'var(--border)'};color:${b.text};"><span class="icon">${b.icon}</span><span>${b.label}</span></button>`).join('');
 }
-function handleClockBtn(type){if(type==='out-assign'){$('assignNote').value='';$('noteModal').style.display='flex';return;}clockAction(type);}
+function handleClockBtn(type){if(type==='out-assign'){$('assignNote').value='';$('noteModal').style.display='flex';return;}if(type==='clock-in'){openCamera();return;}clockAction(type);}
 function closeNoteModal(){$('noteModal').style.display='none';}
 function confirmOutAssign(){const n=$('assignNote').value.trim();if(!n){toast('Please enter an assignment note','warn');return;}closeNoteModal();clockAction('out-assign',n);}
 
@@ -895,7 +936,13 @@ async function openDayDetail(userId, dateStr) {
       <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Break</p><p style="font-size:.95rem;font-weight:700;color:var(--brand);">${bs?fmtTime(bs)+(be?' → '+fmtTime(be):'…'):'—'}</p>${bm>0?`<p style="font-size:.74rem;color:var(--muted);">${bm} min</p>`:''}</div>
       <div style="background:var(--surface);border-radius:12px;padding:14px;"><p style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Work Time</p><p class="syne" style="font-size:1.3rem;font-weight:800;color:var(--brand);">${wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—'}</p></div>
     </div>
-    <div style="margin-bottom:12px;"><span class="badge ${sc}" style="font-size:.82rem;padding:5px 12px;">${(rec.status||'absent').replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>
+    <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="badge ${sc}" style="font-size:.82rem;padding:5px 12px;">${(rec.status||'absent').replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+    </div>
+    ${rec.face_stamp_url?`<div style="margin-bottom:16px;background:var(--surface);border-radius:14px;padding:14px;">
+      <p style="font-size:.74rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;"><i class="fas fa-camera" style="color:var(--brand-mid);margin-right:5px;"></i>Face Stamp at Clock-In</p>
+      <img src="${rec.face_stamp_url}" alt="Face stamp" style="width:100%;max-width:240px;border-radius:10px;border:2px solid var(--border);display:block;">
+    </div>`:''}
     ${rec.assign_note?`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px;"><p style="font-size:.74rem;font-weight:600;color:#9a3412;margin-bottom:4px;"><i class="fas fa-car"></i> Assignment Note</p><p style="font-size:.84rem;">${san(rec.assign_note)}</p></div>`:''}
     <p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Timeline</p>
     <div style="display:flex;flex-direction:column;gap:6px;">${(rec.events||[]).map(e=>{const t=new Date(e.ts);const nl={'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};return `<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;"><span style="font-family:monospace;font-weight:700;color:var(--brand);min-width:60px;">${fmtTime(t)}</span><span style="font-weight:600;">${nl[e.type]||e.type}</span>${e.note?`<span style="color:var(--muted);font-size:.76rem;"> — ${san(e.note)}</span>`:''}</div>`;}).join('')}</div>`;
@@ -1010,8 +1057,13 @@ async function loadAdminData() {
     const sb2={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[stat]||'badge-absent';
     let live='clocked-out';if(r?.events?.length){const last=r.events[r.events.length-1];if(['clock-in','end-break','back-assign'].includes(last.type))live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
     return `<div onclick="openDayDetail('${s.id}','${today}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0)}</div>
-      <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${icons[live]||''}</p></div>
+      <div style="position:relative;flex-shrink:0;">
+        ${r?.face_stamp_url
+          ? `<img src="${r.face_stamp_url}" alt="face" style="width:36px;height:36px;border-radius:10px;object-fit:cover;border:2px solid var(--brand-lite);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''}
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:${r?.face_stamp_url?'none':'flex'};align-items:center;justify-content:center;font-weight:700;font-size:.88rem;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0)}</div>
+      </div>
+      <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${icons[live]||''}${r?.face_stamp_url?' <i class=\"fas fa-camera\" style=\"color:var(--brand-mid);font-size:.65rem;\"></i>':''}</p></div>
       <span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
     </div>`;
   }).join('');
@@ -1048,7 +1100,13 @@ async function renderStaffList(){
     let live='absent';if(r?.events?.length){const last=r.events[r.events.length-1];if(['clock-in','end-break','back-assign'].includes(last.type))live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
     const liveBadge={'clocked-in':'badge-present','on-break':'badge-break','out-assign':'badge-out','clocked-out':'badge-staff','absent':'badge-absent'}[live]||'badge-absent';
     return `<div class="card card-hover" style="padding:18px;cursor:pointer;" onclick="openDayDetail('${s.id}','${today}')">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:42px;height:42px;border-radius:12px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0).toUpperCase()}</div><div style="flex:1;min-width:0;"><p style="font-weight:700;font-size:.88rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.email)}</p></div></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="position:relative;flex-shrink:0;">
+          ${r?.face_stamp_url?`<img src="${r.face_stamp_url}" alt="face" style="width:42px;height:42px;border-radius:12px;object-fit:cover;border:2px solid var(--brand-lite);display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:''}
+          <div style="width:42px;height:42px;border-radius:12px;background:var(--brand-mid);color:#fff;display:${r?.face_stamp_url?'none':'flex'};align-items:center;justify-content:center;font-weight:700;font-size:1rem;font-family:'Bricolage Grotesque',sans-serif;">${(s.full_name||s.email).charAt(0).toUpperCase()}</div>
+        </div>
+        <div style="flex:1;min-width:0;"><p style="font-weight:700;font-size:.88rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${san(s.email)}</p></div>
+      </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;"><span class="badge ${sb2}">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span><span class="badge ${liveBadge}">${live.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>
       <div style="display:flex;gap:12px;font-size:.78rem;color:var(--muted);"><span><i class="fas fa-sign-in-alt" style="margin-right:4px;color:var(--brand-mid);"></i>${ci?fmtTime(ci):'—'}</span><span><i class="fas fa-sign-out-alt" style="margin-right:4px;color:#dc2626;"></i>${co?fmtTime(co):'—'}</span></div>
     </div>`;
@@ -1098,6 +1156,151 @@ async function generateReport(){
 }
 function exportCSV(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const csv=['Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note',...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}"`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='attendance-report.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('CSV exported');}
 function exportPDF(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f4f7f5;padding:8px 10px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:7px 10px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}</style></head><body><h1>NonStop Travels — Attendance Report</h1><p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p><table><thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Work</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</td></tr>`).join('')}</tbody></table></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);toast('PDF ready — use browser print','info');}
+
+// ================================================================
+//  CAMERA & FACE STAMP
+// ================================================================
+let _cameraStream = null;
+let _capturedBlob  = null;
+
+async function openCamera() {
+  _capturedBlob = null;
+
+  // Reset modal state
+  $('cameraPreview').style.display     = 'none';
+  $('cameraFeed').style.display        = 'block';
+  $('captureBtn').style.display        = 'inline-flex';
+  $('retakeBtn').style.display         = 'none';
+  $('confirmClockInBtn').style.display = 'none';
+  $('confirmClockInBtn').textContent   = 'Clock In';
+  $('confirmClockInBtn').style.background = '#16a34a';
+  $('cameraStatus').textContent        = 'Starting camera…';
+  $('cameraStatus').style.color        = 'var(--muted)';
+
+  // Show modal first so user sees feedback
+  $('cameraModal').style.display = 'flex';
+
+  // getUserMedia requires HTTPS (or localhost)
+  const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!isSecure) {
+    showCameraFallback('Camera requires HTTPS. The app must be served over a secure connection.');
+    return;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showCameraFallback('Camera not supported on this browser. Please use Chrome or Safari.');
+    return;
+  }
+
+  try {
+    _cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    });
+    $('cameraFeed').srcObject = _cameraStream;
+    $('cameraStatus').textContent = 'Position your face in the circle, then tap Capture.';
+    $('cameraStatus').style.color = 'var(--muted)';
+  } catch(e) {
+    const msg = e.name === 'NotAllowedError'
+      ? 'Camera permission denied. Please allow camera access in your browser settings.'
+      : e.name === 'NotFoundError'
+      ? 'No camera found on this device.'
+      : 'Camera error: ' + e.message;
+    showCameraFallback(msg);
+  }
+}
+
+function showCameraFallback(msg) {
+  $('cameraFeed').style.display        = 'none';
+  $('captureBtn').style.display        = 'none';
+  $('cameraStatus').textContent        = '⚠️ ' + msg + ' You can still clock in without a photo.';
+  $('cameraStatus').style.color        = '#f59e0b';
+  $('confirmClockInBtn').innerHTML     = '<i class="fas fa-sign-in-alt"></i> Clock In Without Photo';
+  $('confirmClockInBtn').style.display = 'inline-flex';
+  $('confirmClockInBtn').style.background = 'var(--brand-mid)';
+}
+
+function capturePhoto() {
+  const video  = $('cameraFeed');
+  const canvas = $('cameraCanvas');
+  canvas.width  = video.videoWidth  || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  // Mirror horizontally (selfie feel)
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0);
+  ctx.setTransform(1,0,0,1,0,0); // reset transform
+
+  canvas.toBlob(blob => {
+    _capturedBlob = blob;
+    const url = URL.createObjectURL(blob);
+    $('capturedPhoto').src = url;
+    $('cameraPreview').style.display = 'block';
+    $('cameraFeed').style.display    = 'none';
+    $('captureBtn').style.display    = 'none';
+    $('retakeBtn').style.display     = 'inline-flex';
+    $('confirmClockInBtn').style.display = 'inline-flex';
+    $('cameraStatus').textContent    = '✅ Looking good! Tap Clock In to confirm.';
+    $('cameraStatus').style.color    = '#16a34a';
+  }, 'image/jpeg', 0.82);
+}
+
+function retakePhoto() {
+  _capturedBlob = null;
+  $('cameraPreview').style.display = 'none';
+  $('cameraFeed').style.display    = 'block';
+  $('captureBtn').style.display    = 'inline-flex';
+  $('retakeBtn').style.display     = 'none';
+  $('confirmClockInBtn').style.display = 'none';
+  $('cameraStatus').textContent    = '';
+}
+
+function stopCamera() {
+  if (_cameraStream) { _cameraStream.getTracks().forEach(t => t.stop()); _cameraStream = null; }
+}
+
+function cancelCamera() {
+  stopCamera();
+  _capturedBlob = null;
+  $('cameraModal').style.display = 'none';
+}
+
+async function confirmClockIn() {
+  $('confirmClockInBtn').disabled = true;
+  $('confirmClockInBtn').innerHTML = '<span class="spinner"></span> Clocking in…';
+  let faceUrl = null;
+
+  if (_capturedBlob && navigator.onLine) {
+    try {
+      const filename = `${CU.id}/${todayStr()}_clockin.jpg`;
+      const { data, error } = await sb.storage.from('face-stamps').upload(filename, _capturedBlob, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
+      if (!error) {
+        const { data: urlData } = sb.storage.from('face-stamps').getPublicUrl(filename);
+        faceUrl = urlData.publicUrl;
+      }
+    } catch(e) { console.warn('Face stamp upload failed', e); }
+  } else if (_capturedBlob && !navigator.onLine) {
+    // Offline: store as base64 in the record, upload later
+    faceUrl = await blobToBase64(_capturedBlob);
+  }
+
+  stopCamera();
+  $('cameraModal').style.display = 'none';
+  _capturedBlob = null;
+  await clockAction('clock-in', '', faceUrl);
+}
+
+function blobToBase64(blob) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onloadend = () => res(r.result);
+    r.readAsDataURL(blob);
+  });
+}
 
 // ================================================================
 //  NAVIGATION
