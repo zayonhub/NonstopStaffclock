@@ -1226,8 +1226,9 @@ async function openCamera() {
   $('captureBtn').style.display        = 'inline-flex';
   $('retakeBtn').style.display         = 'none';
   $('confirmClockInBtn').style.display = 'none';
-  $('confirmClockInBtn').textContent   = 'Clock In';
+  $('confirmClockInBtn').innerHTML     = '<i class="fas fa-check"></i> Clock In';
   $('confirmClockInBtn').style.background = '#16a34a';
+  $('confirmClockInBtn').disabled      = false;
   $('cameraStatus').textContent        = 'Starting camera…';
   $('cameraStatus').style.color        = 'var(--muted)';
 
@@ -1335,8 +1336,19 @@ async function confirmClockIn() {
       if (!error) {
         const { data: urlData } = sb.storage.from('face-stamps').getPublicUrl(filename);
         faceUrl = urlData.publicUrl;
+        console.log('[FaceStamp] Upload OK:', faceUrl);
+      } else {
+        console.error('[FaceStamp] Upload error:', error.message, error);
+        $('cameraStatus').textContent = '⚠️ Photo upload failed: ' + error.message + ' — clocking in without photo.';
+        $('cameraStatus').style.color = '#f59e0b';
+        await new Promise(r => setTimeout(r, 2500)); // let user read the message
       }
-    } catch(e) { console.warn('Face stamp upload failed', e); }
+    } catch(e) {
+      console.error('[FaceStamp] Upload exception:', e);
+      $('cameraStatus').textContent = '⚠️ Photo upload error — clocking in without photo.';
+      $('cameraStatus').style.color = '#f59e0b';
+      await new Promise(r => setTimeout(r, 2500));
+    }
   } else if (_capturedBlob && !navigator.onLine) {
     // Offline: store as base64 in the record, upload later
     faceUrl = await blobToBase64(_capturedBlob);
