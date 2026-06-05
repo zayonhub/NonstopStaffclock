@@ -498,7 +498,7 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
   );
 */
 const SB_URL = 'https://asupemsmwzrovucpvqyt.supabase.co';
-const SB_KEY = 'sb_publishable_h3Kb-0pknHcYItkGeyEI-Q_urYDrPD9';
+const sb_publishable_h3Kb-0pknHcYItkGeyEI-Q_urYDrPD9';
 const sb = window.supabase.createClient(SB_URL, SB_KEY, {
   auth: { persistSession: true, autoRefreshToken: true }
 });
@@ -1614,8 +1614,7 @@ async function generateReport(){
   if(!selectedStatuses.length){toast('Please select at least one status','warn');return;}
   $('reportResults').innerHTML='<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</p>';
   if(navigator.onLine){
-    let q=sb.from('clock_records').select('*').gte('date',from).lte('date',to).in('user_id',selectedStaffIds);
-    const {data}=await q;
+    const {data}=await sb.from('clock_records').select('*').gte('date',from).lte('date',to).in('user_id',selectedStaffIds);
     (data||[]).forEach(r=>{RECORDS[r.date+'_'+r.user_id]=dbRecToLocal(r);});
   }
   const staff = allStaffProfiles.filter(s => selectedStaffIds.includes(s.id));
@@ -1629,9 +1628,8 @@ async function generateReport(){
         if(selectedStatuses.includes(stat)){
           const ci=r?.clock_in?new Date(r.clock_in):null,co=r?.clock_out?new Date(r.clock_out):null;
           let wm=0;if(ci&&co)wm=Math.floor((co-ci)/60000);
-          // Include late reason info in report
-          const lrStatus = r?.late_reason_status||'none';
-          const lrText = r?.late_reason||'';
+          const lrStatus=r?.late_reason_status||'none';
+          const lrText=r?.late_reason||'';
           rows.push({staff:s.full_name||s.email,date:ds,clockIn:ci?fmtTime(ci):'—',clockOut:co?fmtTime(co):'—',status:stat,workHours:wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—',note:r?.assign_note||'',lateReason:lrText,lateReasonStatus:lrStatus});
         }
       }
@@ -1640,11 +1638,44 @@ async function generateReport(){
   });
   window._reportRows=rows;
   if(!rows.length){$('reportResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No records found for selected filters.</p>';return;}
-  const sb2=s=>({'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[s]||'badge-absent');
-  const lrBadge = s => ({'pending':'badge-pending','approved':'badge-approved','rejected':'badge-rejected'}[s]||'');
-  const lrLabel = s => ({'pending':'⏳ Pending','approved':'✅ Approved','rejected':'❌ Rejected'}[s]||'');
-  $('reportResults').innerHTML=`<p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s) · ${staff.length} staff · ${selectedStatuses.length < 4 ? selectedStatuses.join(', ') : 'all statuses'}</p><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="background:var(--surface);"><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">In</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Out</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Late Reason</th></tr></thead><tbody>${rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}"><td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td><td style="padding:9px 12px;font-family:monospace;">${r.date}</td><td style="padding:9px 12px;">${r.clockIn}</td><td style="padding:9px 12px;">${r.clockOut}</td><td style="padding:9px 12px;">${r.workHours}</td><td style="padding:9px 12px;"><span class="badge ${sb2(r.status)}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td><td style="padding:9px 12px;">${r.lateReason?`<span title="${san(r.lateReason)}" style="font-size:.78rem;font-style:italic;max-width:140px;display:inline-block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:middle;">"${san(r.lateReason)}"</span> ${r.lateReasonStatus!=='none'?`<span class="badge ${lrBadge(r.lateReasonStatus)}" style="font-size:.64rem;vertical-align:middle;">${lrLabel(r.lateReasonStatus)}</span>`:'`':'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  const statusBadge=s=>({'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[s]||'badge-absent');
+  const lrBadge=s=>({'pending':'badge-pending','approved':'badge-approved','rejected':'badge-rejected'}[s]||'');
+  const lrLabel=s=>({'pending':'⏳ Pending','approved':'✅ Approved','rejected':'❌ Rejected'}[s]||'');
+  const lateCell=r=>{
+    if(!r.lateReason) return '—';
+    const badge=r.lateReasonStatus!=='none'
+      ? `<span class="badge ${lrBadge(r.lateReasonStatus)}" style="font-size:.64rem;vertical-align:middle;margin-left:4px;">${lrLabel(r.lateReasonStatus)}</span>`
+      : '';
+    return `<span title="${san(r.lateReason)}" style="font-size:.78rem;font-style:italic;max-width:140px;display:inline-block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:middle;">"${san(r.lateReason)}"</span>${badge}`;
+  };
+  $('reportResults').innerHTML=`
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s) · ${staff.length} staff · ${selectedStatuses.length<4?selectedStatuses.join(', '):'all statuses'}</p>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+        <thead><tr style="background:var(--surface);">
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">In</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Out</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Late Reason</th>
+        </tr></thead>
+        <tbody>${rows.map((r,i)=>`
+          <tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}">
+            <td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td>
+            <td style="padding:9px 12px;font-family:monospace;">${r.date}</td>
+            <td style="padding:9px 12px;">${r.clockIn}</td>
+            <td style="padding:9px 12px;">${r.clockOut}</td>
+            <td style="padding:9px 12px;">${r.workHours}</td>
+            <td style="padding:9px 12px;"><span class="badge ${statusBadge(r.status)}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td>
+            <td style="padding:9px 12px;">${lateCell(r)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
+
 function exportCSV(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const csv=['Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note,Late Reason,Late Reason Status',...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}","${r.lateReason||''}","${r.lateReasonStatus||''}"`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='attendance-report.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('CSV exported');}
 function exportPDF(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f4f7f5;padding:7px 9px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:6px 9px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}.pending{color:#92400e}.approved{color:#14532d}.rejected{color:#7f1d1d}</style></head><body><h1>NonStop Travels — Attendance Report</h1><p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p><table><thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Work</th><th>Status</th><th>Late Reason</th><th>Reason Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</td><td style="font-style:italic;max-width:160px;">${r.lateReason||'—'}</td><td class="${r.lateReasonStatus||''}">${r.lateReasonStatus||'—'}</td></tr>`).join('')}</tbody></table></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);toast('PDF ready — use browser print','info');}
 
