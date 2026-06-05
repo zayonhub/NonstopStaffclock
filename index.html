@@ -28,6 +28,8 @@ header{position:sticky;top:0;background:rgba(244,247,245,.94);backdrop-filter:bl
 .btn-secondary{background:transparent;color:var(--brand-mid);border:1.5px solid var(--brand-mid);}.btn-secondary:hover{background:var(--brand-glow);}
 .btn-ghost{background:transparent;color:var(--muted);}.btn-ghost:hover{background:var(--surface);color:var(--text);}
 .btn-danger{background:#fef2f2;color:var(--danger);border:1.5px solid #fca5a5;}.btn-danger:hover{background:#fee2e2;}
+.btn-approve{background:#dcfce7;color:#166534;border:1.5px solid #86efac;}.btn-approve:hover{background:#bbf7d0;}
+.btn-reject{background:#fef2f2;color:#991b1b;border:1.5px solid #fca5a5;}.btn-reject:hover{background:#fee2e2;}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
 .clock-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 14px;border-radius:16px;border:none;cursor:pointer;transition:all .2s;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:.85rem;text-align:center;}
 .clock-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.12);}
@@ -38,6 +40,7 @@ header{position:sticky;top:0;background:rgba(244,247,245,.94);backdrop-filter:bl
 label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.03em;text-transform:uppercase;}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:600;letter-spacing:.02em;}
 .badge-ontime{background:#dcfce7;color:#14532d;}.badge-late{background:#fef9c3;color:#854d0e;}.badge-verylate{background:#fee2e2;color:#7f1d1d;}.badge-absent{background:#dbeafe;color:#1e3a8a;}.badge-present{background:#d1fae5;color:#065f46;}.badge-admin{background:#ede9fe;color:#5b21b6;}.badge-staff{background:#e0f2fe;color:#075985;}.badge-break{background:#fef9c3;color:#854d0e;}.badge-out{background:#ffedd5;color:#9a3412;}
+.badge-pending{background:#fef9c3;color:#854d0e;}.badge-approved{background:#dcfce7;color:#14532d;}.badge-rejected{background:#fee2e2;color:#7f1d1d;}
 .modal-overlay{position:fixed;inset:0;background:rgba(10,20,15,.55);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;}
 .modal-box{background:var(--card);border-radius:20px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);}
 @keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
@@ -70,6 +73,25 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
 .msg-other{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:13px 13px 13px 4px;align-self:flex-start;}
 .mob-menu-btn{display:none;}
 #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49;}
+
+/* ── Multi-select dropdown ── */
+.ms-wrapper{position:relative;}
+.ms-trigger{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.86rem;background:var(--card);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;transition:border-color .2s,box-shadow .2s;}
+.ms-trigger:hover,.ms-trigger.open{border-color:var(--brand-mid);box-shadow:0 0 0 3px var(--brand-glow);}
+.ms-trigger .ms-label{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ms-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1.5px solid var(--brand-mid);border-radius:12px;box-shadow:0 8px 32px rgba(13,92,58,.14);z-index:90;max-height:240px;overflow-y:auto;display:none;}
+.ms-dropdown.open{display:block;animation:fadeUp .18s ease;}
+.ms-option{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:.84rem;transition:background .12s;}
+.ms-option:hover{background:var(--surface);}
+.ms-option input[type=checkbox]{accent-color:var(--brand-mid);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+.ms-option label{cursor:pointer;flex:1;}
+.ms-select-all{border-bottom:1px solid var(--border);font-weight:700;color:var(--brand-mid);}
+
+/* ── Approval queue card ── */
+.approval-card{background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+.approval-item{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:13px 15px;display:flex;flex-direction:column;gap:8px;}
+.approval-actions{display:flex;gap:8px;}
+
 @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}#sidebarOverlay.open{display:block;}main{margin-left:0!important;}.mob-menu-btn{display:flex!important;}.hide-mob{display:none!important;}.page-pad{padding:14px!important;}header{padding:12px 16px!important;}.clock-grid{grid-template-columns:repeat(2,1fr)!important;}.stats-4{grid-template-columns:1fr 1fr!important;}}
 @media(max-width:480px){.stats-4{grid-template-columns:1fr 1fr!important;}.auth-body{padding:18px 20px 24px;}.auth-header{padding:24px 20px 18px;}}
 .section-page{animation:fadeUp .3s ease;}
@@ -128,7 +150,7 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
       <div id="navClock" class="nav-item active" onclick="showSection('clock')"><i class="fas fa-clock"></i><span>Clock In/Out</span></div>
       <div id="navCalendar" class="nav-item" onclick="showSection('calendar')"><i class="fas fa-calendar-alt"></i><span>My Calendar</span></div>
       <div id="navMessages" class="nav-item" onclick="showSection('messages')"><i class="fas fa-comment-dots"></i><span>Messages</span><span id="msgBadge" class="nav-badge" style="display:none;"></span></div>
-      <div id="navAdmin" class="nav-item" style="display:none;" onclick="showSection('admin')"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></div>
+      <div id="navAdmin" class="nav-item" style="display:none;" onclick="showSection('admin')"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span><span id="approvalNavBadge" class="nav-badge" style="display:none;"></span></div>
       <div id="navStaffList" class="nav-item" style="display:none;" onclick="showSection('stafflist')"><i class="fas fa-users"></i><span>Staff Overview</span></div>
       <div id="navAdminCal" class="nav-item" style="display:none;" onclick="showSection('admincal')"><i class="fas fa-calendar-week"></i><span>All Calendars</span></div>
       <div id="navReports" class="nav-item" style="display:none;" onclick="showSection('reports')"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
@@ -174,6 +196,11 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
             <i class="fas fa-circle-notch fa-spin" id="locIcon"></i><span id="locText">Checking office network…</span>
           </div>
         </div>
+        <!-- Pending reason notice for staff -->
+        <div id="pendingReasonNotice" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;padding:14px 18px;margin-bottom:18px;display:none;align-items:center;gap:10px;">
+          <i class="fas fa-hourglass-half" style="color:#d97706;font-size:1.1rem;flex-shrink:0;"></i>
+          <div><p style="font-weight:600;font-size:.85rem;color:#92400e;">Late reason pending admin approval</p><p style="font-size:.78rem;color:#a16207;margin-top:2px;" id="pendingReasonText"></p></div>
+        </div>
         <div id="todaySummary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;" class="stats-4 fade-up fu1"></div>
         <div class="card" style="padding:22px;margin-bottom:22px;"><h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:16px;">Clock Actions</h3><div id="clockButtons" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;" class="clock-grid"></div></div>
         <div class="card" style="padding:22px;"><h3 class="syne" style="font-size:1rem;font-weight:700;margin-bottom:14px;">Today's Timeline</h3><div id="todayLog" style="display:flex;flex-direction:column;gap:8px;"></div></div>
@@ -211,6 +238,21 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
           <h2 class="syne" style="font-size:1.7rem;font-weight:800;margin-bottom:4px;">Admin Dashboard</h2>
           <p style="opacity:.7;font-size:.85rem;" id="adminDateLabel">Today's attendance overview</p>
         </div>
+
+        <!-- PENDING APPROVALS CARD -->
+        <div id="approvalQueueCard" style="display:none;margin-bottom:22px;">
+          <div class="approval-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:9px;">
+                <div style="width:36px;height:36px;border-radius:10px;background:#fef9c3;color:#d97706;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;"><i class="fas fa-hourglass-half"></i></div>
+                <div><p class="syne" style="font-weight:700;font-size:.95rem;color:#92400e;">Pending Late Reason Approvals</p><p style="font-size:.76rem;color:#a16207;" id="approvalQueueCount">0 requests awaiting your review</p></div>
+              </div>
+              <button onclick="toggleApprovalQueue()" class="btn" style="background:#fef9c3;color:#92400e;border:1px solid #fde68a;padding:7px 14px;font-size:.82rem;" id="approvalToggleBtn"><i class="fas fa-chevron-down" id="approvalToggleIcon"></i> Review</button>
+            </div>
+            <div id="approvalQueueList" style="display:none;flex-direction:column;gap:10px;margin-top:4px;"></div>
+          </div>
+        </div>
+
         <div id="adminStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;" class="stats-4"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div class="card" style="padding:20px;"><h3 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:14px;">Today's Staff Status</h3><div id="adminTodayList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;"></div></div>
@@ -251,9 +293,46 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
       <div id="reportsSection" class="section-page" style="display:none;">
         <div class="card" style="padding:22px;margin-bottom:18px;">
           <h4 class="syne" style="font-size:.95rem;font-weight:700;margin-bottom:16px;">Generate Report</h4>
-          <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
-            <div><label class="lbl">Staff Member</label><select id="rptStaff" class="inp" style="padding:9px 12px;"><option value="all">All Staff</option></select></div>
-            <div><label class="lbl">Filter By</label><select id="rptType" class="inp" style="padding:9px 12px;"><option value="all">All Statuses</option><option value="on-time">On Time</option><option value="late">Late</option><option value="very-late">Very Late</option><option value="absent">Absent</option></select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;align-items:start;">
+            <!-- Staff multi-select -->
+            <div>
+              <label class="lbl">Staff Members</label>
+              <div class="ms-wrapper" id="msStaffWrapper">
+                <div class="ms-trigger" id="msStaffTrigger" onclick="toggleMs('msStaff')">
+                  <span class="ms-label" id="msStaffLabel">All Staff</span>
+                  <i class="fas fa-chevron-down" style="font-size:.72rem;color:var(--muted);flex-shrink:0;transition:transform .2s;" id="msStaffArrow"></i>
+                </div>
+                <div class="ms-dropdown" id="msStaffDropdown">
+                  <div class="ms-option ms-select-all">
+                    <input type="checkbox" id="msStaffAll" checked onchange="msToggleAll('msStaff',this.checked)">
+                    <label for="msStaffAll">All Staff</label>
+                  </div>
+                  <div id="msStaffOptions"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Status multi-select -->
+            <div>
+              <label class="lbl">Status</label>
+              <div class="ms-wrapper" id="msStatusWrapper">
+                <div class="ms-trigger" id="msStatusTrigger" onclick="toggleMs('msStatus')">
+                  <span class="ms-label" id="msStatusLabel">All Statuses</span>
+                  <i class="fas fa-chevron-down" style="font-size:.72rem;color:var(--muted);flex-shrink:0;transition:transform .2s;" id="msStatusArrow"></i>
+                </div>
+                <div class="ms-dropdown" id="msStatusDropdown">
+                  <div class="ms-option ms-select-all">
+                    <input type="checkbox" id="msStatusAll" checked onchange="msToggleAll('msStatus',this.checked)">
+                    <label for="msStatusAll">All Statuses</label>
+                  </div>
+                  <div id="msStatusOptions">
+                    <div class="ms-option"><input type="checkbox" id="ms_s_ontime" value="on-time" checked onchange="msOptionChanged('msStatus')"><label for="ms_s_ontime">On Time</label></div>
+                    <div class="ms-option"><input type="checkbox" id="ms_s_late" value="late" checked onchange="msOptionChanged('msStatus')"><label for="ms_s_late">Late</label></div>
+                    <div class="ms-option"><input type="checkbox" id="ms_s_verylate" value="very-late" checked onchange="msOptionChanged('msStatus')"><label for="ms_s_verylate">Very Late</label></div>
+                    <div class="ms-option"><input type="checkbox" id="ms_s_absent" value="absent" checked onchange="msOptionChanged('msStatus')"><label for="ms_s_absent">Absent</label></div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div><label class="lbl">From</label><input type="date" id="rptFrom" class="inp"></div>
             <div><label class="lbl">To</label><input type="date" id="rptTo" class="inp"></div>
           </div>
@@ -329,6 +408,27 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
   </div>
 </div>
 
+<!-- LATE REASON MODAL -->
+<div id="lateReasonModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <div>
+        <h3 class="syne" style="font-size:1.05rem;font-weight:700;"><i class="fas fa-clock" style="color:var(--warn);margin-right:8px;"></i>Reason for Lateness</h3>
+        <p style="font-size:.76rem;color:var(--muted);margin-top:2px;">You are clocking in <span id="lateReasonStatus" style="font-weight:700;color:#d97706;">late</span>. Please provide a reason.</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <label class="lbl">Reason <span style="color:#dc2626;">*</span></label>
+      <textarea id="lateReasonText" class="inp" rows="4" style="resize:none;" placeholder="e.g. Traffic on the way to office, official assignment before resumption…"></textarea>
+      <p style="font-size:.74rem;color:var(--muted);margin-top:8px;"><i class="fas fa-info-circle"></i> Your reason will be reviewed by the admin. It will only appear on your log if approved.</p>
+    </div>
+    <div class="modal-footer">
+      <button onclick="cancelLateReason()" class="btn btn-ghost">Skip</button>
+      <button onclick="submitLateReason()" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Reason</button>
+    </div>
+  </div>
+</div>
+
 <!-- BROADCAST MODAL -->
 <div id="broadcastModal" class="modal-overlay" style="display:none;">
   <div class="modal-box" style="max-width:460px;">
@@ -350,7 +450,6 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
       <div style="position:relative;width:100%;max-width:320px;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:4/3;">
         <video id="cameraFeed" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
         <canvas id="cameraCanvas" style="display:none;"></canvas>
-        <!-- Overlay circle guide -->
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
           <div style="width:160px;height:160px;border-radius:50%;border:3px solid rgba(29,185,107,.7);box-shadow:0 0 0 4px rgba(29,185,107,.2);"></div>
         </div>
@@ -373,16 +472,30 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
 
 <script>
 // ================================================================
-//  SUPABASE — same project as AMS
+//  SUPABASE
 // ================================================================
 /*
-  SUPABASE SETUP REQUIRED (run once in SQL Editor):
-  ─────────────────────────────────────────────────
+  SQL to run once in Supabase SQL Editor:
+  ────────────────────────────────────────
   alter table clock_records add column if not exists face_stamp_url text;
+  alter table clock_records add column if not exists late_reason text;
+  alter table clock_records add column if not exists late_reason_status text default 'none';
 
-  -- In Supabase Dashboard → Storage → New Bucket:
-  --   Name: face-stamps
-  --   Public: YES
+  -- In Supabase Dashboard -> Storage -> New Bucket: face-stamps (Public: YES)
+
+  -- Late reason approval queue
+  create table if not exists late_reason_requests (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references auth.users(id),
+    user_name text,
+    date date,
+    status text default 'on-time',
+    reason text,
+    approval_status text default 'pending',
+    admin_note text,
+    created_at timestamptz default now(),
+    reviewed_at timestamptz
+  );
 */
 const SB_URL = 'https://asupemsmwzrovucpvqyt.supabase.co';
 const SB_KEY = 'sb_publishable_h3Kb-0pknHcYItkGeyEI-Q_urYDrPD9';
@@ -393,12 +506,10 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 // ================================================================
 //  CONFIG
 // ================================================================
-const AUTO_CLOCKOUT_TIME = '17:10'; // change if needed
+const AUTO_CLOCKOUT_TIME = '17:10';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// localStorage keys — namespaced by userId so multiple staff on one PC
-// never collide with each other's offline data
-const SETTINGS_KEY = 'nst_clk_settings';   // shared (settings are global)
+const SETTINGS_KEY = 'nst_clk_settings';
 function offlineKey(uid)  { return 'nst_offline_'  + uid; }
 function recordsKey(uid)  { return 'nst_records_'  + uid; }
 function messagesKey(uid) { return 'nst_messages_' + uid; }
@@ -407,12 +518,12 @@ function profileKey(uid)  { return 'nst_profile_'  + uid; }
 // ================================================================
 //  STATE
 // ================================================================
-let CU = null;   // supabase auth user
-let CP = null;   // profile row from profiles table
-let RECORDS = {};          // local cache: key = "date_userId"
-let MESSAGES = {};         // local cache for offline message preview
+let CU = null;
+let CP = null;
+let RECORDS = {};
+let MESSAGES = {};
 let APP_SETTINGS = loadSettingsLocal();
-let allStaffProfiles = []; // admin only
+let allStaffProfiles = [];
 let currentStatus = 'clocked-out';
 let sessionStart = null;
 let liveTimerInterval = null;
@@ -421,10 +532,27 @@ let pollInterval = null;
 let calYear, calMonth;
 let adminCalYear, adminCalMonth, adminCalStaffId;
 let currentAdminChatUser = null;
-let _autoClockoutFired = '';
+
+// ── Late-reason approval state ──────────────────────────────────
+const LATE_REASON_STATE = {
+  pendingReasons:   [],   // array of rows from late_reason_requests table
+  pendingCount:     0,    // drives badge + card visibility
+  cardExpanded:     true, // collapses when count reaches 0
+};
+
+// Pending clock-in face URL held while waiting for late reason modal
+const PENDING_CLOCKIN = {
+  faceUrl:    null,
+  detectedAt: null,
+};
+const AUTO_CLOCKOUT_STATE = { firedDate: '' };
+
+// Late reason state
+let _pendingLateClockInData = null; // { faceUrl } — held while waiting for reason
+let _pendingApprovals = [];         // admin-side pending requests
 
 // ================================================================
-//  SETTINGS (local + Supabase)
+//  SETTINGS
 // ================================================================
 function defaultSettings() { return { onTimeUntil:'08:00', lateTo:'08:30', officeIP:'' }; }
 function loadSettingsLocal() {
@@ -471,14 +599,11 @@ function updateUnsyncedBadge() {
   if (b) { b.style.display = n>0?'block':'none'; const c=$('unsyncedCount'); if(c) c.textContent=n; }
 }
 
-// ================================================================
-//  OFFLINE PROFILE CACHE (per user)
-// ================================================================
 function cacheProfile(p) { try { localStorage.setItem(profileKey(p.id), JSON.stringify(p)); } catch(e){} }
 function getCachedProfile(uid) { try { return JSON.parse(localStorage.getItem(profileKey(uid))||'null'); } catch(e) { return null; } }
 
 // ================================================================
-//  SUPABASE SYNC — push unsynced local records to clock_records
+//  SUPABASE SYNC
 // ================================================================
 async function syncToSupabase() {
   if (!navigator.onLine || !CU) return;
@@ -487,8 +612,6 @@ async function syncToSupabase() {
   for (const rec of unsynced) {
     try {
       let faceUrl = rec.face_stamp_url || null;
-
-      // If face_stamp_url is a base64 data URL (stored offline), upload it to storage now
       if (faceUrl && faceUrl.startsWith('data:')) {
         try {
           const res = await fetch(faceUrl);
@@ -498,11 +621,10 @@ async function syncToSupabase() {
           if (!upErr) {
             const { data: urlData } = sb.storage.from('face-stamps').getPublicUrl(filename);
             faceUrl = urlData.publicUrl;
-            rec.face_stamp_url = faceUrl; // update local record with the real URL
+            rec.face_stamp_url = faceUrl;
           }
         } catch(e) { console.warn('Offline face stamp upload failed during sync', e); }
       }
-
       const payload = {
         user_id:     rec.user_id,
         user_name:   rec.user_name || CP?.full_name || '',
@@ -514,6 +636,8 @@ async function syncToSupabase() {
         break_end:   rec.break_end   || null,
         assign_note:    rec.assign_note     || null,
         face_stamp_url: faceUrl,
+        late_reason:    rec.late_reason     || null,
+        late_reason_status: rec.late_reason_status || 'none',
         events:         rec.events         || [],
         updated_at:  nowTs()
       };
@@ -524,7 +648,6 @@ async function syncToSupabase() {
   saveUserRecords(CU.id);
 }
 
-// Pull records for a month (admin viewing other staff)
 async function pullMonthRecords(userId, year, month) {
   if (!navigator.onLine) return;
   const from = `${year}-${pad(month+1)}-01`;
@@ -533,7 +656,6 @@ async function pullMonthRecords(userId, year, month) {
   (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r, RECORDS[r.date+'_'+r.user_id]); });
 }
 
-// Pull today for all staff (admin dashboard)
 async function pullTodayAll() {
   if (!navigator.onLine) return;
   const { data } = await sb.from('clock_records').select('*').eq('date',todayStr());
@@ -541,10 +663,8 @@ async function pullTodayAll() {
 }
 
 function dbRecToLocal(r, existingRec) {
-  // Preserve a locally-held face_stamp_url if the DB row doesn't have one yet
-  // (e.g. base64 from offline capture, or upload still pending)
   const faceUrl = r.face_stamp_url || (existingRec && existingRec.face_stamp_url) || null;
-  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, face_stamp_url:faceUrl, events:r.events||[], _synced:true };
+  return { user_id:r.user_id, user_name:r.user_name, date:r.date, status:r.status, clock_in:r.clock_in, clock_out:r.clock_out, break_start:r.break_start, break_end:r.break_end, assign_note:r.assign_note, face_stamp_url:faceUrl, late_reason:r.late_reason||null, late_reason_status:r.late_reason_status||'none', events:r.events||[], _synced:true };
 }
 
 // ================================================================
@@ -586,10 +706,7 @@ async function doLogin() {
   const btn=$('loginBtn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Signing in…';
   try {
-    if (!navigator.onLine) {
-      // Offline — try to find cached profile matching this email
-      showAuthErr('You are offline. Please connect to the internet to sign in for the first time.'); return;
-    }
+    if (!navigator.onLine) { showAuthErr('You are offline. Please connect to the internet to sign in for the first time.'); return; }
     const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
     if (error) { showAuthErr(error.message); return; }
     await bootApp(data.user);
@@ -615,24 +732,14 @@ async function doLogout() {
 async function bootApp(user) {
   CU = user;
   setLoadMsg('Loading profile…');
-
-  // Load profile from AMS profiles table
   const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', user.id).single();
   if (pErr || !profile) { showAuthErr('Profile not found. Contact your administrator.'); $('authScreen').style.display='flex'; return; }
-
-  // Block applicants
   if (profile.role === 'applicant') { showAuthErr('Access denied — this system is for staff only.'); await sb.auth.signOut(); $('authScreen').style.display='flex'; return; }
-
   CP = profile;
   cacheProfile(profile);
-
-  // Load this user's offline records
   RECORDS = loadUserRecords(user.id);
-
   const isAdmin = CP.role === 'admin';
   const name = CP.full_name || user.email.split('@')[0];
-
-  // Sidebar
   ['navClock','navCalendar','navMessages'].forEach(id=>$(id).style.display='flex');
   ['navAdmin','navStaffList','navAdminCal','navReports','navAdminMsg','navSettings'].forEach(id=>{
     $(id).style.display = isAdmin?'flex':'none';
@@ -646,11 +753,9 @@ async function bootApp(user) {
   $('clockGreet').textContent = greet()+',';
   $('clockName').textContent = name.split(' ')[0];
   $('onlineIndicator').style.background = navigator.onLine?'#22c55e':'#ef4444';
-
   setLoadMsg('Loading settings…');
   await loadSettingsFromDB();
   if (isAdmin) { $('settingOnTime').value=APP_SETTINGS.onTimeUntil||'08:00'; $('settingLateTo').value=APP_SETTINGS.lateTo||'08:30'; $('settingIP').value=APP_SETTINGS.officeIP||''; }
-
   if (isAdmin) {
     setLoadMsg('Loading staff…');
     const { data: staffData } = await sb.from('profiles').select('id,full_name,email,role').order('full_name');
@@ -660,29 +765,22 @@ async function bootApp(user) {
     setLoadMsg('Loading attendance…');
     await pullTodayAll();
     loadAdminData();
+    populateMsStaffOptions();
   }
-
-  // Restore clock state from local cache
   setLoadMsg('Restoring clock state…');
   await loadTodayFromDB();
   restoreClockState();
-
-  // Sync any offline records
   await syncToSupabase();
   updateUnsyncedBadge();
-
-  // Calendar
   const now = new Date();
   calYear=now.getFullYear(); calMonth=now.getMonth();
   adminCalYear=now.getFullYear(); adminCalMonth=now.getMonth();
   const fom = new Date(now.getFullYear(),now.getMonth(),1);
   $('rptFrom').value = fom.toISOString().slice(0,10);
   $('rptTo').value   = now.toISOString().slice(0,10);
-
   startHeaderClock();
   checkOfficeNetwork();
-
-  // Poll every 15s
+  checkPendingReasonNotice();
   clearInterval(pollInterval);
   pollInterval = setInterval(async () => {
     if (!CU) return;
@@ -694,11 +792,12 @@ async function bootApp(user) {
       await pullTodayAll();
       if ($('adminSection').style.display!=='none') loadAdminData();
       if ($('adminmsgSection').style.display!=='none' && currentAdminChatUser) renderAdminMsgList();
+      loadApprovalQueue();
     }
     await syncToSupabase();
   }, 15000);
-
   updateMsgBadges();
+  if (isAdmin) loadApprovalQueue();
   $('authScreen').style.display='none';
   $('mainApp').style.display='flex';
   showSection('clock');
@@ -709,19 +808,19 @@ async function bootApp(user) {
 }
 
 // ================================================================
-//  HEADER CLOCK + AUTO CLOCK-OUT AT 17:10
+//  HEADER CLOCK + AUTO CLOCK-OUT
 // ================================================================
 function checkAutoClockout() {
   if (!CU) return;
   const now=new Date(), today=todayStr();
   const hhmm=pad(now.getHours())+':'+pad(now.getMinutes());
   if (hhmm < AUTO_CLOCKOUT_TIME) return;
-  if (_autoClockoutFired === today) return;
+  if (AUTO_CLOCKOUT_STATE.firedDate === today) return;
   const rec = getTodayRecord();
   if (!rec || !rec.clock_in || rec.clock_out) return;
   const last = rec.events[rec.events.length-1];
   if (last && last.type==='clock-out') return;
-  _autoClockoutFired = today;
+  AUTO_CLOCKOUT_STATE.firedDate = today;
   const ts = new Date(today+'T'+AUTO_CLOCKOUT_TIME+':00').toISOString();
   rec.clock_out = ts;
   rec.events.push({ type:'clock-out', ts, note:'Auto clock-out at '+AUTO_CLOCKOUT_TIME });
@@ -780,7 +879,7 @@ window.addEventListener('offline', ()=>{
 });
 
 // ================================================================
-//  CLOCK RECORDS — local + Supabase
+//  CLOCK RECORDS
 // ================================================================
 async function loadTodayFromDB() {
   if (!navigator.onLine) return;
@@ -788,7 +887,6 @@ async function loadTodayFromDB() {
   const { data } = await sb.from('clock_records').select('*').eq('user_id',CU.id).eq('date',today).maybeSingle();
   if (data) {
     const local = RECORDS[today+'_'+CU.id];
-    // Prefer local if newer / unsynced
     if (!local || local._synced) { RECORDS[today+'_'+CU.id] = dbRecToLocal(data, local); saveUserRecords(CU.id); }
   }
 }
@@ -797,7 +895,6 @@ function getTodayRecord() { return RECORDS[todayStr()+'_'+CU.id] || null; }
 function setTodayRecord(rec) {
   RECORDS[rec.date+'_'+rec.user_id] = rec;
   saveUserRecords(CU.id);
-  // Also save to offline queue if offline
   if (!navigator.onLine) {
     try {
       const q = JSON.parse(localStorage.getItem(offlineKey(CU.id))||'[]');
@@ -822,7 +919,7 @@ function restoreClockState() {
 async function clockAction(type, note='', faceUrl=null) {
   if (type==='clock-in' && window._netOk===false) { toast('You must be on the office network to clock in','error'); return; }
   const now=new Date(), ts=now.toISOString();
-  let rec = getTodayRecord() || { user_id:CU.id, user_name:CP.full_name||'', date:todayStr(), status:'absent', events:[], clock_in:null, clock_out:null, break_start:null, break_end:null, assign_note:null, face_stamp_url:null, _synced:false };
+  let rec = getTodayRecord() || { user_id:CU.id, user_name:CP.full_name||'', date:todayStr(), status:'absent', events:[], clock_in:null, clock_out:null, break_start:null, break_end:null, assign_note:null, face_stamp_url:null, late_reason:null, late_reason_status:'none', _synced:false };
   rec.events = [...rec.events, {type,ts,note}];
   rec._synced = false;
   if(type==='clock-in'){rec.clock_in=ts;rec.status=getAStatus(now);if(faceUrl)rec.face_stamp_url=faceUrl;currentStatus='clocked-in';sessionStart=now;startLiveTimer();}
@@ -836,6 +933,14 @@ async function clockAction(type, note='', faceUrl=null) {
   const labels={'clock-in':'Clocked In ✅','start-break':'Break Started ☕','end-break':'Break Ended 🔁','out-assign':'Out for Assignment 🚗','back-assign':'Back from Assignment','clock-out':'Clocked Out 🔚'};
   toast(labels[type]||type);
   syncToSupabase();
+
+  // After clock-in, check if late/very-late and prompt for reason
+  if (type === 'clock-in') {
+    const stat = getAStatus(now);
+    if (stat === 'late' || stat === 'very-late') {
+      openLateReasonModal(stat);
+    }
+  }
 }
 
 function getAStatus(t) {
@@ -855,6 +960,209 @@ function updateStatusDisplay() {
 }
 function startLiveTimer(){clearInterval(liveTimerInterval);const t=()=>{if(!sessionStart)return;const e=Math.floor((new Date()-sessionStart)/1000);$('liveTimer').textContent=`${pad(Math.floor(e/3600))}:${pad(Math.floor((e%3600)/60))}:${pad(e%60)}`;};t();liveTimerInterval=setInterval(t,1000);}
 function stopLiveTimer(){clearInterval(liveTimerInterval);$('liveTimer').textContent='--:--:--';}
+
+// ================================================================
+//  LATE REASON — STAFF SIDE
+// ================================================================
+function openLateReasonModal(statusLabel) {
+  $('lateReasonStatus').textContent = statusLabel === 'very-late' ? 'very late' : 'late';
+  $('lateReasonText').value = '';
+  $('lateReasonModal').style.display = 'flex';
+}
+
+function cancelLateReason() {
+  $('lateReasonModal').style.display = 'none';
+  toast('Reason skipped — your late arrival is noted without explanation', 'info', 4000);
+}
+
+async function submitLateReason() {
+  const reason = $('lateReasonText').value.trim();
+  if (!reason) { toast('Please enter a reason before submitting', 'warn'); return; }
+  $('lateReasonModal').style.display = 'none';
+
+  // Save pending reason to late_reason_requests table
+  const rec = getTodayRecord();
+  const payload = {
+    user_id:   CU.id,
+    user_name: CP.full_name || '',
+    date:      todayStr(),
+    status:    rec?.status || 'late',
+    reason:    reason,
+    approval_status: 'pending'
+  };
+
+  if (navigator.onLine) {
+    const { error } = await sb.from('late_reason_requests').insert([payload]);
+    if (error) {
+      toast('Reason saved locally — will sync when online', 'warn');
+      savePendingReasonLocal(payload);
+    } else {
+      toast('Reason submitted — awaiting admin approval ⏳', 'info', 5000);
+    }
+  } else {
+    savePendingReasonLocal(payload);
+    toast('Reason saved locally — will submit when online ⏳', 'warn', 5000);
+  }
+
+  // Update local record with pending state
+  if (rec) {
+    rec.late_reason = reason;
+    rec.late_reason_status = 'pending';
+    rec._synced = false;
+    setTodayRecord(rec);
+    renderTodayLog();
+    renderTodaySummary();
+  }
+  checkPendingReasonNotice();
+}
+
+function savePendingReasonLocal(payload) {
+  try {
+    const key = 'nst_pending_reasons_' + CU.id;
+    const q = JSON.parse(localStorage.getItem(key)||'[]');
+    q.push(payload);
+    localStorage.setItem(key, JSON.stringify(q));
+  } catch(e) {}
+}
+
+async function syncPendingReasons() {
+  if (!navigator.onLine || !CU) return;
+  try {
+    const key = 'nst_pending_reasons_' + CU.id;
+    const q = JSON.parse(localStorage.getItem(key)||'[]');
+    if (!q.length) return;
+    const { error } = await sb.from('late_reason_requests').insert(q);
+    if (!error) { localStorage.removeItem(key); }
+  } catch(e) {}
+}
+
+function checkPendingReasonNotice() {
+  const rec = getTodayRecord();
+  const notice = $('pendingReasonNotice');
+  if (!notice) return;
+  if (rec?.late_reason && rec?.late_reason_status === 'pending') {
+    $('pendingReasonText').textContent = `"${rec.late_reason}"`;
+    notice.style.display = 'flex';
+  } else if (rec?.late_reason && rec?.late_reason_status === 'approved') {
+    notice.style.display = 'none';
+  } else if (rec?.late_reason && rec?.late_reason_status === 'rejected') {
+    notice.innerHTML = `<i class="fas fa-times-circle" style="color:#dc2626;font-size:1.1rem;flex-shrink:0;"></i><div><p style="font-weight:600;font-size:.85rem;color:#991b1b;">Late reason rejected by admin</p><p style="font-size:.78rem;color:#b91c1c;margin-top:2px;">"${san(rec.late_reason)}"</p></div>`;
+    notice.style.background = '#fef2f2';
+    notice.style.borderColor = '#fca5a5';
+    notice.style.display = 'flex';
+  } else {
+    notice.style.display = 'none';
+  }
+}
+
+// ================================================================
+//  LATE REASON — ADMIN APPROVAL QUEUE
+// ================================================================
+async function loadApprovalQueue() {
+  if (!navigator.onLine) return;
+  try {
+    const { data } = await sb.from('late_reason_requests').select('*').eq('approval_status','pending').order('created_at',{ascending:true});
+    _pendingApprovals = data || [];
+    renderApprovalQueue();
+  } catch(e) {}
+}
+
+function renderApprovalQueue() {
+  const count = _pendingApprovals.length;
+  const card = $('approvalQueueCard');
+  const badge = $('approvalNavBadge');
+
+  if (!card) return;
+
+  if (count === 0) {
+    card.style.display = 'none';
+    badge.style.display = 'none';
+    return;
+  }
+
+  card.style.display = 'block';
+  badge.textContent = count;
+  badge.style.display = 'block';
+  $('approvalQueueCount').textContent = `${count} request${count>1?'s':''} awaiting your review`;
+
+  const list = $('approvalQueueList');
+  list.innerHTML = _pendingApprovals.map(req => {
+    const statusLabel = req.status === 'very-late' ? '🔴 Very Late' : '🟠 Late';
+    const dateFormatted = new Date(req.date+'T12:00:00').toLocaleDateString('en-NG',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    return `<div class="approval-item">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+            <div style="width:30px;height:30px;border-radius:8px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;font-family:'Bricolage Grotesque',sans-serif;flex-shrink:0;">${(req.user_name||'?').charAt(0).toUpperCase()}</div>
+            <p style="font-weight:700;font-size:.88rem;">${san(req.user_name||'Unknown')}</p>
+            <span class="badge badge-${req.status==='very-late'?'verylate':'late'}" style="font-size:.68rem;">${statusLabel}</span>
+          </div>
+          <p style="font-size:.76rem;color:var(--muted);margin-bottom:6px;">${dateFormatted}</p>
+          <div style="background:var(--surface);border-radius:8px;padding:10px 12px;border-left:3px solid #fde68a;">
+            <p style="font-size:.83rem;font-style:italic;color:var(--text);">"${san(req.reason)}"</p>
+          </div>
+        </div>
+      </div>
+      <div class="approval-actions">
+        <button onclick="processApproval('${req.id}','${req.user_id}','${req.date}',true)" class="btn btn-approve" style="flex:1;justify-content:center;padding:8px;font-size:.82rem;"><i class="fas fa-check"></i> Approve</button>
+        <button onclick="processApproval('${req.id}','${req.user_id}','${req.date}',false)" class="btn btn-reject" style="flex:1;justify-content:center;padding:8px;font-size:.82rem;"><i class="fas fa-times"></i> Reject</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleApprovalQueue() {
+  const list = $('approvalQueueList');
+  const icon = $('approvalToggleIcon');
+  const btn  = $('approvalToggleBtn');
+  const isOpen = list.style.display === 'flex';
+  list.style.display = isOpen ? 'none' : 'flex';
+  icon.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+  btn.innerHTML = `<i class="${icon.className}" id="approvalToggleIcon"></i> ${isOpen?'Review':'Collapse'}`;
+}
+
+async function processApproval(requestId, userId, date, approved) {
+  if (!navigator.onLine) { toast('Cannot process approvals while offline', 'warn'); return; }
+
+  const approvalStatus = approved ? 'approved' : 'rejected';
+
+  // 1. Update the request record
+  const { error: reqErr } = await sb.from('late_reason_requests')
+    .update({ approval_status: approvalStatus, reviewed_at: nowTs() })
+    .eq('id', requestId);
+  if (reqErr) { toast('Update failed: ' + reqErr.message, 'error'); return; }
+
+  // 2. Get the reason text for the log
+  const req = _pendingApprovals.find(r => r.id === requestId);
+  const reason = req?.reason || '';
+
+  // 3. Update the clock_record for this staff + date
+  //    - If approved: write late_reason + late_reason_status='approved'
+  //    - If rejected: write late_reason_status='rejected', late_reason stays for audit but is NOT added to events
+  const recUpdate = approved
+    ? { late_reason: reason, late_reason_status: 'approved', updated_at: nowTs() }
+    : { late_reason_status: 'rejected', updated_at: nowTs() };
+
+  await sb.from('clock_records')
+    .update(recUpdate)
+    .eq('user_id', userId)
+    .eq('date', date);
+
+  // 4. If approved, also append reason to the events array so it shows in timeline
+  if (approved) {
+    const { data: crData } = await sb.from('clock_records').select('events').eq('user_id',userId).eq('date',date).maybeSingle();
+    if (crData) {
+      const events = crData.events || [];
+      events.push({ type:'late-reason', ts: nowTs(), note: reason, approved_by: CP.full_name||'Admin' });
+      await sb.from('clock_records').update({ events, updated_at: nowTs() }).eq('user_id',userId).eq('date',date);
+    }
+  }
+
+  toast(approved ? `✅ Reason approved for ${req?.user_name||'staff'}` : `❌ Reason rejected for ${req?.user_name||'staff'}`, approved?'success':'info', 4000);
+  await loadApprovalQueue();
+  // Refresh local records cache so admin dashboard reflects update
+  await pullTodayAll();
+}
 
 // ================================================================
 //  CLOCK BUTTONS
@@ -887,18 +1195,47 @@ function renderTodaySummary() {
   const faceCard = rec?.face_stamp_url
     ? `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px;grid-column:span 4;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;"><i class="fas fa-camera" style="color:var(--brand-mid);margin-right:5px;"></i>Today's Face Stamp</div><img src="${rec.face_stamp_url}" alt="Face stamp" style="width:100%;max-width:180px;border-radius:12px;border:3px solid var(--brand-lite);display:block;" onerror="this.parentElement.parentElement.style.display='none'"></div>`
     : '';
+  // Late reason status card
+  let lateCard = '';
+  if (rec?.late_reason) {
+    const lrsc = {pending:'badge-pending',approved:'badge-approved',rejected:'badge-rejected'}[rec.late_reason_status]||'badge-pending';
+    const lrLabel = {pending:'⏳ Pending Approval',approved:'✅ Approved',rejected:'❌ Rejected'}[rec.late_reason_status]||'Pending';
+    const lrIcon = {pending:'fas fa-hourglass-half',approved:'fas fa-check-circle',rejected:'fas fa-times-circle'}[rec.late_reason_status]||'fas fa-hourglass-half';
+    const lrColor = {pending:'#d97706',approved:'#16a34a',rejected:'#dc2626'}[rec.late_reason_status]||'#d97706';
+    lateCard = `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px;grid-column:span 4;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;"><i class="${lrIcon}" style="color:${lrColor};margin-right:5px;"></i>Late Reason</div><span class="badge ${lrsc}">${lrLabel}</span></div><p style="font-size:.84rem;font-style:italic;color:var(--text);">"${san(rec.late_reason)}"</p></div>`;
+  }
   $('todaySummary').innerHTML=`
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock In</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${ci?fmtTime(ci):'—'}</div></div>
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Clock Out</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${co?fmtTime(co):'—'}</div></div>
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Work Time</div><div class="syne" style="font-size:1.4rem;font-weight:800;color:var(--brand);">${wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—'}</div></div>
     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;">Status</div><span class="badge ${sc}" style="width:fit-content;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></div>
-    ${faceCard}`;
+    ${faceCard}${lateCard}`;
+  checkPendingReasonNotice();
 }
+
 function renderTodayLog() {
   const rec=getTodayRecord(),el=$('todayLog');
   if(!rec||!rec.events.length){el.innerHTML='<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;">No activity today yet</p>';return;}
-  const tm={'clock-in':{icon:'fas fa-sign-in-alt',color:'#22c55e',label:'Clocked In'},'start-break':{icon:'fas fa-coffee',color:'#f59e0b',label:'Break Started'},'end-break':{icon:'fas fa-redo',color:'#3b82f6',label:'Break Ended'},'out-assign':{icon:'fas fa-car',color:'#f97316',label:'Out for Assignment'},'back-assign':{icon:'fas fa-building',color:'#22c55e',label:'Back from Assignment'},'clock-out':{icon:'fas fa-sign-out-alt',color:'#dc2626',label:'Clocked Out'}};
-  el.innerHTML=rec.events.map(e=>{const m=tm[e.type]||{icon:'fas fa-circle',color:'#9ca3af',label:e.type};const t=new Date(e.ts);return `<div style="display:flex;align-items:flex-start;gap:12px;"><div style="width:34px;height:34px;border-radius:10px;background:${m.color}18;color:${m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="${m.icon}" style="font-size:.88rem;"></i></div><div style="flex:1;padding-top:2px;"><p style="font-weight:600;font-size:.85rem;">${m.label}</p><p style="font-size:.75rem;color:var(--muted);">${fmtTimeFull(t)}${e.note?` · <em>${san(e.note)}</em>`:''}</p></div></div>`;}).join('');
+  const tm={
+    'clock-in':{icon:'fas fa-sign-in-alt',color:'#22c55e',label:'Clocked In'},
+    'start-break':{icon:'fas fa-coffee',color:'#f59e0b',label:'Break Started'},
+    'end-break':{icon:'fas fa-redo',color:'#3b82f6',label:'Break Ended'},
+    'out-assign':{icon:'fas fa-car',color:'#f97316',label:'Out for Assignment'},
+    'back-assign':{icon:'fas fa-building',color:'#22c55e',label:'Back from Assignment'},
+    'clock-out':{icon:'fas fa-sign-out-alt',color:'#dc2626',label:'Clocked Out'},
+    'late-reason':{icon:'fas fa-comment-check',color:'#16a34a',label:'Late Reason (Approved)'}
+  };
+  el.innerHTML=rec.events.map(e=>{
+    const m=tm[e.type]||{icon:'fas fa-circle',color:'#9ca3af',label:e.type};
+    const t=new Date(e.ts);
+    return `<div style="display:flex;align-items:flex-start;gap:12px;"><div style="width:34px;height:34px;border-radius:10px;background:${m.color}18;color:${m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="${m.icon}" style="font-size:.88rem;"></i></div><div style="flex:1;padding-top:2px;"><p style="font-weight:600;font-size:.85rem;">${m.label}</p><p style="font-size:.75rem;color:var(--muted);">${fmtTimeFull(t)}${e.note?` · <em>${san(e.note)}</em>`:''}</p></div></div>`;
+  }).join('');
+
+  // Show pending reason notice below timeline if reason is pending
+  const rec2 = getTodayRecord();
+  if (rec2?.late_reason && rec2?.late_reason_status === 'pending') {
+    el.innerHTML += `<div style="display:flex;align-items:flex-start;gap:12px;opacity:.7;"><div style="width:34px;height:34px;border-radius:10px;background:#fef9c318;color:#d97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-hourglass-half" style="font-size:.88rem;"></i></div><div style="flex:1;padding-top:2px;"><p style="font-weight:600;font-size:.85rem;color:#d97706;">Late Reason — Pending Approval</p><p style="font-size:.75rem;color:var(--muted);">"${san(rec2.late_reason)}"</p></div></div>`;
+  }
 }
 
 // ================================================================
@@ -953,7 +1290,6 @@ async function openDayDetail(userId, dateStr) {
   const ci=new Date(rec.clock_in),co=rec.clock_out?new Date(rec.clock_out):null,bs=rec.break_start?new Date(rec.break_start):null,be=rec.break_end?new Date(rec.break_end):null;
   let wm=0;if(co)wm=Math.floor((co-ci)/60000);let bm=0;if(bs&&be)bm=Math.floor((be-bs)/60000);
   const sc={'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[rec.status]||'badge-absent';
-  // Build day detail HTML in safe parts — avoids nested template literal bugs
   const faceSection = rec.face_stamp_url
     ? '<div style="margin-bottom:16px;background:var(--surface);border-radius:14px;padding:14px;">'
       + '<p style="font-size:.74rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">'
@@ -968,12 +1304,27 @@ async function openDayDetail(userId, dateStr) {
       + '<p style="font-size:.84rem;">' + san(rec.assign_note) + '</p></div>'
     : '';
 
+  // Late reason section in day detail
+  let lateSection = '';
+  if (rec.late_reason) {
+    const lrsc = {pending:'badge-pending',approved:'badge-approved',rejected:'badge-rejected'}[rec.late_reason_status]||'badge-pending';
+    const lrLabel = {pending:'⏳ Pending Approval',approved:'✅ Approved',rejected:'❌ Rejected by Admin'}[rec.late_reason_status]||'Pending';
+    const lrBg = {pending:'#fffbeb',approved:'#f0fdf4',rejected:'#fef2f2'}[rec.late_reason_status]||'#fffbeb';
+    const lrBorder = {pending:'#fde68a',approved:'#86efac',rejected:'#fca5a5'}[rec.late_reason_status]||'#fde68a';
+    lateSection = '<div style="background:' + lrBg + ';border:1px solid ' + lrBorder + ';border-radius:10px;padding:12px;margin-bottom:12px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'
+      + '<p style="font-size:.74rem;font-weight:600;color:var(--muted);"><i class="fas fa-comment-alt"></i> Late Reason</p>'
+      + '<span class="badge ' + lrsc + '">' + lrLabel + '</span>'
+      + '</div>'
+      + '<p style="font-size:.84rem;font-style:italic;">"' + san(rec.late_reason) + '"</p>'
+      + '</div>';
+  }
+
   const breakStr = bs ? fmtTime(bs) + (be ? ' → ' + fmtTime(be) : '…') : '—';
   const breakMin = bm > 0 ? '<p style="font-size:.74rem;color:var(--muted);">' + bm + ' min</p>' : '';
   const workStr  = wm > 0 ? Math.floor(wm/60) + 'h ' + (wm%60) + 'm' : '—';
-  const statusLabel = (rec.status||'absent').replace(/-/g,' ').replace(/\w/g,l=>l.toUpperCase());
-
-  const typeLabels = {'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out'};
+  const statusLabel = (rec.status||'absent').replace(/-/g,' ').replace(/\w/g,l=>l.toUpperCase());
+  const typeLabels = {'clock-in':'Clock In','start-break':'Break Start','end-break':'Break End','out-assign':'Out for Assignment','back-assign':'Back from Assignment','clock-out':'Clock Out','late-reason':'Late Reason Approved'};
   const timelineHtml = (rec.events||[]).map(e => {
     const t = new Date(e.ts);
     return '<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:.82rem;">'
@@ -992,6 +1343,7 @@ async function openDayDetail(userId, dateStr) {
     + '</div>'
     + '<div style="margin-bottom:12px;"><span class="badge ' + sc + '" style="font-size:.82rem;padding:5px 12px;">' + statusLabel + '</span></div>'
     + faceSection
+    + lateSection
     + assignSection
     + '<p style="font-size:.78rem;font-weight:700;margin-bottom:8px;">Timeline</p>'
     + '<div style="display:flex;flex-direction:column;gap:6px;">' + timelineHtml + '</div>';
@@ -1001,7 +1353,7 @@ async function openDayDetail(userId, dateStr) {
 function closeDayModal(){$('dayModal').style.display='none';}
 
 // ================================================================
-//  MESSAGING (via profile_notes — same table as AMS)
+//  MESSAGING
 // ================================================================
 async function renderMessages() {
   const el=$('msgList');if(!el||!CU)return;
@@ -1011,7 +1363,6 @@ async function renderMessages() {
   if(!msgs.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);"><i class="fas fa-comments" style="font-size:2.5rem;margin-bottom:10px;display:block;opacity:.4;"></i><p>No messages yet</p></div>';return;}
   el.innerHTML=msgs.map(m=>{const isMe=m.author_id===CU.id;return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};"><div class="msg-bubble ${isMe?'msg-me':'msg-other'}">${san(m.content)}</div><span style="font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 4px;">${fmtTime(new Date(m.created_at))} · ${san(m.author?.full_name||'Admin')}</span></div>`;}).join('');
   el.scrollTop=el.scrollHeight;
-  // Mark as read
   const readKey='nst_msg_read_'+CU.id;
   localStorage.setItem(readKey, msgs.length);
   $('msgBadge').style.display='none';
@@ -1043,7 +1394,6 @@ async function updateMsgBadges(){
   }catch(e){}
 }
 
-// Admin messaging
 async function renderChatStaffList(){
   const el=$('chatStaffList');if(!el)return;
   const staff=allStaffProfiles.filter(u=>u.role==='staff');
@@ -1108,20 +1458,21 @@ async function loadAdminData() {
     let live='clocked-out';if(r?.events?.length){const last=r.events[r.events.length-1];if(['clock-in','end-break','back-assign'].includes(last.type))live='clocked-in';else if(last.type==='start-break')live='on-break';else if(last.type==='out-assign')live='out-assign';else if(last.type==='clock-out')live='clocked-out';}
     const faceThumb = r?.face_stamp_url
       ? `<div style="width:100%;border-radius:0 0 10px 10px;overflow:hidden;border-top:1px solid var(--border);background:#000;max-height:120px;">
-           <img src="${r.face_stamp_url}" alt="face" style="width:100%;max-height:120px;object-fit:cover;object-position:center top;display:block;"
-             onerror="this.parentElement.style.display='none'">
+           <img src="${r.face_stamp_url}" alt="face" style="width:100%;max-height:120px;object-fit:cover;object-position:center top;display:block;" onerror="this.parentElement.style.display='none'">
          </div>`
+      : '';
+    const pendingReasonIndicator = (r?.late_reason && r?.late_reason_status==='pending')
+      ? `<span class="badge badge-pending" style="font-size:.65rem;margin-left:4px;" title="Late reason pending approval"><i class="fas fa-hourglass-half"></i> Reason pending</span>`
       : '';
     return `<div onclick="openDayDetail('${s.id}','${today}')" style="display:flex;flex-direction:column;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .15s;overflow:hidden;" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border)'">
       <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;">
         <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;font-family:'Bricolage Grotesque',sans-serif;flex-shrink:0;">${(s.full_name||s.email).charAt(0)}</div>
         <div style="flex:1;min-width:0;"><p style="font-weight:600;font-size:.84rem;">${san(s.full_name||s.email)}</p><p style="font-size:.72rem;color:var(--muted);">${ci?'In: '+fmtTime(ci):'No clock-in'} ${icons[live]||''}</p></div>
-        <span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span class="badge ${sb2}" style="font-size:.7rem;">${stat.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span>${pendingReasonIndicator}</div>
       </div>
       ${faceThumb}
     </div>`;
   }).join('');
-  // 30-day perf from Supabase
   if(navigator.onLine){
     try{
       const from=new Date();from.setDate(from.getDate()-30);
@@ -1133,6 +1484,8 @@ async function loadAdminData() {
       $('adminPerfChart').innerHTML=bars.map(b=>`<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:.8rem;font-weight:600;color:var(--muted);">${b.label}</span><span style="font-size:.8rem;font-weight:700;">${b.count}</span></div><div style="height:8px;background:var(--surface);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${Math.round(b.count/tot*100)}%;background:${b.color};border-radius:99px;"></div></div></div>`).join('');
     }catch(e){}
   }
+  // Load approval queue whenever admin dashboard is viewed
+  await loadApprovalQueue();
 }
 
 async function renderStaffList(){
@@ -1169,24 +1522,103 @@ async function renderStaffList(){
 
 function populateAdminDropdowns(){
   const staff=allStaffProfiles.filter(u=>u.role==='staff');
-  $('rptStaff').innerHTML='<option value="all">All Staff</option>'+staff.map(s=>`<option value="${s.id}">${san(s.full_name||s.email)}</option>`).join('');
+  // Legacy rptStaff still exists (hidden) — keep for compatibility
+}
+
+// ================================================================
+//  MULTI-SELECT DROPDOWNS (Reports)
+// ================================================================
+function populateMsStaffOptions() {
+  const staff = allStaffProfiles.filter(u => u.role === 'staff');
+  const container = $('msStaffOptions');
+  if (!container) return;
+  container.innerHTML = staff.map(s =>
+    `<div class="ms-option"><input type="checkbox" id="ms_staff_${s.id}" value="${s.id}" checked onchange="msOptionChanged('msStaff')"><label for="ms_staff_${s.id}">${san(s.full_name||s.email)}</label></div>`
+  ).join('');
+  updateMsLabel('msStaff');
+}
+
+function toggleMs(prefix) {
+  const dropdown = $(prefix + 'Dropdown');
+  const trigger  = $(prefix + 'Trigger');
+  const arrow    = $(prefix + 'Arrow');
+  const isOpen   = dropdown.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+    d.classList.remove('open');
+  });
+  document.querySelectorAll('.ms-trigger.open').forEach(t => t.classList.remove('open'));
+  document.querySelectorAll('[id$="Arrow"]').forEach(a => a.style.transform = '');
+  if (!isOpen) {
+    dropdown.classList.add('open');
+    trigger.classList.add('open');
+    arrow.style.transform = 'rotate(180deg)';
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ms-wrapper')) {
+    document.querySelectorAll('.ms-dropdown.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.ms-trigger.open').forEach(t => t.classList.remove('open'));
+    document.querySelectorAll('[id$="Arrow"]').forEach(a => a.style.transform = '');
+  }
+});
+
+function msToggleAll(prefix, checked) {
+  const container = prefix === 'msStaff' ? $('msStaffOptions') : $('msStatusOptions');
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = checked);
+  updateMsLabel(prefix);
+}
+
+function msOptionChanged(prefix) {
+  const container = prefix === 'msStaff' ? $('msStaffOptions') : $('msStatusOptions');
+  const allCbs = container.querySelectorAll('input[type=checkbox]');
+  const allCheck = prefix === 'msStaff' ? $('msStaffAll') : $('msStatusAll');
+  const allChecked = Array.from(allCbs).every(cb => cb.checked);
+  const noneChecked = Array.from(allCbs).every(cb => !cb.checked);
+  allCheck.checked = allChecked;
+  allCheck.indeterminate = !allChecked && !noneChecked;
+  updateMsLabel(prefix);
+}
+
+function updateMsLabel(prefix) {
+  const container = prefix === 'msStaff' ? $('msStaffOptions') : $('msStatusOptions');
+  const label = $(prefix + 'Label');
+  if (!container || !label) return;
+  const all  = container.querySelectorAll('input[type=checkbox]');
+  const checked = Array.from(all).filter(cb => cb.checked);
+  if (checked.length === 0) {
+    label.textContent = 'None selected';
+  } else if (checked.length === all.length) {
+    label.textContent = prefix === 'msStaff' ? 'All Staff' : 'All Statuses';
+  } else {
+    label.textContent = checked.length + ' selected';
+  }
+}
+
+function getMsValues(prefix) {
+  const container = prefix === 'msStaff' ? $('msStaffOptions') : $('msStatusOptions');
+  return Array.from(container.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
 }
 
 // ================================================================
 //  REPORTS
 // ================================================================
 async function generateReport(){
-  const staffId=$('rptStaff').value,type=$('rptType').value,from=$('rptFrom').value,to=$('rptTo').value;
+  const selectedStaffIds = getMsValues('msStaff');
+  const selectedStatuses = getMsValues('msStatus');
+  const from=$('rptFrom').value, to=$('rptTo').value;
   if(!from||!to){toast('Please select a date range','warn');return;}
+  if(!selectedStaffIds.length){toast('Please select at least one staff member','warn');return;}
+  if(!selectedStatuses.length){toast('Please select at least one status','warn');return;}
   $('reportResults').innerHTML='<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:24px;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</p>';
-  // Pull from Supabase
   if(navigator.onLine){
-    let q=sb.from('clock_records').select('*').gte('date',from).lte('date',to);
-    if(staffId!=='all')q=q.eq('user_id',staffId);
+    let q=sb.from('clock_records').select('*').gte('date',from).lte('date',to).in('user_id',selectedStaffIds);
     const {data}=await q;
     (data||[]).forEach(r=>{RECORDS[r.date+'_'+r.user_id]=dbRecToLocal(r);});
   }
-  const staff=staffId==='all'?allStaffProfiles.filter(u=>u.role==='staff'):[allStaffProfiles.find(u=>u.id===staffId)].filter(Boolean);
+  const staff = allStaffProfiles.filter(s => selectedStaffIds.includes(s.id));
   const rows=[];
   staff.forEach(s=>{
     let d=new Date(from);
@@ -1194,22 +1626,27 @@ async function generateReport(){
       const ds=d.toISOString().slice(0,10);
       if(d.getDay()!==0){
         const r=RECORDS[ds+'_'+s.id];const stat=r?.status||'absent';
-        if(type==='all'||type===stat){
+        if(selectedStatuses.includes(stat)){
           const ci=r?.clock_in?new Date(r.clock_in):null,co=r?.clock_out?new Date(r.clock_out):null;
           let wm=0;if(ci&&co)wm=Math.floor((co-ci)/60000);
-          rows.push({staff:s.full_name||s.email,date:ds,clockIn:ci?fmtTime(ci):'—',clockOut:co?fmtTime(co):'—',status:stat,workHours:wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—',note:r?.assign_note||''});
+          // Include late reason info in report
+          const lrStatus = r?.late_reason_status||'none';
+          const lrText = r?.late_reason||'';
+          rows.push({staff:s.full_name||s.email,date:ds,clockIn:ci?fmtTime(ci):'—',clockOut:co?fmtTime(co):'—',status:stat,workHours:wm>0?`${Math.floor(wm/60)}h ${wm%60}m`:'—',note:r?.assign_note||'',lateReason:lrText,lateReasonStatus:lrStatus});
         }
       }
       d.setDate(d.getDate()+1);
     }
   });
   window._reportRows=rows;
-  if(!rows.length){$('reportResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No records found.</p>';return;}
+  if(!rows.length){$('reportResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:24px;">No records found for selected filters.</p>';return;}
   const sb2=s=>({'on-time':'badge-ontime','late':'badge-late','very-late':'badge-verylate','absent':'badge-absent'}[s]||'badge-absent');
-  $('reportResults').innerHTML=`<p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s)</p><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="background:var(--surface);"><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">In</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Out</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th></tr></thead><tbody>${rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}"><td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td><td style="padding:9px 12px;font-family:monospace;">${r.date}</td><td style="padding:9px 12px;">${r.clockIn}</td><td style="padding:9px 12px;">${r.clockOut}</td><td style="padding:9px 12px;">${r.workHours}</td><td style="padding:9px 12px;"><span class="badge ${sb2(r.status)}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td></tr>`).join('')}</tbody></table></div>`;
+  const lrBadge = s => ({'pending':'badge-pending','approved':'badge-approved','rejected':'badge-rejected'}[s]||'');
+  const lrLabel = s => ({'pending':'⏳ Pending','approved':'✅ Approved','rejected':'❌ Rejected'}[s]||'');
+  $('reportResults').innerHTML=`<p style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">${rows.length} record(s) · ${staff.length} staff · ${selectedStatuses.length < 4 ? selectedStatuses.join(', ') : 'all statuses'}</p><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="background:var(--surface);"><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Staff</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Date</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">In</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Out</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Work</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Status</th><th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border);">Late Reason</th></tr></thead><tbody>${rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);${i%2?'background:#fafbfa':''}"><td style="padding:9px 12px;font-weight:600;">${san(r.staff)}</td><td style="padding:9px 12px;font-family:monospace;">${r.date}</td><td style="padding:9px 12px;">${r.clockIn}</td><td style="padding:9px 12px;">${r.clockOut}</td><td style="padding:9px 12px;">${r.workHours}</td><td style="padding:9px 12px;"><span class="badge ${sb2(r.status)}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</span></td><td style="padding:9px 12px;">${r.lateReason?`<span title="${san(r.lateReason)}" style="font-size:.78rem;font-style:italic;max-width:140px;display:inline-block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:middle;">"${san(r.lateReason)}"</span> ${r.lateReasonStatus!=='none'?`<span class="badge ${lrBadge(r.lateReasonStatus)}" style="font-size:.64rem;vertical-align:middle;">${lrLabel(r.lateReasonStatus)}</span>`:'`':'—'}</td></tr>`).join('')}</tbody></table></div>`;
 }
-function exportCSV(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const csv=['Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note',...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}"`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='attendance-report.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('CSV exported');}
-function exportPDF(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f4f7f5;padding:8px 10px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:7px 10px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}</style></head><body><h1>NonStop Travels — Attendance Report</h1><p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p><table><thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Work</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</td></tr>`).join('')}</tbody></table></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);toast('PDF ready — use browser print','info');}
+function exportCSV(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const csv=['Staff,Date,Clock In,Clock Out,Work Hours,Status,Assignment Note,Late Reason,Late Reason Status',...rows.map(r=>`"${r.staff}","${r.date}","${r.clockIn}","${r.clockOut}","${r.workHours}","${r.status}","${r.note||''}","${r.lateReason||''}","${r.lateReasonStatus||''}"`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='attendance-report.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('CSV exported');}
+function exportPDF(){const rows=window._reportRows;if(!rows?.length){toast('Generate a report first','warn');return;}const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:24px;color:#0f1f17}h1{color:#0d5c3a}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f4f7f5;padding:7px 9px;text-align:left;border-bottom:2px solid #e2ebe6;font-weight:700}td{padding:6px 9px;border-bottom:1px solid #e2ebe6}.on-time{color:#16a34a}.late{color:#d97706}.very-late{color:#dc2626}.absent{color:#2563eb}.pending{color:#92400e}.approved{color:#14532d}.rejected{color:#7f1d1d}</style></head><body><h1>NonStop Travels — Attendance Report</h1><p>Generated: ${new Date().toLocaleString('en-NG')} · ${rows.length} records</p><table><thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Work</th><th>Status</th><th>Late Reason</th><th>Reason Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.staff}</b></td><td>${r.date}</td><td>${r.clockIn}</td><td>${r.clockOut}</td><td>${r.workHours}</td><td class="${r.status}">${r.status.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</td><td style="font-style:italic;max-width:160px;">${r.lateReason||'—'}</td><td class="${r.lateReasonStatus||''}">${r.lateReasonStatus||'—'}</td></tr>`).join('')}</tbody></table></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);toast('PDF ready — use browser print','info');}
 
 // ================================================================
 //  CAMERA & FACE STAMP
@@ -1219,8 +1656,6 @@ let _capturedBlob  = null;
 
 async function openCamera() {
   _capturedBlob = null;
-
-  // Reset modal state
   $('cameraPreview').style.display     = 'none';
   $('cameraFeed').style.display        = 'block';
   $('captureBtn').style.display        = 'inline-flex';
@@ -1231,40 +1666,20 @@ async function openCamera() {
   $('confirmClockInBtn').disabled      = false;
   $('cameraStatus').textContent        = 'Starting camera…';
   $('cameraStatus').style.color        = 'var(--muted)';
-
-  // Show modal first so user sees feedback
   $('cameraModal').style.display = 'flex';
-
-  // getUserMedia requires HTTPS (or localhost)
   const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  if (!isSecure) {
-    showCameraFallback('Camera requires HTTPS. The app must be served over a secure connection.');
-    return;
-  }
-
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showCameraFallback('Camera not supported on this browser. Please use Chrome or Safari.');
-    return;
-  }
-
+  if (!isSecure) { showCameraFallback('Camera requires HTTPS. The app must be served over a secure connection.'); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showCameraFallback('Camera not supported on this browser. Please use Chrome or Safari.'); return; }
   try {
-    _cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-      audio: false
-    });
+    _cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
     $('cameraFeed').srcObject = _cameraStream;
     $('cameraStatus').textContent = 'Position your face in the circle, then tap Capture.';
     $('cameraStatus').style.color = 'var(--muted)';
   } catch(e) {
-    const msg = e.name === 'NotAllowedError'
-      ? 'Camera permission denied. Please allow camera access in your browser settings.'
-      : e.name === 'NotFoundError'
-      ? 'No camera found on this device.'
-      : 'Camera error: ' + e.message;
+    const msg = e.name === 'NotAllowedError' ? 'Camera permission denied. Please allow camera access in your browser settings.' : e.name === 'NotFoundError' ? 'No camera found on this device.' : 'Camera error: ' + e.message;
     showCameraFallback(msg);
   }
 }
-
 function showCameraFallback(msg) {
   $('cameraFeed').style.display        = 'none';
   $('captureBtn').style.display        = 'none';
@@ -1274,99 +1689,31 @@ function showCameraFallback(msg) {
   $('confirmClockInBtn').style.display = 'inline-flex';
   $('confirmClockInBtn').style.background = 'var(--brand-mid)';
 }
-
 function capturePhoto() {
-  const video  = $('cameraFeed');
-  const canvas = $('cameraCanvas');
-  canvas.width  = video.videoWidth  || 640;
-  canvas.height = video.videoHeight || 480;
-  const ctx = canvas.getContext('2d');
-  // Mirror horizontally (selfie feel)
-  ctx.translate(canvas.width, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0);
-  ctx.setTransform(1,0,0,1,0,0); // reset transform
-
-  canvas.toBlob(blob => {
-    _capturedBlob = blob;
-    const url = URL.createObjectURL(blob);
-    $('capturedPhoto').src = url;
-    $('cameraPreview').style.display = 'block';
-    $('cameraFeed').style.display    = 'none';
-    $('captureBtn').style.display    = 'none';
-    $('retakeBtn').style.display     = 'inline-flex';
-    $('confirmClockInBtn').style.display = 'inline-flex';
-    $('cameraStatus').textContent    = '✅ Looking good! Tap Clock In to confirm.';
-    $('cameraStatus').style.color    = '#16a34a';
-  }, 'image/jpeg', 0.82);
+  const video=$('cameraFeed'), canvas=$('cameraCanvas');
+  canvas.width=video.videoWidth||640; canvas.height=video.videoHeight||480;
+  const ctx=canvas.getContext('2d');
+  ctx.translate(canvas.width,0); ctx.scale(-1,1); ctx.drawImage(video,0,0); ctx.setTransform(1,0,0,1,0,0);
+  canvas.toBlob(blob=>{_capturedBlob=blob;const url=URL.createObjectURL(blob);$('capturedPhoto').src=url;$('cameraPreview').style.display='block';$('cameraFeed').style.display='none';$('captureBtn').style.display='none';$('retakeBtn').style.display='inline-flex';$('confirmClockInBtn').style.display='inline-flex';$('cameraStatus').textContent='✅ Looking good! Tap Clock In to confirm.';$('cameraStatus').style.color='#16a34a';},'image/jpeg',0.82);
 }
-
-function retakePhoto() {
-  _capturedBlob = null;
-  $('cameraPreview').style.display = 'none';
-  $('cameraFeed').style.display    = 'block';
-  $('captureBtn').style.display    = 'inline-flex';
-  $('retakeBtn').style.display     = 'none';
-  $('confirmClockInBtn').style.display = 'none';
-  $('cameraStatus').textContent    = '';
-}
-
-function stopCamera() {
-  if (_cameraStream) { _cameraStream.getTracks().forEach(t => t.stop()); _cameraStream = null; }
-}
-
-function cancelCamera() {
-  stopCamera();
-  _capturedBlob = null;
-  $('cameraModal').style.display = 'none';
-}
-
+function retakePhoto(){_capturedBlob=null;$('cameraPreview').style.display='none';$('cameraFeed').style.display='block';$('captureBtn').style.display='inline-flex';$('retakeBtn').style.display='none';$('confirmClockInBtn').style.display='none';$('cameraStatus').textContent='';}
+function stopCamera(){if(_cameraStream){_cameraStream.getTracks().forEach(t=>t.stop());_cameraStream=null;}}
+function cancelCamera(){stopCamera();_capturedBlob=null;$('cameraModal').style.display='none';}
 async function confirmClockIn() {
-  $('confirmClockInBtn').disabled = true;
-  $('confirmClockInBtn').innerHTML = '<span class="spinner"></span> Clocking in…';
-  let faceUrl = null;
-
-  if (_capturedBlob && navigator.onLine) {
-    try {
-      const filename = `${CU.id}/${todayStr()}_clockin.jpg`;
-      const { data, error } = await sb.storage.from('face-stamps').upload(filename, _capturedBlob, {
-        contentType: 'image/jpeg',
-        upsert: true
-      });
-      if (!error) {
-        const { data: urlData } = sb.storage.from('face-stamps').getPublicUrl(filename);
-        faceUrl = urlData.publicUrl;
-        console.log('[FaceStamp] Upload OK:', faceUrl);
-      } else {
-        console.error('[FaceStamp] Upload error:', error.message, error);
-        $('cameraStatus').textContent = '⚠️ Photo upload failed: ' + error.message + ' — clocking in without photo.';
-        $('cameraStatus').style.color = '#f59e0b';
-        await new Promise(r => setTimeout(r, 2500)); // let user read the message
-      }
-    } catch(e) {
-      console.error('[FaceStamp] Upload exception:', e);
-      $('cameraStatus').textContent = '⚠️ Photo upload error — clocking in without photo.';
-      $('cameraStatus').style.color = '#f59e0b';
-      await new Promise(r => setTimeout(r, 2500));
-    }
-  } else if (_capturedBlob && !navigator.onLine) {
-    // Offline: store as base64 in the record, upload later
-    faceUrl = await blobToBase64(_capturedBlob);
-  }
-
-  stopCamera();
-  $('cameraModal').style.display = 'none';
-  _capturedBlob = null;
-  await clockAction('clock-in', '', faceUrl);
+  $('confirmClockInBtn').disabled=true; $('confirmClockInBtn').innerHTML='<span class="spinner"></span> Clocking in…';
+  let faceUrl=null;
+  if(_capturedBlob&&navigator.onLine){
+    try{
+      const filename=`${CU.id}/${todayStr()}_clockin.jpg`;
+      const{data,error}=await sb.storage.from('face-stamps').upload(filename,_capturedBlob,{contentType:'image/jpeg',upsert:true});
+      if(!error){const{data:urlData}=sb.storage.from('face-stamps').getPublicUrl(filename);faceUrl=urlData.publicUrl;}
+      else{$('cameraStatus').textContent='⚠️ Photo upload failed — clocking in without photo.';$('cameraStatus').style.color='#f59e0b';await new Promise(r=>setTimeout(r,2500));}
+    }catch(e){$('cameraStatus').textContent='⚠️ Photo upload error — clocking in without photo.';$('cameraStatus').style.color='#f59e0b';await new Promise(r=>setTimeout(r,2500));}
+  }else if(_capturedBlob&&!navigator.onLine){faceUrl=await blobToBase64(_capturedBlob);}
+  stopCamera(); $('cameraModal').style.display='none'; _capturedBlob=null;
+  await clockAction('clock-in','',faceUrl);
 }
-
-function blobToBase64(blob) {
-  return new Promise(res => {
-    const r = new FileReader();
-    r.onloadend = () => res(r.result);
-    r.readAsDataURL(blob);
-  });
-}
+function blobToBase64(blob){return new Promise(res=>{const r=new FileReader();r.onloadend=()=>res(r.result);r.readAsDataURL(blob);});}
 
 // ================================================================
 //  NAVIGATION
@@ -1386,14 +1733,14 @@ function showSection(name){
   if(name==='stafflist')renderStaffList();
   if(name==='admincal'){loadAdminCalendarDropdown();$('adminCalTitle').textContent=`${MONTHS[adminCalMonth]} ${adminCalYear}`;}
   if(name==='adminmsg'){renderChatStaffList();if(currentAdminChatUser)renderAdminMsgList();}
-  if(name==='reports')populateAdminDropdowns();
+  if(name==='reports'){populateMsStaffOptions();updateMsLabel('msStaff');updateMsLabel('msStatus');}
   closeSidebar();
 }
 function openSidebar(){$('sidebar').classList.add('open');$('sidebarOverlay').classList.add('open');}
 function closeSidebar(){$('sidebar').classList.remove('open');$('sidebarOverlay').classList.remove('open');}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('dayModal').style.display='none';$('noteModal').style.display='none';$('broadcastModal').style.display='none';closeSidebar();}
+  if(e.key==='Escape'){$('dayModal').style.display='none';$('noteModal').style.display='none';$('broadcastModal').style.display='none';$('lateReasonModal').style.display='none';closeSidebar();}
   if(e.key==='Enter'&&document.activeElement?.id==='loginPw')doLogin();
 });
 
@@ -1402,7 +1749,6 @@ document.addEventListener('keydown',e=>{
 // ================================================================
 window.addEventListener('load', async () => {
   if(!navigator.onLine) $('offlineBanner').style.display='block';
-
   sb.auth.onAuthStateChange((event, session) => {
     if (event==='SIGNED_OUT') {
       CU=null; CP=null; RECORDS={}; allStaffProfiles=[];
@@ -1410,19 +1756,11 @@ window.addEventListener('load', async () => {
       $('mainApp').style.display='none'; $('authScreen').style.display='flex';
     }
   });
-
   setLoadMsg('Checking session…');
   try {
     const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      await bootApp(session.user);
-    } else {
-      showAuthScreen();
-    }
-  } catch(e) {
-    console.error('Init error:', e);
-    showAuthScreen();
-  }
+    if (session) { await bootApp(session.user); } else { showAuthScreen(); }
+  } catch(e) { console.error('Init error:', e); showAuthScreen(); }
 });
 </script>
 </body>
