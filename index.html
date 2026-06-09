@@ -67,7 +67,8 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
 .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 #loadingOverlay{position:fixed;inset:0;background:var(--brand);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s;}
 .ldr-ring{animation:spin 1s linear infinite;}
-#offlineBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#f59e0b;color:#fff;text-align:center;padding:8px;font-size:.83rem;font-weight:600;}
+#offlineBanner{display:none;}
+#offlineScreen{display:none;}
 .msg-bubble{padding:10px 13px;border-radius:12px;max-width:82%;font-size:.84rem;line-height:1.55;}
 .msg-me{background:var(--brand-mid);color:#fff;border-radius:13px 13px 4px 13px;align-self:flex-end;}
 .msg-other{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:13px 13px 13px 4px;align-self:flex-start;}
@@ -105,7 +106,23 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
   <p id="loadingMsg" style="color:rgba(255,255,255,.65);font-family:'Bricolage Grotesque',sans-serif;font-size:.85rem;letter-spacing:.1em;">LOADING…</p>
 </div>
 
-<div id="offlineBanner"><i class="fas fa-wifi-slash"></i> Offline — Clocks saved locally, will sync when reconnected.</div>
+<div id="offlineBanner" style="display:none;"></div>
+
+<!-- OFFLINE SCREEN — blocks all usage when disconnected -->
+<div id="offlineScreen" style="display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,var(--brand),var(--brand-mid));flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;">
+  <div style="position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:rgba(29,185,107,.18);border-radius:50%;"></div>
+  <div style="position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;background:rgba(29,185,107,.12);border-radius:50%;"></div>
+  <img src="https://nonstoptravels.co/wp-content/uploads/2025/04/logo-nonstop-1-e1744980029776.png" alt="NonStop Travels" style="height:56px;object-fit:contain;filter:brightness(0) invert(1);position:relative;">
+  <div style="position:relative;">
+    <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <i class="fas fa-wifi-slash" style="font-size:2rem;color:#fff;"></i>
+    </div>
+    <h2 class="syne" style="font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:8px;">No Internet Connection</h2>
+    <p style="color:rgba(255,255,255,.75);font-size:.9rem;max-width:340px;line-height:1.6;">The Staff Clock system requires an active internet connection. Please connect to your network or Wi-Fi and try again.</p>
+  </div>
+  <button onclick="retryConnection()" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4);padding:12px 28px;font-size:.9rem;border-radius:12px;backdrop-filter:blur(6px);"><i class="fas fa-redo"></i> Retry Connection</button>
+  <p style="color:rgba(255,255,255,.45);font-size:.74rem;position:relative;">Checking every 5 seconds…</p>
+</div>
 
 <!-- AUTH -->
 <div id="authScreen" style="display:none;">
@@ -197,7 +214,7 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
           </div>
         </div>
         <!-- Pending reason notice for staff -->
-        <div id="pendingReasonNotice" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;padding:14px 18px;margin-bottom:18px;display:none;align-items:center;gap:10px;">
+        <div id="pendingReasonNotice" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;padding:14px 18px;margin-bottom:18px;align-items:center;gap:10px;">
           <i class="fas fa-hourglass-half" style="color:#d97706;font-size:1.1rem;flex-shrink:0;"></i>
           <div><p style="font-weight:600;font-size:.85rem;color:#92400e;">Late reason pending admin approval</p><p style="font-size:.78rem;color:#a16207;margin-top:2px;" id="pendingReasonText"></p></div>
         </div>
@@ -861,21 +878,49 @@ async function checkOfficeNetwork() {
 }
 
 // ================================================================
-//  ONLINE / OFFLINE
+//  ONLINE / OFFLINE — HARD BLOCK
 // ================================================================
-window.addEventListener('online', async ()=>{
-  $('offlineBanner').style.display='none';
-  $('onlineIndicator').style.background='#22c55e';
-  toast('Back online — syncing records…','info');
-  await syncToSupabase();
-  checkOfficeNetwork();
-  if (CP?.role==='admin') await pullTodayAll();
+let _offlineRetryTimer = null;
+
+function showOfflineScreen() {
+  const os = $('offlineScreen');
+  if (!os) return;
+  os.style.display = 'flex';
+  // Pulse retry every 5 s
+  clearInterval(_offlineRetryTimer);
+  _offlineRetryTimer = setInterval(() => {
+    if (navigator.onLine) hideOfflineScreen();
+  }, 5000);
+}
+
+function hideOfflineScreen() {
+  clearInterval(_offlineRetryTimer);
+  const os = $('offlineScreen');
+  if (os) os.style.display = 'none';
+  $('onlineIndicator').style.background = '#22c55e';
+  toast('Connected — welcome back!', 'info');
+  // Re-sync and refresh
+  if (CU) {
+    syncToSupabase();
+    checkOfficeNetwork();
+    if (CP?.role === 'admin') pullTodayAll().then(() => {
+      if ($('adminSection').style.display !== 'none') loadAdminData();
+    });
+  }
+}
+
+function retryConnection() {
+  if (navigator.onLine) { hideOfflineScreen(); return; }
+  toast('Still offline — please check your connection', 'warn', 3000);
+}
+
+window.addEventListener('online', () => {
+  hideOfflineScreen();
 });
-window.addEventListener('offline', ()=>{
-  $('offlineBanner').style.display='block';
-  $('onlineIndicator').style.background='#ef4444';
-  toast('Offline — clocks saved locally','warn');
-  checkOfficeNetwork();
+
+window.addEventListener('offline', () => {
+  $('onlineIndicator').style.background = '#ef4444';
+  showOfflineScreen();
 });
 
 // ================================================================
@@ -1113,12 +1158,10 @@ function renderApprovalQueue() {
 
 function toggleApprovalQueue() {
   const list = $('approvalQueueList');
-  const icon = $('approvalToggleIcon');
   const btn  = $('approvalToggleBtn');
   const isOpen = list.style.display === 'flex';
   list.style.display = isOpen ? 'none' : 'flex';
-  icon.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-  btn.innerHTML = `<i class="${icon.className}" id="approvalToggleIcon"></i> ${isOpen?'Review':'Collapse'}`;
+  btn.innerHTML = `<i class="fas fa-chevron-${isOpen?'down':'up'}" id="approvalToggleIcon"></i> ${isOpen?'Review':'Collapse'}`;
 }
 
 async function processApproval(requestId, userId, date, approved) {
@@ -1162,6 +1205,40 @@ async function processApproval(requestId, userId, date, approved) {
   await loadApprovalQueue();
   // Refresh local records cache so admin dashboard reflects update
   await pullTodayAll();
+}
+
+// Approve/Reject from Day Detail Modal (admin has a cached request id)
+async function processApprovalFromModal(requestId, userId, date, approved) {
+  $('dayModal').style.display = 'none';
+  await processApproval(requestId, userId, date, approved);
+  // Reopen the day detail after processing
+  setTimeout(() => openDayDetail(userId, date), 600);
+}
+
+// Approve/Reject from Day Detail Modal (no cached request — look up from DB)
+async function processApprovalInline(userId, date, approved) {
+  if (!navigator.onLine) { toast('Cannot process approvals while offline', 'warn'); return; }
+  try {
+    const { data } = await sb.from('late_reason_requests')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('date', date)
+      .eq('approval_status', 'pending')
+      .maybeSingle();
+    if (!data) {
+      // Already processed or missing — update clock_record directly
+      const approvalStatus = approved ? 'approved' : 'rejected';
+      await sb.from('clock_records').update({ late_reason_status: approvalStatus, updated_at: nowTs() }).eq('user_id', userId).eq('date', date);
+      toast(approved ? '✅ Reason approved' : '❌ Reason rejected', approved ? 'success' : 'info', 3000);
+      await pullTodayAll();
+      $('dayModal').style.display = 'none';
+      setTimeout(() => openDayDetail(userId, date), 600);
+      return;
+    }
+    $('dayModal').style.display = 'none';
+    await processApproval(data.id, userId, date, approved);
+    setTimeout(() => openDayDetail(userId, date), 600);
+  } catch(e) { toast('Error processing approval: ' + e.message, 'error'); }
 }
 
 // ================================================================
@@ -1311,12 +1388,31 @@ async function openDayDetail(userId, dateStr) {
     const lrLabel = {pending:'⏳ Pending Approval',approved:'✅ Approved',rejected:'❌ Rejected by Admin'}[rec.late_reason_status]||'Pending';
     const lrBg = {pending:'#fffbeb',approved:'#f0fdf4',rejected:'#fef2f2'}[rec.late_reason_status]||'#fffbeb';
     const lrBorder = {pending:'#fde68a',approved:'#86efac',rejected:'#fca5a5'}[rec.late_reason_status]||'#fde68a';
+    // Admin approval buttons — look up matching pending request
+    let adminActions = '';
+    if (CP.role === 'admin' && rec.late_reason_status === 'pending') {
+      // Find the matching request id from _pendingApprovals first; fall back to inline query
+      const matchReq = _pendingApprovals.find(r => r.user_id === userId && r.date === dateStr);
+      if (matchReq) {
+        adminActions = `<div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="processApprovalFromModal('${matchReq.id}','${userId}','${dateStr}',true)" class="btn btn-approve" style="flex:1;justify-content:center;padding:8px;font-size:.82rem;"><i class="fas fa-check"></i> Approve</button>
+          <button onclick="processApprovalFromModal('${matchReq.id}','${userId}','${dateStr}',false)" class="btn btn-reject" style="flex:1;justify-content:center;padding:8px;font-size:.82rem;"><i class="fas fa-times"></i> Reject</button>
+        </div>`;
+      } else {
+        // No cached request — show inline lookup buttons
+        adminActions = `<div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="processApprovalInline('${userId}','${dateStr}',true)" class="btn btn-approve" style="flex:1;justify-content:center;padding:8px;font-size:.82rem;"><i class="fas fa-check"></i> Approve</button>
+          <button onclick="processApprovalInline('${userId}','${dateStr}',false)" class="btn btn-reject" style="flex:1;justify-content:center;padding:8px;font-size:.82rem;"><i class="fas fa-times"></i> Reject</button>
+        </div>`;
+      }
+    }
     lateSection = '<div style="background:' + lrBg + ';border:1px solid ' + lrBorder + ';border-radius:10px;padding:12px;margin-bottom:12px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'
       + '<p style="font-size:.74rem;font-weight:600;color:var(--muted);"><i class="fas fa-comment-alt"></i> Late Reason</p>'
       + '<span class="badge ' + lrsc + '">' + lrLabel + '</span>'
       + '</div>'
       + '<p style="font-size:.84rem;font-style:italic;">"' + san(rec.late_reason) + '"</p>'
+      + adminActions
       + '</div>';
   }
 
@@ -1740,7 +1836,7 @@ async function confirmClockIn() {
       if(!error){const{data:urlData}=sb.storage.from('face-stamps').getPublicUrl(filename);faceUrl=urlData.publicUrl;}
       else{$('cameraStatus').textContent='⚠️ Photo upload failed — clocking in without photo.';$('cameraStatus').style.color='#f59e0b';await new Promise(r=>setTimeout(r,2500));}
     }catch(e){$('cameraStatus').textContent='⚠️ Photo upload error — clocking in without photo.';$('cameraStatus').style.color='#f59e0b';await new Promise(r=>setTimeout(r,2500));}
-  }else if(_capturedBlob&&!navigator.onLine){faceUrl=await blobToBase64(_capturedBlob);}
+  }
   stopCamera(); $('cameraModal').style.display='none'; _capturedBlob=null;
   await clockAction('clock-in','',faceUrl);
 }
@@ -1779,7 +1875,19 @@ document.addEventListener('keydown',e=>{
 //  INIT
 // ================================================================
 window.addEventListener('load', async () => {
-  if(!navigator.onLine) $('offlineBanner').style.display='block';
+  // Hard offline block — show screen and don't proceed
+  if (!navigator.onLine) {
+    hideLoading();
+    showOfflineScreen();
+    // Keep retrying; when online, reload page to do a clean boot
+    const waitForOnline = setInterval(() => {
+      if (navigator.onLine) {
+        clearInterval(waitForOnline);
+        window.location.reload();
+      }
+    }, 3000);
+    return;
+  }
   sb.auth.onAuthStateChange((event, session) => {
     if (event==='SIGNED_OUT') {
       CU=null; CP=null; RECORDS={}; allStaffProfiles=[];
