@@ -163,8 +163,8 @@ label.lbl{display:block;font-size:.74rem;font-weight:600;color:var(--muted);marg
         <div style="min-width:0;flex:1;"><div id="sideName" style="color:#fff;font-weight:600;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">User</div><span id="sideRole" class="badge badge-staff" style="font-size:.62rem;">Staff</span></div>
         <div id="onlineIndicator" style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
       </div>
-      <div id="unsyncedBadge" style="display:none;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:6px 10px;margin-bottom:7px;font-size:.72rem;color:#fbbf24;text-align:center;">
-        <i class="fas fa-cloud-upload-alt"></i> <span id="unsyncedCount">0</span> pending sync
+      <div id="unsyncedBadge" onclick="retrySyncNow()" title="Click to retry syncing now" style="cursor:pointer;display:none;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:6px 10px;margin-bottom:7px;font-size:.72rem;color:#fbbf24;text-align:center;">
+        <i class="fas fa-cloud-upload-alt"></i> <span id="unsyncedCount">0</span> pending sync — tap to retry
       </div>
       <button onclick="doLogout()" class="nav-item" style="width:100%;border:none;background:none;cursor:pointer;"><i class="fas fa-sign-out-alt" style="color:rgba(255,255,255,.45);"></i><span style="color:rgba(255,255,255,.45);">Sign Out</span></button>
     </div>
@@ -560,7 +560,10 @@ function saveUserRecords(uid) {
   updateUnsyncedBadge();
 }
 function updateUnsyncedBadge() {
-  const n = Object.values(RECORDS).filter(r=>!r._synced).length;
+  // FIX: scope to the current user only (was counting every record in memory —
+  // for an admin that includes every staff member's already-synced records pulled
+  // in via pullTodayAll, which could inflate or skew the "pending sync" count).
+  const n = CU ? Object.values(RECORDS).filter(r=>!r._synced && r.user_id===CU.id).length : 0;
   const b = $('unsyncedBadge');
   if (b) { b.style.display = n>0?'block':'none'; const c=$('unsyncedCount'); if(c) c.textContent=n; }
 }
@@ -571,6 +574,18 @@ function getCachedProfile(uid) { try { return JSON.parse(localStorage.getItem(pr
 // ================================================================
 //  SUPABASE SYNC
 // ================================================================
+async function retrySyncNow() {
+  if (!navigator.onLine) { toast('You are offline — connect to the internet to sync', 'warn'); return; }
+  toast('Retrying sync…', 'info', 2000);
+  window._syncErrorWarned = false; // allow a fresh error toast if it fails again
+  await syncToSupabase();
+  if (CU && Object.values(RECORDS).some(r=>!r._synced && r.user_id===CU.id)) {
+    toast('Still pending — check the console for details, or contact your admin', 'warn', 5000);
+  } else {
+    toast('All synced ✓', 'success');
+  }
+}
+
 async function syncToSupabase() {
   if (!navigator.onLine || !CU) return;
   const unsynced = Object.values(RECORDS).filter(r => !r._synced && r.user_id === CU.id);
@@ -609,7 +624,20 @@ async function syncToSupabase() {
       };
       const { error } = await sb.from('clock_records').upsert(payload, { onConflict:'user_id,date' });
       if (!error) { rec._synced = true; RECORDS[rec.date+'_'+rec.user_id] = rec; }
-    } catch(e) {}
+      else {
+        // FIX: this error was being swallowed completely — a record could fail to sync
+        // forever (e.g. missing unique constraint on clock_records(user_id,date) for the
+        // upsert's onConflict target, or an RLS policy blocking the write) with zero
+        // visibility into why. Log it and warn the user once per session.
+        console.error('clock_records upsert failed:', error);
+        if (!window._syncErrorWarned) {
+          window._syncErrorWarned = true;
+          toast('Sync error: '+error.message, 'error', 6000);
+        }
+      }
+    } catch(e) {
+      console.error('syncToSupabase unexpected error:', e);
+    }
   }
   saveUserRecords(CU.id);
 }
@@ -618,13 +646,25 @@ async function pullMonthRecords(userId, year, month) {
   if (!navigator.onLine) return;
   const from = `${year}-${pad(month+1)}-01`;
   const to   = `${year}-${pad(month+1)}-${new Date(year,month+1,0).getDate()}`;
-  const { data } = await sb.from('clock_records').select('*').eq('user_id',userId).gte('date',from).lte('date',to);
+  const { data, error } = await sb.from('clock_records').select('*').eq('user_id',userId).gte('date',from).lte('date',to);
+  if (error) { console.error('pullMonthRecords failed:', error); return; }
   (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r, RECORDS[r.date+'_'+r.user_id]); });
 }
 
 async function pullTodayAll() {
   if (!navigator.onLine) return;
-  const { data } = await sb.from('clock_records').select('*').eq('date',todayStr());
+  // FIX: this query feeds the entire admin "staff clocked in today" view. Its error was
+  // being discarded — if it ever failed (RLS policy, network hiccup, etc.) the admin
+  // dashboard would silently render everyone as absent with no indication why.
+  const { data, error } = await sb.from('clock_records').select('*').eq('date',todayStr());
+  if (error) {
+    console.error('pullTodayAll failed — admin dashboard data may be stale/empty:', error);
+    if (!window._pullTodayErrorWarned) {
+      window._pullTodayErrorWarned = true;
+      toast('Could not load staff attendance: '+error.message, 'error', 6000);
+    }
+    return;
+  }
   (data||[]).forEach(r => { RECORDS[r.date+'_'+r.user_id] = dbRecToLocal(r, RECORDS[r.date+'_'+r.user_id]); });
 }
 
@@ -649,7 +689,13 @@ const san = s => s?String(s).replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'
 const pad = n => String(n).padStart(2,'0');
 const fmtTime = d => d?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'—';
 const fmtTimeFull = d => d?`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`:'—';
-const todayStr = () => new Date().toISOString().slice(0,10);
+// FIX (timezone bug): toISOString() returns the UTC date, not the local calendar date.
+// For any timezone ahead of UTC (e.g. Nigeria, UTC+1) a clock action taken in the first
+// hour(s) after local midnight was being filed under YESTERDAY's date. That record then
+// became unreachable (later "today" lookups resolve to the correct local day and never
+// find it again), which is why a clock-in could vanish from the admin dashboard and why
+// a user could accumulate permanently-unsynced "pending sync" records.
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const nowTs = () => new Date().toISOString();
 const greet = () => { const h=new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; };
 
@@ -732,7 +778,11 @@ async function bootApp(user) {
   if (isAdmin) { $('settingOnTime').value=APP_SETTINGS.onTimeUntil||'08:00'; $('settingLateTo').value=APP_SETTINGS.lateTo||'08:30'; $('settingIP').value=APP_SETTINGS.officeIP||''; }
   if (isAdmin) {
     setLoadMsg('Loading staff…');
-    const { data: staffData } = await sb.from('profiles').select('id,full_name,email,role').order('full_name');
+    const { data: staffData, error: staffErr } = await sb.from('profiles').select('id,full_name,email,role').order('full_name');
+    if (staffErr) {
+      console.error('Failed to load staff profiles (admin will see 0 staff):', staffErr);
+      toast('Could not load staff list: '+staffErr.message, 'error', 6000);
+    }
     allStaffProfiles = staffData || [];
     populateAdminDropdowns();
     loadAdminCalendarDropdown();
@@ -870,10 +920,16 @@ window.addEventListener('offline', ()=>{
 async function loadTodayFromDB() {
   if (!navigator.onLine) return;
   const today=todayStr();
-  const { data } = await sb.from('clock_records').select('*').eq('user_id',CU.id).eq('date',today).maybeSingle();
+  const { data, error } = await sb.from('clock_records').select('*').eq('user_id',CU.id).eq('date',today).maybeSingle();
+  if (error) { console.error('loadTodayFromDB failed:', error); return; }
   if (data) {
-    // Always overwrite with DB version to pick up admin changes (late_reason_status etc.)
-    RECORDS[today+'_'+CU.id] = dbRecToLocal(data, RECORDS[today+'_'+CU.id]);
+    const existing = RECORDS[today+'_'+CU.id];
+    // FIX: don't let a periodic background pull clobber a local change that hasn't synced
+    // yet (e.g. you clock out, the upsert is still in flight, and the next 15s poll pulls
+    // back the older "still clocked in" row, silently erasing your clock-out).
+    // Still overwrite once the local copy is synced, so admin edits (late_reason_status etc.) come through.
+    if (existing && existing._synced === false) return;
+    RECORDS[today+'_'+CU.id] = dbRecToLocal(data, existing);
     saveUserRecords(CU.id);
   }
 }
