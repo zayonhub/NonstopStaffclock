@@ -1361,8 +1361,6 @@ function renderTodayLog() {
 //  CALENDAR
 // ================================================================
 function dayStatus(rec, dateStr) {
-  const dow=new Date(dateStr+'T12:00:00').getDay();
-  if(dow===0 || dow===6) return 'weekend';
   if(dateStr>todayStr()) return 'future';
   if(!rec?.clock_in) return 'absent';
   return rec.status||'on-time';
@@ -1738,7 +1736,7 @@ async function generateReport(){
     let d=new Date(from);
     while(d.toISOString().slice(0,10)<=to){
       const ds=d.toISOString().slice(0,10);
-      if(d.getDay()!==0){
+      {
         const r=RECORDS[ds+'_'+s.id];const stat=r?.status||'absent';
         if(selectedStatuses.includes(stat)){
           const ci=r?.clock_in?new Date(r.clock_in):null,co=r?.clock_out?new Date(r.clock_out):null;
