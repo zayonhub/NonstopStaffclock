@@ -778,7 +778,7 @@ async function bootApp(user) {
   if (isAdmin) { $('settingOnTime').value=APP_SETTINGS.onTimeUntil||'08:00'; $('settingLateTo').value=APP_SETTINGS.lateTo||'08:30'; $('settingIP').value=APP_SETTINGS.officeIP||''; }
   if (isAdmin) {
     setLoadMsg('Loading staff…');
-    const { data: staffData, error: staffErr } = await sb.from('profiles').select('id,full_name,email,role').order('full_name');
+    const { data: staffData, error: staffErr } = await sb.from('profiles').select('id,full_name,email,role').eq('role','staff').order('full_name');
     if (staffErr) {
       console.error('Failed to load staff profiles (admin will see 0 staff):', staffErr);
       toast('Could not load staff list: '+staffErr.message, 'error', 6000);
